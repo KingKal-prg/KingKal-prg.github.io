@@ -3,12 +3,12 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Oswald&display=swap" rel="stylesheet">
     <title>Search the Web</title>
     <style>
-        /* Custom CSS for black theme */
         body {
             font-family: 'Open Sans', sans-serif;
             background-color: #0d0d0d;
@@ -55,89 +55,91 @@
             outline: none;
             border-color: #00aaff;
         }
+    </style>
+</head>
+<body>
 
-        #header {
-            background-color: #000;
-            padding: 20px;
-            text-align: center;
-        }
+    <div id="particles-js"></div>
 
-        #header h1 {
-            margin: 0;
-            font-size: 24px;
-            font-family: 'Arial', sans-serif;
-            color: #fff;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
+    <!-- Search Form -->
+    <form id="uv-form">
+        <input id="uv-search-engine" value="https://www.google.com/search?q=%s" type="hidden"> 
+        <input id="uv-address" type="text" placeholder="Search Google or type a URL">
+    </form>
 
-        #content {
-            text-align: center;
-            padding: 20px;
-            margin-top: -4%;
-        }
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js", {
+            "particles": {
+                "number": {
+                    "value": 100,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ffffff"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 5
+                    },
+                    "image": {
+                        "src": "img/github.svg",
+                        "width": 100,
+                        "height": 100
+                    }
+                },
+                "opacity": {
+                    "value": 0.5,
+                    "random": false,
+                    "anim": {
+                        "enable": false,
+                        "speed": 1,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 5,
+                    "random": true,
+                    "anim": {
+                        "enable": false,
+                        "speed": 40,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ffffff",
+                    "opacity": 0.4,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 6,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": false,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
+                }
+            }
+        });
+    </script>
 
-        #content h1 {
-            font-size: 24px;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-family: 'Open Sans', sans-serif;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        #searchbar {
-            text-align: center;
-            margin: 20px auto;
-        }
-
-        .form__input {
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            width: 300px;
-            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-            background-color: #222;
-            text-align: center;
-            color: #fff;
-            cursor: cell;
-        }
-
-        a {
-            text-decoration: none;
-            color: white;
-            width: 50px;
-            height: 50px;
-            padding-right: 1px;
-            padding-left: 1px;
-            text-align: center;
-            align-self: center;
-        }
-
-        .form__input::placeholder {
-            color: #aaa;
-            text-align: center;
-        }
-
-        .form_input:hover {
-            cursor: cell;
-        }
-
-        .form__input:focus {
-            outline: none;
-            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-        }
-
-        #footer {
-            position: fixed;
-            left: 0;
-            bottom: 0;
-            border-top-width: 1px;
-            border-top-style: solid;
-            border-top-color: #99ccff;
-            font-family: 'Open Sans', sans-serif;
-            width: 100%;
-            height: 15px;
-            background-color: #000;
-            padding
+</body>
+</html>
