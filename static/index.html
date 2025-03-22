@@ -2,76 +2,32 @@
 <html>
    <head>
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Web Proxy</title>
+      <title>Unblocker</title>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
       <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
-      <script src="particles.js"></script>
-      <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
-      <style>
-         body {
-            font-family: 'Open Sans', sans-serif;
-            background-color: #0d0d0d;
-            color: white;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-         }
-
-         /* Particles background */
-         canvas#canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-         }
-
-         /* Form styling */
-         #uv-form {
-            margin-top: 100px;
-         }
-
-         input {
-            width: 80%;
-            padding: 10px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            outline: none;
-            background: #1a1a1a;
-            color: white;
-         }
-
-         input::placeholder {
-            color: gray;
-         }
-
-         /* Footer */
-         #footer {
-            margin-top: 30px;
-            font-size: 14px;
-            color: gray;
-         }
-      </style>
+      <link rel="stylesheet" href="index.css">
+      <script src="particles.js"></script> <!-- Link to particles.js -->
    </head>
    <body>
-      <canvas id="canvas"></canvas>
+      <canvas id="particles-js"></canvas> <!-- Particles background -->
 
-      <h1>Kelvin's Arcade</h1>
-      <p>Enter a URL to unblock websites:</p>
+      <div id="content">
+         <form id="uv-form">
+            <input id="uv-search-engine" value="https://www.google.com/search?q=%s" type="hidden"/> 
+            <input id="uv-address" type="text" placeholder="Type URL or search query" class="form__input"/>
+         </form>
 
-      <form id="uv-form">
-         <input id="uv-address" type="text" placeholder="Enter URL and press Enter" class="form__input"/>
-      </form>
-
-      <script src="uv/uv.bundle.js" charset="UTF-8" defer></script>
-      <script src="uv/uv.config.js" charset="UTF-8" defer></script>
-      <script src="register-sw.js" charset="UTF-8" defer></script>
-      <script src="search.js" charset="UTF-8" defer></script>
-      <script src="index.js" charset="UTF-8" defer></script>
-
-      <div id="footer">
-         <footer>©Kelvin 2024 Web Proxy - Use responsibly.</footer>
+         <div id="popularSites">
+            <img src="https://img.icons8.com/?size=100&id=T2CwYFr5ouk6&format=png&color=000000" alt="Xbox" class="hidden" onclick="autofill('http://xbox.com/play')">
+            <img src="https://img.icons8.com/?size=100&id=48137&format=png&color=000000" alt="Now.gg" class="hidden" onclick="autofill('https://now.gg/')">
+            <img src="https://img.icons8.com/?size=100&id=48166&format=png&color=000000" alt="Google" class="hidden" onclick="autofill('https://google.com')">
+            <img src="https://img.icons8.com/?size=100&id=92582&format=png&color=000000" alt="GeForce NOW" class="hidden" onclick="autofill('https://play.geforcenow.com/')">
+         </div>
       </div>
+
+      <script src="uv/uv.bundle.js" defer></script>
+      <script src="uv/uv.config.js" defer></script>
+      <script src="search.js" defer></script>
+      <script src="index.js" defer></script>
    </body>
 </html>
