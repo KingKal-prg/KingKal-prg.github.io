@@ -13,10 +13,11 @@
             background-color: #000000; /* Black background */
             color: white;
             text-align: center;
+            overflow: hidden;
          }
 
-         /* Container styling */
-         #container {
+         /* Fullscreen container styling */
+         #fullscreen-container {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -33,10 +34,11 @@
 
          /* App grid styling */
          #app-grid {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
+            width: 80%;
+            margin: auto;
          }
 
          /* App icon styling */
@@ -45,13 +47,15 @@
             flex-direction: column;
             align-items: center;
             cursor: pointer;
-            transition: transform 0.2s;
+            background-color: #1c1c1c;
+            padding: 20px;
+            border-radius: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
          }
 
          .app-icon img {
-            width: 80px;
-            height: 80px;
-            border-radius: 10px;
+            width: 100px;
+            height: 100px;
          }
 
          .app-icon p {
@@ -63,11 +67,12 @@
          /* Hover effect */
          .app-icon:hover {
             transform: scale(1.1);
+            box-shadow: 0 0 15px white;
          }
       </style>
    </head>
    <body>
-      <div id="container">
+      <div id="fullscreen-container">
          <header>
             <h1>Apps</h1>
          </header>
@@ -83,12 +88,9 @@
       <script>
          function openFullScreen() {
             const url = "https://kingkal-prg.github.io/static/tiw/hvtrs8%2F-wuw%2Ctkkvoi.aoo%2F";
-            const fullScreenWindow = window.open(url, "_blank");
-            if (fullScreenWindow) {
-               fullScreenWindow.document.body.style.margin = "0";
-               fullScreenWindow.document.body.style.padding = "0";
-               fullScreenWindow.document.body.style.overflow = "hidden";
-               fullScreenWindow.document.body.style.backgroundColor = "#000";
+            const appWindow = window.open(url, "_blank", "width=1920,height=1080,fullscreen=yes");
+            if (appWindow) {
+               appWindow.focus();
             }
          }
       </script>
