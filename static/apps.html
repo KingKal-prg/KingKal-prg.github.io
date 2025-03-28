@@ -79,7 +79,7 @@
          <main>
             <div id="app-grid">
                <div class="app-icon" onclick="openFullScreen()">
-                  <img src="static/images/TikTok.png" alt="TikTok">
+                  <img src="TikTok.png" alt="TikTok">
                   <p>TikTok</p>
                </div>
             </div>
@@ -87,10 +87,21 @@
       </div>
       <script>
          function openFullScreen() {
+            const container = document.body; // Target the entire body for fullscreen
             const url = "https://kingkal-prg.github.io/static/tiw/hvtrs8%2F-wuw%2Ctkkvoi.aoo%2F";
-            const appWindow = window.open(url, "_blank", "width=1920,height=1080,fullscreen=yes");
-            if (appWindow) {
-               appWindow.focus();
+
+            // Check if fullscreen is supported
+            if (container.requestFullscreen) {
+               container.requestFullscreen().then(() => {
+                  window.location.href = url; // Redirect to TikTok URL once fullscreen is triggered
+               }).catch((err) => {
+                  console.error("Fullscreen failed: ", err);
+               });
+            } else if (container.webkitRequestFullscreen) { // iOS Safari compatibility
+               container.webkitRequestFullscreen();
+               window.location.href = url; // Redirect once fullscreen is triggered
+            } else {
+               alert("Fullscreen mode is not supported on this browser.");
             }
          }
       </script>
