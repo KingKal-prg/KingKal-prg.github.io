@@ -35,7 +35,7 @@
          /* App grid styling */
          #app-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr); /* Adjusted for 3 apps */
             gap: 20px;
             width: 80%;
             margin: auto;
@@ -80,6 +80,7 @@
             height: 100%;
             border: none;
             z-index: 9999;
+            background-color: #000; /* Black background for iframe */
          }
       </style>
    </head>
@@ -90,18 +91,26 @@
          </header>
          <main>
             <div id="app-grid">
-               <div class="app-icon" onclick="openEmbed()">
+               <div class="app-icon" onclick="openEmbed('https://kingkal-prg.github.io/static/tiw/hvtrs8%2F-wuw%2Ctkkvoi.aoo%2F')">
                   <img src="static/images/TikTok.png" alt="TikTok">
                   <p>TikTok</p>
+               </div>
+               <div class="app-icon" onclick="openEmbed('https://kingkal-prg.github.io/static/tiw/hvtrs8%2F-wuw%2Cslarcjav.aoo%2F')">
+                  <img src="static/images/Snapchat.png" alt="Snapchat">
+                  <p>Snapchat</p>
+               </div>
+               <div class="app-icon" onclick="openEmbed('https://kingkal-prg.github.io/static/tiw/hvtrs8%2F-nmw%2Cge%2F')">
+                  <img src="static/images/nowgg.png" alt="now.gg">
+                  <p>now.gg</p>
                </div>
             </div>
          </main>
       </div>
       <iframe id="fullscreen-iframe"></iframe>
       <script>
-         function openEmbed() {
+         function openEmbed(link) {
             const iframe = document.getElementById("fullscreen-iframe");
-            iframe.src = "https://kingkal-prg.github.io/static/tiw/hvtrs8%2F-wuw%2Ctkkvoi.aoo%2F";
+            iframe.src = link;
             iframe.style.display = "block"; // Show the iframe fullscreen
          }
       </script>
