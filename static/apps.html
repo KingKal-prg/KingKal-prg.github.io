@@ -12,6 +12,7 @@
             padding: 0;
             background-color: #000000; /* Black background */
             color: white;
+            text-align: center;
             overflow: hidden; /* Prevent scrolling */
          }
 
@@ -71,7 +72,7 @@
 
          /* Fullscreen iframe styling */
          #fullscreen-iframe {
-            display: none; /* Initially hidden */
+            display: none; /* Hidden by default */
             position: fixed;
             top: 0;
             left: 0;
@@ -89,7 +90,7 @@
          </header>
          <main>
             <div id="app-grid">
-               <div class="app-icon" onclick="openFullScreen()">
+               <div class="app-icon" onclick="openEmbed()">
                   <img src="static/images/TikTok.png" alt="TikTok">
                   <p>TikTok</p>
                </div>
@@ -98,10 +99,10 @@
       </div>
       <iframe id="fullscreen-iframe"></iframe>
       <script>
-         function openFullScreen() {
+         function openEmbed() {
             const iframe = document.getElementById("fullscreen-iframe");
             iframe.src = "https://kingkal-prg.github.io/static/tiw/hvtrs8%2F-wuw%2Ctkkvoi.aoo%2F";
-            iframe.style.display = "block"; // Show the iframe
+            iframe.style.display = "block"; // Show the iframe fullscreen
          }
       </script>
    </body>
