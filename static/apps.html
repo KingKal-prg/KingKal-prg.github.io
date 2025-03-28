@@ -1,28 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="stylesheet" href="apps.css">
-      <link rel="shortcut icon" type="image/jpg" href="~/favicon.ico"/>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Apps - Kelvin Proxy</title>
+      <style>
+         /* General body styling */
+         body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000000; /* Black background */
+            color: white;
+            text-align: center;
+         }
+
+         /* Container styling */
+         #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+         }
+
+         /* Header styling */
+         header h1 {
+            margin: 20px 0;
+            font-size: 2em;
+            color: white;
+         }
+
+         /* App grid styling */
+         #app-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+         }
+
+         /* App icon styling */
+         .app-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+         }
+
+         .app-icon img {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+         }
+
+         .app-icon p {
+            margin-top: 10px;
+            font-size: 1em;
+            color: white;
+         }
+
+         /* Hover effect */
+         .app-icon:hover {
+            transform: scale(1.1);
+         }
+      </style>
    </head>
    <body>
-      <div id="header">
-         <h1>Apps</h1>
-      </div>
-      <div id="apps-section">
-         <a id="tiktok-app" href="#" onclick="openFullScreen()">
-            <img src="static/images/TikTok.png" alt="TikTok" class="app-icon">
-         </a>
+      <div id="container">
+         <header>
+            <h1>Apps</h1>
+         </header>
+         <main>
+            <div id="app-grid">
+               <div class="app-icon" onclick="openFullScreen()">
+                  <img src="static/images/TikTok.png" alt="TikTok">
+                  <p>TikTok</p>
+               </div>
+            </div>
+         </main>
       </div>
       <script>
          function openFullScreen() {
             const url = "https://kingkal-prg.github.io/static/tiw/hvtrs8%2F-wuw%2Ctkkvoi.aoo%2F";
             const fullScreenWindow = window.open(url, "_blank");
             if (fullScreenWindow) {
-               fullScreenWindow.focus();
                fullScreenWindow.document.body.style.margin = "0";
                fullScreenWindow.document.body.style.padding = "0";
+               fullScreenWindow.document.body.style.overflow = "hidden";
+               fullScreenWindow.document.body.style.backgroundColor = "#000";
             }
          }
       </script>
