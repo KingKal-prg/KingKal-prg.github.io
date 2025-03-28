@@ -23,6 +23,8 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            position: relative; /* To ensure particles are in the background */
+            z-index: 1;
          }
 
          /* Header styling */
@@ -30,15 +32,19 @@
             margin: 20px 0;
             font-size: 2em;
             color: white;
+            z-index: 2;
+            position: relative;
          }
 
          /* App grid styling */
          #app-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* Adjusted for 3 apps */
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             width: 80%;
             margin: auto;
+            z-index: 2;
+            position: relative;
          }
 
          /* App icon styling */
@@ -82,9 +88,20 @@
             z-index: 9999;
             background-color: #000; /* Black background for iframe */
          }
+
+         /* Particles container */
+         #particles-js {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* Ensure it's behind other content */
+         }
       </style>
    </head>
    <body>
+      <div id="particles-js"></div>
       <div id="fullscreen-container">
          <header>
             <h1>Apps</h1>
@@ -103,16 +120,26 @@
                   <img src="static/images/nowgg.png" alt="now.gg">
                   <p>now.gg</p>
                </div>
+               <div class="app-icon" onclick="openEmbed('https://kingkal-prg.github.io/static/tiw/hvtrs8%2F-sdlkx%2Ctm%2Fjooe')">
+                  <img src="static/images/movies.png" alt="Movies">
+                  <p>Movies</p>
+               </div>
             </div>
          </main>
       </div>
       <iframe id="fullscreen-iframe"></iframe>
+      <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
       <script>
          function openEmbed(link) {
             const iframe = document.getElementById("fullscreen-iframe");
             iframe.src = link;
             iframe.style.display = "block"; // Show the iframe fullscreen
          }
+
+         // Initialize particles.js
+         particlesJS.load('particles-js', 'particles-config.json', function() {
+            console.log('Particles.js loaded successfully');
+         });
       </script>
    </body>
 </html>
