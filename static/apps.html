@@ -12,8 +12,7 @@
             padding: 0;
             background-color: #000000; /* Black background */
             color: white;
-            text-align: center;
-            overflow: hidden;
+            overflow: hidden; /* Prevent scrolling */
          }
 
          /* Fullscreen container styling */
@@ -69,6 +68,18 @@
             transform: scale(1.1);
             box-shadow: 0 0 15px white;
          }
+
+         /* Fullscreen iframe styling */
+         #fullscreen-iframe {
+            display: none; /* Initially hidden */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 9999;
+         }
       </style>
    </head>
    <body>
@@ -79,30 +90,18 @@
          <main>
             <div id="app-grid">
                <div class="app-icon" onclick="openFullScreen()">
-                  <img src="TikTok.png" alt="TikTok">
+                  <img src="static/images/TikTok.png" alt="TikTok">
                   <p>TikTok</p>
                </div>
             </div>
          </main>
       </div>
+      <iframe id="fullscreen-iframe"></iframe>
       <script>
          function openFullScreen() {
-            const container = document.body; // Target the entire body for fullscreen
-            const url = "https://kingkal-prg.github.io/static/tiw/hvtrs8%2F-wuw%2Ctkkvoi.aoo%2F";
-
-            // Check if fullscreen is supported
-            if (container.requestFullscreen) {
-               container.requestFullscreen().then(() => {
-                  window.location.href = url; // Redirect to TikTok URL once fullscreen is triggered
-               }).catch((err) => {
-                  console.error("Fullscreen failed: ", err);
-               });
-            } else if (container.webkitRequestFullscreen) { // iOS Safari compatibility
-               container.webkitRequestFullscreen();
-               window.location.href = url; // Redirect once fullscreen is triggered
-            } else {
-               alert("Fullscreen mode is not supported on this browser.");
-            }
+            const iframe = document.getElementById("fullscreen-iframe");
+            iframe.src = "https://kingkal-prg.github.io/static/tiw/hvtrs8%2F-wuw%2Ctkkvoi.aoo%2F";
+            iframe.style.display = "block"; // Show the iframe
          }
       </script>
    </body>
