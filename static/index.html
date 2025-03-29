@@ -7,15 +7,32 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
       <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
       <title>Kelvin Proxy</title>
+      <style>
+         html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+         }
+         /* Use flexbox to center the content */
+         body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+         }
+         #content {
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+         }
+         #uv-address {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+         }
+      </style>
    </head>
    <body>
-      <div id="header">
-         <img src="logo.gif" alt="Logo">
-         <div id="tabs">
-            <a href="apps.html">Apps</a>
-            <a href="settings.html">Settings</a>
-         </div>
-      </div>
       <div id="content">
          <form id="uv-form">
             <input id="uv-search-engine" value="https://www.google.com/search?q=%s" type="hidden"/> 
@@ -28,8 +45,5 @@
       <script src="search.js" defer></script>
       <script src="index.js" defer></script>
       <script src="error.js" defer></script>
-      <div id="footer">
-         <p>&copy; 2023 Kelvin. All rights reserved.</p>
-      </div>
    </body>
 </html>
