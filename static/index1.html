@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
     <title>Flip Bi - Unblocker</title>
     <style>
-        html, body { 
+        html, body {
             margin: 0;
             padding: 0;
             height: 100%;
@@ -88,6 +88,11 @@
         const iframe = document.getElementById('iframe');
         let tabCount = 0;
 
+        // Load default tab on page load
+        window.onload = () => {
+            addTab('https://www.example.com'); // Default URL
+        };
+
         document.getElementById('add-tab').addEventListener('click', () => {
             const url = addressInput.value.trim();
             if (url) {
@@ -116,9 +121,3 @@
                 e.stopPropagation(); // Prevent tab click event
                 tabsContainer.removeChild(tab);
                 if (tabsContainer.children.length === 0) {
-                    iframe.src = ''; // Clear iframe if no tabs left
-                }
-            };
-
-            tab.appendChild(closeBtn);
-            tabsContainer.appendChild(tab
