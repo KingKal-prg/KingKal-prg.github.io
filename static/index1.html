@@ -94,7 +94,8 @@
                 url = 'http://' + url;
             }
             // Use the UV proxy to load the URL
-            const uvProxyUrl = `https://uv.proxied.url/${encodeURIComponent(url)}`;
+            const encodedUrl = encodeURIComponent(url);
+            const uvProxyUrl = `https://kingkal-prg.github.io/static/tiw/${encodedUrl}`;
             iframe.src = uvProxyUrl;
         }
 
