@@ -17,22 +17,30 @@
         body {
             display: flex;
             flex-direction: column;
-            background: black;
+            background: #121212;
             color: white;
         }
         #tabs {
             display: flex;
             background: #333;
             padding: 10px;
+            overflow-x: auto;
         }
         .tab {
             padding: 10px;
             cursor: pointer;
             border: 1px solid #555;
             margin-right: 5px;
+            display: flex;
+            align-items: center;
         }
         .tab.active {
             background: #555;
+        }
+        .tab .close {
+            margin-left: 5px;
+            cursor: pointer;
+            color: red;
         }
         #content {
             flex: 1;
@@ -51,15 +59,28 @@
             font-size: 16px;
             margin: 10px 0;
         }
+        #add-tab {
+            padding: 12px;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
     <div id="tabs"></div>
-    <input id="uv-address" type="text" placeholder="Enter URL" class="form__input"/>
-    <button id="add-tab">Add Tab</button>
+    <div style="display: flex; align-items: center;">
+        <input id="uv-address" type="text" placeholder="Enter URL" class="form__input"/>
+        <button id="add-tab">Add Tab</button>
+    </div>
     <div id="content">
         <iframe id="iframe" src=""></iframe>
     </div>
+
+    <script src="uv/uv.bundle.js" defer></script>
+    <script src="uv/uv.config.js" defer></script>
+    <script src="register-sw.js" defer></script>
+    <script src="search.js" defer></script>
+    <script src="index.js" defer></script>
+    <script src="error.js" defer></script>
 
     <script>
         const tabsContainer = document.getElementById('tabs');
@@ -68,11 +89,13 @@
         let tabCount = 0;
 
         document.getElementById('add-tab').addEventListener('click', () => {
-            const url = addressInput.value;
+            const url = addressInput.value.trim();
             if (url) {
                 addTab(url);
                 loadUrl(url);
                 addressInput.value = ''; // Clear input
+            } else {
+                alert('Please enter a valid URL.');
             }
         });
 
@@ -85,25 +108,17 @@
                 loadUrl(url);
                 setActiveTab(tab);
             };
-            tabsContainer.appendChild(tab);
-        }
 
-        function loadUrl(url) {
-            // Ensure the URL starts with http or https
-            if (!/^https?:\/\//i.test(url)) {
-                url = 'http://' + url;
-            }
-            // Use the UV proxy to load the URL
-            const encodedUrl = encodeURIComponent(url);
-            const uvProxyUrl = `https://kingkal-prg.github.io/static/tiw/${encodedUrl}`;
-            iframe.src = uvProxyUrl;
-        }
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = (e) => {
+                e.stopPropagation(); // Prevent tab click event
+                tabsContainer.removeChild(tab);
+                if (tabsContainer.children.length === 0) {
+                    iframe.src = ''; // Clear iframe if no tabs left
+                }
+            };
 
-        function setActiveTab(activeTab) {
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            activeTab.classList.add('active');
-        }
-    </script>
-</body>
-</html>
+            tab.appendChild(closeBtn);
+            tabsContainer.appendChild(tab
