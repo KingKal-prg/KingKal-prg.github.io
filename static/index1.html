@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="index.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
     <title>Kelvin Proxy</title>
     <style>
         html, body {
             margin: 0;
             padding: 0;
             height: 100%;
-            font-family: Arial, sans-serif;
+            font-family: 'Open Sans', sans-serif;
             background: black;
             color: white;
             display: flex;
@@ -85,7 +89,7 @@
             const url = addressInput.value.trim();
             if (url) {
                 const encodedUrl = self.__uv$config.encodeUrl(url);
-                const proxiedUrl = `${self.__uv$config.prefix}service/${encodedUrl}`;
+                const proxiedUrl = `${self.__uv$config.prefix}${encodedUrl}`;
                 addTab(proxiedUrl);
                 loadUrl(proxiedUrl);
                 addressInput.value = '';
