@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="index.css">
+    <link rel="shortcut icon" type="image/jpg" href="~/favicon.ico"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    <title>Flip Bi - Unblocker</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Open Sans', sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            background: black;
+            color: white;
+        }
+        #tabs {
+            display: flex;
+            background: #333;
+            padding: 10px;
+        }
+        .tab {
+            padding: 10px;
+            cursor: pointer;
+            border: 1px solid #555;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background: #555;
+        }
+        #content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #uv-address {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="tabs"></div>
+    <input id="uv-address" type="text" placeholder="Enter URL" class="form__input"/>
+    <button id="add-tab">Add Tab</button>
+    <div id="content">
+        <iframe id="iframe" src=""></iframe>
+    </div>
+
+    <script>
+        const tabsContainer = document.getElementById('tabs');
+        const addressInput = document.getElementById('uv-address');
+        const iframe = document.getElementById('iframe');
+        let tabCount = 0;
+
+        document.getElementById('add-tab').addEventListener('click', () => {
+            const url = addressInput.value;
+            if (url) {
+                addTab(url);
+                loadUrl(url);
+                addressInput.value = ''; // Clear input
+            }
+        });
+
+        function addTab(url) {
+            tabCount++;
+            const tab = document.createElement('div');
+            tab.className = 'tab active';
+            tab.innerText = `Tab ${tabCount}`;
+            tab.onclick = () => {
+                loadUrl(url);
+                setActiveTab(tab);
+            };
+            tabsContainer.appendChild(tab);
+        }
+
+        function loadUrl(url) {
+            // Ensure the URL starts with http or https
+            if (!/^https?:\/\//i.test(url)) {
+                url = 'http://' + url;
+            }
+            // Use the UV proxy to load the URL
+            const uvProxyUrl = `https://uv.proxied.url/${encodeURIComponent(url)}`;
+            iframe.src = uvProxyUrl;
+        }
+
+        function setActiveTab(activeTab) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            activeTab.classList.add('active');
+        }
+    </script>
+</body>
+</html>
