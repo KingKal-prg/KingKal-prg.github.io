@@ -2,37 +2,25 @@
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>UV Unblocker</title>
+    <title>Kelvin Proxy</title>
     <style>
         html, body {
             margin: 0;
             padding: 0;
             height: 100%;
             font-family: Arial, sans-serif;
-            background: #121212;
+            background: black;
             color: white;
             display: flex;
             flex-direction: column;
-        }
-        #controls {
-            display: flex;
             align-items: center;
-            padding: 10px;
-        }
-        #uv-address {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            margin: 10px;
-        }
-        #add-tab {
-            padding: 12px;
-            cursor: pointer;
+            justify-content: center;
         }
         #tabs {
             display: flex;
             background: #333;
             padding: 10px;
+            width: 100%;
             overflow-x: auto;
         }
         .tab {
@@ -44,42 +32,63 @@
         .tab.active {
             background: #555;
         }
+        .tab .close {
+            margin-left: 5px;
+            cursor: pointer;
+            color: red;
+        }
         #content {
-            flex: 1;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        #uv-address {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
         }
         iframe {
             width: 100%;
-            height: 100%;
+            height: 80vh;
             border: none;
         }
     </style>
 </head>
 <body>
 
-    <div id="controls">
-        <input id="uv-address" type="text" placeholder="Enter URL" />
-        <button id="add-tab">Open URL</button>
-    </div>
     <div id="tabs"></div>
+
     <div id="content">
-        <iframe id="iframe" src="https://kingkal-prg.github.io/static"></iframe>
+        <form id="uv-form">
+            <input id="uv-search-engine" value="https://www.google.com/search?q=%s" type="hidden"/> 
+            <input id="uv-address" type="text" placeholder="Search Google or type an URL" class="form__input"/>
+            <button type="button" id="add-tab">Open</button>
+        </form>
     </div>
+
+    <div id="browser-container">
+        <iframe id="iframe" src=""></iframe>
+    </div>
+
+    <script src="/static/uv/uv.bundle.js" defer></script>
+    <script src="/static/uv/uv.config.js" defer></script>
+    <script src="/static/uv/uv.sw.js" defer></script>
+    <script src="/static/uv/uv.handler.js" defer></script>
 
     <script>
         const tabsContainer = document.getElementById('tabs');
+        const addressInput = document.getElementById('uv-address');
         const iframe = document.getElementById('iframe');
         let tabCount = 0;
 
         document.getElementById('add-tab').addEventListener('click', () => {
-            const url = document.getElementById('uv-address').value.trim();
-            
+            const url = addressInput.value.trim();
             if (url) {
-                const encodedUrl = encodeURIComponent(url);
-                const fullUrl = `https://kingkal-prg.github.io/static/tiw/${encodedUrl}`;
-
-                addTab(fullUrl);
-                iframe.src = fullUrl;
-                document.getElementById('uv-address').value = '';
+                const encodedUrl = self.__uv$config.encodeUrl(url);
+                const proxiedUrl = `${self.__uv$config.prefix}service/${encodedUrl}`;
+                addTab(proxiedUrl);
+                loadUrl(proxiedUrl);
+                addressInput.value = '';
             } else {
                 alert('Please enter a valid URL.');
             }
@@ -91,10 +100,27 @@
             tab.className = 'tab active';
             tab.innerText = `Tab ${tabCount}`;
             tab.onclick = () => {
-                iframe.src = url;
+                loadUrl(url);
                 setActiveTab(tab);
             };
+
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = (event) => {
+                event.stopPropagation();
+                tab.remove();
+                if (tabsContainer.children.length === 0) {
+                    iframe.src = ""; // Reset iframe when no tabs remain
+                }
+            };
+
+            tab.appendChild(closeBtn);
             tabsContainer.appendChild(tab);
+        }
+
+        function loadUrl(url) {
+            iframe.src = url;
         }
 
         function setActiveTab(activeTab) {
