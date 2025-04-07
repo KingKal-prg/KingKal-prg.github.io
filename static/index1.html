@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="index.css">
@@ -51,11 +51,6 @@
             padding: 12px;
             font-size: 16px;
         }
-        iframe {
-            width: 100%;
-            height: 80vh;
-            border: none;
-        }
     </style>
 </head>
 <body>
@@ -66,23 +61,20 @@
         <form id="uv-form">
             <input id="uv-search-engine" value="https://www.google.com/search?q=%s" type="hidden"/> 
             <input id="uv-address" type="text" placeholder="Search Google or type an URL" class="form__input"/>
-            <button type="button" id="add-tab">Open</button>
+            <button type="button" id="add-tab">New Tab</button>
         </form>
     </div>
 
-    <div id="browser-container">
-        <iframe id="iframe" src=""></iframe>
-    </div>
-
-    <script src="/static/uv/uv.bundle.js" defer></script>
-    <script src="/static/uv/uv.config.js" defer></script>
-    <script src="/static/uv/uv.sw.js" defer></script>
-    <script src="/static/uv/uv.handler.js" defer></script>
+    <script src="uv/uv.bundle.js" defer></script>
+    <script src="uv/uv.config.js" defer></script>
+    <script src="register-sw.js" defer></script>
+    <script src="search.js" defer></script>
+    <script src="index.js" defer></script>
+    <script src="error.js" defer></script>
 
     <script>
         const tabsContainer = document.getElementById('tabs');
         const addressInput = document.getElementById('uv-address');
-        const iframe = document.getElementById('iframe');
         let tabCount = 0;
 
         document.getElementById('add-tab').addEventListener('click', () => {
@@ -91,7 +83,7 @@
                 const encodedUrl = self.__uv$config.encodeUrl(url);
                 const proxiedUrl = `${self.__uv$config.prefix}${encodedUrl}`;
                 addTab(proxiedUrl);
-                loadUrl(proxiedUrl);
+                window.open(proxiedUrl, '_blank');
                 addressInput.value = '';
             } else {
                 alert('Please enter a valid URL.');
@@ -104,7 +96,7 @@
             tab.className = 'tab active';
             tab.innerText = `Tab ${tabCount}`;
             tab.onclick = () => {
-                loadUrl(url);
+                window.open(url, '_blank');
                 setActiveTab(tab);
             };
 
@@ -114,17 +106,10 @@
             closeBtn.onclick = (event) => {
                 event.stopPropagation();
                 tab.remove();
-                if (tabsContainer.children.length === 0) {
-                    iframe.src = ""; // Reset iframe when no tabs remain
-                }
             };
 
             tab.appendChild(closeBtn);
             tabsContainer.appendChild(tab);
-        }
-
-        function loadUrl(url) {
-            iframe.src = url;
         }
 
         function setActiveTab(activeTab) {
