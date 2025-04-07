@@ -16,12 +16,21 @@
             color: white;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+        }
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
         }
         #browser-container {
             display: flex;
             flex-direction: column;
             width: 100%;
             height: 100%;
+            position: relative;
+            z-index: 1;
         }
         #tabs-container {
             display: flex;
@@ -85,6 +94,8 @@
 </head>
 <body>
 
+    <div id="particles-js"></div>
+
     <div id="browser-container">
         <div id="tabs-container"></div>
         <div id="controls">
@@ -96,6 +107,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="uv/uv.bundle.js" defer></script>
     <script src="uv/uv.config.js" defer></script>
     <script src="register-sw.js" defer></script>
@@ -104,6 +116,17 @@
     <script src="error.js" defer></script>
 
     <script>
+        particlesJS("particles-js", {
+            particles: {
+                number: { value: 100 },
+                color: { value: "#800080" },
+                shape: { type: "circle" },
+                opacity: { value: 0.5 },
+                size: { value: 3 },
+                move: { speed: 2 }
+            }
+        });
+
         const tabsContainer = document.getElementById('tabs-container');
         const addressInput = document.getElementById('uv-address');
         const iframe = document.getElementById('iframe');
