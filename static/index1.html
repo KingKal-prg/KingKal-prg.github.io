@@ -96,8 +96,10 @@
         document.getElementById('add-tab').addEventListener('click', () => {
             const url = addressInput.value.trim();
             if (url) {
-                addTab(url);
-                loadUrl(url);
+                const encodedUrl = encodeURIComponent(url);
+                const fullUrl = `https://kingkal-prg.github.io/static/tiw/${encodedUrl}`;
+                addTab(fullUrl);
+                loadUrl(fullUrl);
                 addressInput.value = ''; // Clear input
             } else {
                 alert('Please enter a valid URL.');
@@ -116,7 +118,4 @@
 
             const closeBtn = document.createElement('span');
             closeBtn.className = 'close';
-            closeBtn.innerHTML = '&times;';
-            closeBtn.onclick = (e) => {
-                e.stopPropagation(); // Prevent tab click event
-                tabsContainer.removeChild(tab
+            closeBtn.innerHTML = '&times
