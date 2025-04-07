@@ -1,90 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Kelvin Proxy Browser</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultraviolet Browser</title>
     <style>
-        * {
+        body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-        html, body {
-            height: 100%;
-            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
             background: #222;
             color: white;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
         }
-        #particles-js {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-        #browser-container {
+        #address-bar {
             display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
-            position: relative;
-            z-index: 1;
-        }
-        #controls {
-            display: flex;
-            background: #111;
             padding: 10px;
-            align-items: center;
+            background-color: #333;
+            border-bottom: 2px solid #444;
         }
-        #uv-address {
-            flex-grow: 1;
-            padding: 10px;
+        #url {
+            flex: 1;
+            padding: 8px;
             font-size: 16px;
-            background: #333;
+            background: #444;
             color: white;
-            border: 1px solid #555;
+            border: 1px solid #666;
             border-radius: 5px;
-            margin-right: 10px;
         }
-        #open-url {
-            padding: 10px;
+        #go-button {
+            padding: 8px 12px;
+            font-size: 16px;
             background: #555;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
-        .iframe-container {
-            flex-grow: 1;
-            width: 100%;
-            height: calc(100vh - 60px);
-            background: #000;
-            border: none;
+        #content {
+            flex: 1;
+            overflow: auto;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         iframe {
-            width: 100%;
-            height: 100%;
+            width: 98%;
+            height: 96%;
             border: none;
+            background: #000;
         }
     </style>
 </head>
 <body>
 
-    <div id="particles-js"></div>
-
-    <div id="browser-container">
-        <div id="controls">
-            <input id="uv-address" type="text" placeholder="Enter a URL"/>
-            <button id="open-url">Go</button>
-        </div>
-        <div class="iframe-container">
-            <iframe id="iframe" src=""></iframe>
-        </div>
+    <div id="address-bar">
+        <input type="text" id="url" placeholder="Enter URL (e.g., https://www.example.com)" />
+        <button id="go-button">Go</button>
+    </div>
+    <div id="content">
+        <iframe id="web-view" src=""></iframe>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="uv/uv.bundle.js" defer></script>
     <script src="uv/uv.config.js" defer></script>
     <script src="register-sw.js" defer></script>
@@ -93,29 +73,18 @@
     <script src="error.js" defer></script>
 
     <script>
-        particlesJS("particles-js", {
-            particles: {
-                number: { value: 100 },
-                color: { value: "#800080" },
-                shape: { type: "circle" },
-                opacity: { value: 0.5 },
-                size: { value: 3 },
-                move: { speed: 2 }
-            }
-        });
-
-        document.getElementById("open-url").addEventListener("click", () => {
-            const addressInput = document.getElementById("uv-address").value.trim();
-            if (addressInput) {
-                const encodedUrl = self.__uv$config.encodeUrl(addressInput);
+        document.getElementById('go-button').addEventListener('click', function() {
+            const urlInput = document.getElementById('url').value.trim();
+            if (urlInput) {
+                const encodedUrl = self.__uv$config.encodeUrl(urlInput);
                 const proxiedUrl = `${self.__uv$config.prefix}${encodedUrl}`;
-                document.getElementById("iframe").src = proxiedUrl;
+                document.getElementById('web-view').src = proxiedUrl;
             }
         });
 
-        document.getElementById("uv-address").addEventListener("keypress", (event) => {
+        document.getElementById("url").addEventListener("keypress", (event) => {
             if (event.key === "Enter") {
-                document.getElementById("open-url").click();
+                document.getElementById("go-button").click();
             }
         });
     </script>
