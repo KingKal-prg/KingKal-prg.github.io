@@ -2,23 +2,32 @@
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="index.css">
-    <link rel="shortcut icon" type="image/jpg" href="~/favicon.ico"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
-    <title>Flip Bi - Unblocker</title>
+    <title>UV Unblocker</title>
     <style>
         html, body {
             margin: 0;
             padding: 0;
             height: 100%;
-            font-family: 'Open Sans', sans-serif;
-        }
-        body {
-            display: flex;
-            flex-direction: column;
+            font-family: Arial, sans-serif;
             background: #121212;
             color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        #controls {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+        #uv-address {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            margin: 10px;
+        }
+        #add-tab {
+            padding: 12px;
+            cursor: pointer;
         }
         #tabs {
             display: flex;
@@ -31,75 +40,68 @@
             cursor: pointer;
             border: 1px solid #555;
             margin-right: 5px;
-            display: flex;
-            align-items: center;
         }
         .tab.active {
             background: #555;
         }
-        .tab .close {
-            margin-left: 5px;
-            cursor: pointer;
-            color: red;
-        }
         #content {
             flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
-        #iframe {
+        iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
-        #uv-address {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            margin: 10px 0;
-        }
-        #add-tab {
-            padding: 12px;
-            margin-left: 10px;
-        }
     </style>
 </head>
 <body>
-    <div id="tabs"></div>
-    <div style="display: flex; align-items: center;">
-        <input id="uv-address" type="text" placeholder="Enter URL" class="form__input"/>
-        <button id="add-tab">Add Tab</button>
-    </div>
-    <div id="content">
-        <iframe id="iframe" src=""></iframe>
-    </div>
 
-    <script src="uv/uv.bundle.js" defer></script>
-    <script src="uv/uv.config.js" defer></script>
-    <script src="register-sw.js" defer></script>
-    <script src="search.js" defer></script>
-    <script src="index.js" defer></script>
-    <script src="error.js" defer></script>
+    <div id="controls">
+        <input id="uv-address" type="text" placeholder="Enter URL" />
+        <button id="add-tab">Open URL</button>
+    </div>
+    <div id="tabs"></div>
+    <div id="content">
+        <iframe id="iframe" src="https://kingkal-prg.github.io/static"></iframe>
+    </div>
 
     <script>
+        const tabsContainer = document.getElementById('tabs');
+        const iframe = document.getElementById('iframe');
+        let tabCount = 0;
+
         document.getElementById('add-tab').addEventListener('click', () => {
-            const addressInput = document.getElementById('uv-address');
-            const url = addressInput.value.trim();
+            const url = document.getElementById('uv-address').value.trim();
             
             if (url) {
-                // Encode the URL and append it to the base link
-                const fullUrl = `https://kingkal-prg.github.io/static/tiw/${encodeURIComponent(url)}`;
-                
-                // Load in iframe
-                document.getElementById('iframe').src = fullUrl;
-                
-                // Optional: Clear the input field
-                addressInput.value = '';
+                const encodedUrl = encodeURIComponent(url);
+                const fullUrl = `https://kingkal-prg.github.io/static/tiw/${encodedUrl}`;
+
+                addTab(fullUrl);
+                iframe.src = fullUrl;
+                document.getElementById('uv-address').value = '';
             } else {
                 alert('Please enter a valid URL.');
             }
         });
+
+        function addTab(url) {
+            tabCount++;
+            const tab = document.createElement('div');
+            tab.className = 'tab active';
+            tab.innerText = `Tab ${tabCount}`;
+            tab.onclick = () => {
+                iframe.src = url;
+                setActiveTab(tab);
+            };
+            tabsContainer.appendChild(tab);
+        }
+
+        function setActiveTab(activeTab) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            activeTab.classList.add('active');
+        }
     </script>
+
 </body>
 </html>
