@@ -83,39 +83,23 @@
     <script src="error.js" defer></script>
 
     <script>
-        const tabsContainer = document.getElementById('tabs');
-        const addressInput = document.getElementById('uv-address');
-        const iframe = document.getElementById('iframe');
-        let tabCount = 0;
-
-        // Load default tab on page load
-        window.onload = () => {
-            addTab('https://www.example.com'); // Default URL
-        };
-
         document.getElementById('add-tab').addEventListener('click', () => {
+            const addressInput = document.getElementById('uv-address');
             const url = addressInput.value.trim();
+            
             if (url) {
-                const encodedUrl = encodeURIComponent(url);
-                const fullUrl = `https://kingkal-prg.github.io/static/tiw/${encodedUrl}`;
-                addTab(fullUrl);
-                loadUrl(fullUrl);
-                addressInput.value = ''; // Clear input
+                // Encode the URL and append it to the base link
+                const fullUrl = `https://kingkal-prg.github.io/static/tiw/${encodeURIComponent(url)}`;
+                
+                // Load in iframe
+                document.getElementById('iframe').src = fullUrl;
+                
+                // Optional: Clear the input field
+                addressInput.value = '';
             } else {
                 alert('Please enter a valid URL.');
             }
         });
-
-        function addTab(url) {
-            tabCount++;
-            const tab = document.createElement('div');
-            tab.className = 'tab active';
-            tab.innerText = `Tab ${tabCount}`;
-            tab.onclick = () => {
-                loadUrl(url);
-                setActiveTab(tab);
-            };
-
-            const closeBtn = document.createElement('span');
-            closeBtn.className = 'close';
-            closeBtn.innerHTML = '&times
+    </script>
+</body>
+</html>
