@@ -16,12 +16,12 @@
       margin: 0;
       padding: 20px;
       color: #f1f1f1;
-      /* Overall body fade-in */
+      /* Overall body fade in */
       animation: bodyFadeIn 1.5s ease-out;
     }
     @keyframes bodyFadeIn {
       from { opacity: 0; }
-      to { opacity: 1; }
+      to   { opacity: 1; }
     }
     h1 {
       text-align: center;
@@ -61,12 +61,12 @@
       padding: 20px;
       border: 1px solid #444;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
       animation: fadeInSlide 1s ease-out;
     }
     @keyframes fadeInSlide {
       from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     #messages {
       list-style-type: none;
@@ -137,9 +137,9 @@
     }
     @keyframes spin {
       0% { transform: rotate(0deg); }
-      100% {transform: rotate(360deg); }
+      100% { transform: rotate(360deg); }
     }
-    /* TEACH & CONFIGURE TABS: Teach Chatbot & Configure Chatbot remain unchanged */
+    /* TEACH & CONFIGURE TABS STYLING */
     #teachForm, #configForm {
       display: flex;
       flex-direction: column;
@@ -162,7 +162,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    /* Button to load basic teachings */
+    /* Button to Load Basic Teachings */
     #teachBasic {
       margin-top: 10px;
       padding: 8px 16px;
@@ -172,7 +172,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    /* Import Teaching Data */
+    /* Import Teaching Data Section */
     #importSection {
       margin-top: 20px;
       border-top: 1px solid #444;
@@ -194,7 +194,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    /* Teach List */
+    /* Teach List Styling */
     #teachList {
       margin-top: 20px;
       list-style-type: none;
@@ -204,7 +204,7 @@
       padding: 5px;
       border-bottom: 1px solid #444;
     }
-    /* Configure Chatbot Tab */
+    /* Configure Chatbot Tab Styling */
     #configForm textarea {
       width: 100%;
       min-height: 100px;
@@ -249,7 +249,7 @@
       <input type="text" id="teachAnswer" placeholder="Answer (e.g., 10000)" required>
       <button type="submit">Save Correction</button>
     </form>
-    <!-- Button for basic teachings -->
+    <!-- Button for Basic Teachings -->
     <button id="teachBasic">Teach Chatbot Basics</button>
     <ul id="teachList"></ul>
     <!-- Import Teaching Data Section -->
@@ -491,8 +491,19 @@
       return true;
     }
     
-    // Chain: DeepSeek -> DuckDuckGo -> Google -> Fallback.
+    // NEW: Check if the input is a greeting.
+    function isGreeting(input) {
+      const lower = input.trim().toLowerCase().replace(/[!.,?]/g, "");  // remove punctuation
+      const greetings = ["hi", "hello", "hey", "howdy", "hola"];
+      return greetings.includes(lower);
+    }
+    
+    // Chain: Check greeting first; then DeepSeek → DuckDuckGo → Google → fallback.
     async function generateResponse(userInput) {
+      if (isGreeting(userInput)) {
+        return "Hello! How can I help you today?";
+      }
+      
       let answer = await deepSeekChat(userInput);
       if (isAcceptable(answer)) return answer;
       
@@ -590,7 +601,7 @@
       document.getElementById('imageFile').click();
     });
     
-    // When a file is selected, process it.
+    // When a file is selected, process and display the image with OCR and DeepSeek results.
     document.getElementById('imageFile').addEventListener('change', () => {
       const file = document.getElementById('imageFile').files[0];
       const messages = document.getElementById('messages');
@@ -604,19 +615,19 @@
           img.style.maxWidth = "100%";
           imageMessage.appendChild(img);
           messages.appendChild(imageMessage);
-          
+  
           try {
             const processedSrc = await preprocessImage(e.target.result);
             document.getElementById('spinner-container').style.display = 'flex';
             let { data: { text } } = await Tesseract.recognize(processedSrc, 'eng');
             document.getElementById('spinner-container').style.display = 'none';
-            
+  
             text = text.replace(/[«»‘’“”]/g, "").trim();
-            
+  
             const extractedTextMsg = document.createElement('li');
             extractedTextMsg.textContent = "Extracted Text from Image: " + text;
             messages.appendChild(extractedTextMsg);
-            
+  
             const deepResponse = await deepSeekChat(text);
             const deepResponseMsg = document.createElement('li');
             deepResponseMsg.textContent = "Chatbot: " + deepResponse;
