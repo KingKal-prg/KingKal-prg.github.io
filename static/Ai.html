@@ -243,23 +243,27 @@
       });
     });
   
-    // Helper: Check if input looks like a math expression
+    // Helper: Check if the input looks like a math expression.
     function isMathQuestion(input) {
       return /[0-9]/.test(input) && /[+\-*/]/.test(input);
     }
   
-    // Math evaluation helper
+    // Improved math evaluation helper.
     function evaluateMath(expression) {
       try {
+        // Trim, then remove all characters except digits, operators, and parentheses.
+        expression = expression.trim();
         const safeExpression = expression.replace(/[^0-9+\-*/().]/g, '');
-        let result = eval(safeExpression);
-        return result;
+        if (!safeExpression || !/\d/.test(safeExpression)) {
+          return "error evaluating the math expression";
+        }
+        return eval(safeExpression);
       } catch (error) {
         return "error evaluating the math expression";
       }
     }
   
-    // DuckDuckGo Instant Answer API integration
+    // DuckDuckGo Instant Answer API integration.
     async function duckDuckGoSearch(query) {
       const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
       try {
@@ -275,7 +279,7 @@
       }
     }
   
-    // DeepSeek API integration with custom fallback message
+    // DeepSeek API integration with fallback message.
     async function deepSeekChat(userInput) {
       const apiKey = "sk-5a079b5335564dba87a3f037274dc108";
       const url = "https://api.deepseek.com/chat/completions";
@@ -317,19 +321,19 @@
       }
     }
   
-    // Generate a response based on user input
+    // Generate a response based on user input.
     async function generateResponse(userInput) {
       let normalizedInput = userInput.trim().toLowerCase();
-      // Use taught corrections if available.
+      // Check for taught corrections.
       if (teachings[normalizedInput]) {
         return teachings[normalizedInput];
       }
-      // If the input starts with "search:" use DuckDuckGo.
+      // If input starts with "search:" use DuckDuckGo.
       if (userInput.toLowerCase().startsWith("search:")) {
         const query = userInput.substring(7).trim();
         return await duckDuckGoSearch(query);
       }
-      // If the input looks like a math expression, evaluate it.
+      // If input appears to be a math expression, evaluate it.
       if (isMathQuestion(userInput)) {
         const result = evaluateMath(userInput);
         return `The answer is ${result}.`;
@@ -338,7 +342,7 @@
       return await deepSeekChat(userInput);
     }
   
-    // Chat message event handling
+    // Chat message event handling.
     document.getElementById('send').addEventListener('click', async () => {
       const userInput = document.getElementById('userInput').value.trim();
       if (userInput === '') return;
@@ -361,7 +365,7 @@
       messages.scrollTop = messages.scrollHeight;
     });
   
-    // Image upload with OCR and response generation
+    // Image upload with OCR and response generation.
     document.getElementById('uploadImageButton').addEventListener('click', () => {
       const fileInput = document.getElementById('imageFile');
       const file = fileInput.files[0];
@@ -387,7 +391,7 @@
             extractedTextDiv.textContent = "Extracted Text: " + text;
             resultDiv.appendChild(extractedTextDiv);
   
-            // If the extracted text is a math question, evaluate it.
+            // If extracted text is a math expression, evaluate it.
             if (isMathQuestion(text)) {
               const result = evaluateMath(text);
               const mathResultDiv = document.createElement('div');
