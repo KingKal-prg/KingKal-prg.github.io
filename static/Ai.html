@@ -15,13 +15,12 @@
       background: #1e1e1e;
       margin: 0;
       padding: 20px;
-      color: #f1f1f1; /* Light text for contrast */
+      color: #f1f1f1;
     }
     h1 {
       text-align: center;
       color: #f1f1f1;
     }
-    /* Chat container dark background */
     #chat {
       max-width: 600px;
       margin: 20px auto;
@@ -291,10 +290,11 @@
     async function deepSeekChat(userInput) {
       const apiKey = "sk-5a079b5335564dba87a3f037274dc108";
       const url = "https://api.deepseek.com/chat/completions";
+      // Updated system prompt to encourage providing a best guess
       const payload = {
         model: "deepseek-chat",
         messages: [
-          { role: "system", content: "You are a helpful assistant." },
+          { role: "system", content: "You are a helpful assistant. If you are unsure, please provide your best informed guess." },
           { role: "user", content: userInput }
         ],
         stream: false
@@ -312,20 +312,23 @@
         document.getElementById('spinner-container').style.display = 'none';
         const data = await response.json();
         console.log("DeepSeek API response:", data);
+        let answer = "";
         if (data && data.choices && data.choices.length > 0) {
           const choice = data.choices[0];
-          return (choice.message && (choice.message.content || choice.message.text)) ||
-                 choice.text ||
-                 "I'm still YN so idk";
+          answer = (choice.message && (choice.message.content || choice.message.text)) || choice.text;
         } else if (data && data.text) {
-          return data.text;
+          answer = data.text;
+        }
+        if (answer && answer.trim().length > 0) {
+          return answer;
         } else {
-          return "I'm still YN so idk";
+          // Fallback to DuckDuckGo if DeepSeek returns nothing.
+          return await duckDuckGoSearch(userInput);
         }
       } catch (error) {
         document.getElementById('spinner-container').style.display = 'none';
         console.error(error);
-        return "Error communicating with DeepSeek API.";
+        return await duckDuckGoSearch(userInput);
       }
     }
     
@@ -338,10 +341,10 @@
         return teachings[normalizedInput];
       }
       
-      // Clean the input (remove punctuation, extra spaces).
+      // Clean the input for pattern matching.
       let cleanInput = normalizedInput.replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
       
-      // If the cleaned input includes known math problem keywords.
+      // If the cleaned input includes known math problem keywords (example).
       if (
         cleanInput.includes("6 sided die") &&
         cleanInput.includes("p not even") &&
@@ -350,19 +353,19 @@
         return "50%";
       }
       
-      // If input starts with "search:" use DuckDuckGo.
+      // If the input starts with "search:" use DuckDuckGo.
       if (normalizedInput.startsWith("search:")) {
         const query = normalizedInput.substring(7).trim();
         return await duckDuckGoSearch(query);
       }
       
-      // If input appears to be a math expression.
+      // If the input appears to be a math expression.
       if (isMathQuestion(normalizedInput)) {
         const result = evaluateMath(normalizedInput);
         return `The answer is ${result}.`;
       }
       
-      // Otherwise, ask DeepSeek.
+      // Otherwise, query DeepSeek.
       return await deepSeekChat(userInput);
     }
     
@@ -404,10 +407,10 @@
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
           for (let i = 0; i < data.length; i += 4) {
-            let avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            let avg = (data[i] + data[i+1] + data[i+2]) / 3;
             data[i] = avg;
-            data[i + 1] = avg;
-            data[i + 2] = avg;
+            data[i+1] = avg;
+            data[i+2] = avg;
           }
           ctx.putImageData(imageData, 0, 0);
           resolve(canvas.toDataURL());
@@ -443,7 +446,7 @@
             extractedTextDiv.textContent = "Extracted Text: " + text;
             resultDiv.appendChild(extractedTextDiv);
   
-            // Always send cleaned OCR text to DeepSeek.
+            // Always send the cleaned OCR text to DeepSeek.
             const deepResponse = await deepSeekChat(text);
             const deepResultDiv = document.createElement('div');
             deepResultDiv.style.marginTop = "10px";
