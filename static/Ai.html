@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Copilot Chat</title>
-  <!-- Optional: Additional chatbot functionality from jsDelivr -->
+  <!-- Optional: Additional chatbot functionality -->
   <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
   <!-- Tesseract.js for OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
   <style>
-    /* Dark theme styling */
+    /* DARK THEME STYLING */
     body {
       font-family: Arial, sans-serif;
       background: #1e1e1e;
@@ -21,6 +21,7 @@
       text-align: center;
       color: #f1f1f1;
     }
+    /* Chat Container */
     #chat {
       max-width: 600px;
       margin: 20px auto;
@@ -143,6 +144,39 @@
       border-radius: 5px;
       cursor: pointer;
     }
+    /* Button to import basic teachings */
+    #teachBasic {
+      margin-top: 10px;
+      padding: 8px 16px;
+      border: none;
+      background-color: #28a745;
+      color: #f1f1f1;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    /* Import Teaching Data section */
+    #importSection {
+      margin-top: 20px;
+      border-top: 1px solid #444;
+      padding-top: 10px;
+    }
+    #importSection input {
+      padding: 8px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background: #333;
+      color: #f1f1f1;
+      margin-right: 10px;
+    }
+    #importButton {
+      padding: 8px 16px;
+      border: none;
+      background-color: #17a2b8;
+      color: #f1f1f1;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    /* Teach List styling */
     #teachList {
       margin-top: 20px;
       list-style-type: none;
@@ -184,13 +218,22 @@
   <!-- Teach Chatbot Tab -->
   <div id="teachTab" class="tabContent">
     <h3>Teach Chatbot</h3>
-    <p>Enter the question and the correct answer to teach the chatbot a new response.</p>
+    <p>Enter a question and its corresponding answer to update the chatbot’s responses.</p>
     <form id="teachForm">
       <input type="text" id="teachQuestion" placeholder="Question (e.g., what's 100x100?)" required>
-      <input type="text" id="teachAnswer" placeholder="Correct Answer (e.g., 10000)" required>
+      <input type="text" id="teachAnswer" placeholder="Answer (e.g., 10000)" required>
       <button type="submit">Save Correction</button>
     </form>
+    <!-- Button to load basic teachings -->
+    <button id="teachBasic">Teach Chatbot Basics</button>
     <ul id="teachList"></ul>
+    <!-- Import Teaching Data Section -->
+    <div id="importSection">
+      <h4>Import Teaching Data</h4>
+      <input type="text" id="importSubject" placeholder="Subject (e.g., math basics)" required>
+      <input type="url" id="importLink" placeholder="URL to import teaching data" required>
+      <button id="importButton">Import Teaching Data</button>
+    </div>
   </div>
   
   <!-- Image Upload Tab -->
@@ -198,8 +241,9 @@
     <h3>Image Upload</h3>
     <p>
       Upload an image using a free image hosting alternative.
-      For production you might use <a href="https://postimages.org" target="_blank" style="color:#007bff;">Postimages</a> or 
-      <a href="https://imagekit.io" target="_blank" style="color:#007bff;">ImageKit</a>, both offering free tiers.
+      For production, you might use 
+      <a href="https://postimages.org" target="_blank" style="color:#007bff;">Postimages</a> or 
+      <a href="https://imagekit.io" target="_blank" style="color:#007bff;">ImageKit</a>, both of which offer free tiers.
     </p>
     <input type="file" id="imageFile" accept="image/*">
     <button id="uploadImageButton">Upload Image</button>
@@ -212,18 +256,20 @@
   </div>
   
   <script>
-    // ---------- Teaching Data (localStorage) ----------
+    /***** TEACHING DATA MANAGEMENT *****/
     let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
+    
     function updateTeachList() {
       const teachList = document.getElementById('teachList');
       teachList.innerHTML = '';
-      for (let question in teachings) {
+      for (let key in teachings) {
         const li = document.createElement('li');
-        li.textContent = `${question} --> ${teachings[question]}`;
+        li.textContent = `${key} --> ${teachings[key]}`;
         teachList.appendChild(li);
       }
     }
     updateTeachList();
+    
     document.getElementById('teachForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const question = document.getElementById('teachQuestion').value.trim().toLowerCase();
@@ -238,7 +284,72 @@
       }
     });
     
-    // ---------- Tab Switching Logic ----------
+    // Teach Chatbot Basics: Pre-populate with some basic Q&A.
+    document.getElementById('teachBasic').addEventListener('click', function() {
+      const basics = {
+        "what is 2+2": "4",
+        "what is 10 divided by 2": "5",
+        "who discovered america": "Christopher Columbus",
+        "when did world war ii end": "1945",
+        "what is photosynthesis": "It is the process by which green plants use sunlight to synthesize foods from CO₂ and water.",
+        "what is gravity": "Gravity is the force of attraction between two masses.",
+        "what is a thesis statement": "A concise summary of the main point of an essay or research paper.",
+        "what is an essay": "A short piece of writing on a particular subject."
+      };
+      teachings = { ...basics, ...teachings };
+      localStorage.setItem('teachings', JSON.stringify(teachings));
+      updateTeachList();
+      alert('Basic teachings added!');
+    });
+    
+    // Import Teaching Data: Fetch link and store contents under the given subject.
+    document.getElementById('importButton').addEventListener('click', async function() {
+      const subject = document.getElementById('importSubject').value.trim().toLowerCase();
+      const url = document.getElementById('importLink').value.trim();
+      if (!subject || !url) {
+        alert("Please enter both a subject and a URL.");
+        return;
+      }
+      try {
+        document.getElementById('spinner-container').style.display = 'flex';
+        const response = await fetch(url);
+        document.getElementById('spinner-container').style.display = 'none';
+        if (!response.ok) {
+          alert("Failed to fetch the content from the URL.");
+          return;
+        }
+        const contentType = response.headers.get("content-type");
+        let importedContent = "";
+        if (contentType && contentType.includes("text/html")) {
+          const htmlText = await response.text();
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(htmlText, "text/html");
+          importedContent = doc.body.innerText;
+        } else {
+          importedContent = await response.text();
+        }
+        if (!importedContent) {
+          alert("No teaching data was found at the provided URL.");
+          return;
+        }
+        // If the subject already exists, append; otherwise, create new.
+        if (teachings[subject]) {
+          teachings[subject] += "\n" + importedContent;
+        } else {
+          teachings[subject] = importedContent;
+        }
+        localStorage.setItem('teachings', JSON.stringify(teachings));
+        updateTeachList();
+        alert("Teaching data imported successfully!");
+        document.getElementById('importSubject').value = "";
+        document.getElementById('importLink').value = "";
+      } catch (err) {
+        document.getElementById('spinner-container').style.display = 'none';
+        alert("Error importing teaching data: " + err.message);
+      }
+    });
+    
+    /***** TAB SWITCHING *****/
     const tabButtons = document.querySelectorAll('.tabButton');
     const tabContents = document.querySelectorAll('.tabContent');
     tabButtons.forEach(button => {
@@ -250,13 +361,11 @@
       });
     });
     
-    // ---------- Helper Functions ----------
-    // Check if input looks like a math expression.
+    /***** HELPER FUNCTIONS *****/
     function isMathQuestion(input) {
       return /[0-9]/.test(input) && /[+\-*/]/.test(input);
     }
     
-    // Improved math evaluation helper.
     function evaluateMath(expression) {
       try {
         expression = expression.trim();
@@ -270,31 +379,14 @@
       }
     }
     
-    // ---------- DuckDuckGo Instant Answer API Integration ----------
-    async function duckDuckGoSearch(query) {
-      const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
-      try {
-        let response = await fetch(url);
-        let data = await response.json();
-        if (data.AbstractText && data.AbstractText.length > 0) {
-          return data.AbstractText;
-        } else {
-          return "DuckDuckGo search did not yield a direct answer.";
-        }
-      } catch (error) {
-        return "Error occurred while searching via DuckDuckGo.";
-      }
-    }
-    
-    // ---------- DeepSeek API Integration ----------
+    // ---------- DATA SOURCES ----------
     async function deepSeekChat(userInput) {
       const apiKey = "sk-5a079b5335564dba87a3f037274dc108";
       const url = "https://api.deepseek.com/chat/completions";
-      // Updated system prompt to encourage providing a best guess
       const payload = {
         model: "deepseek-chat",
         messages: [
-          { role: "system", content: "You are a helpful assistant. If you are unsure, please provide your best informed guess." },
+          { role: "system", content: "You are a helpful assistant. If unsure, provide your best informed guess." },
           { role: "user", content: userInput }
         ],
         stream: false
@@ -312,64 +404,74 @@
         document.getElementById('spinner-container').style.display = 'none';
         const data = await response.json();
         console.log("DeepSeek API response:", data);
-        let answer = "";
         if (data && data.choices && data.choices.length > 0) {
-          const choice = data.choices[0];
-          answer = (choice.message && (choice.message.content || choice.message.text)) || choice.text;
-        } else if (data && data.text) {
-          answer = data.text;
+          const answer = data.choices[0].message.content || data.choices[0].text || "";
+          return answer.trim();
         }
-        if (answer && answer.trim().length > 0) {
-          return answer;
-        } else {
-          // Fallback to DuckDuckGo if DeepSeek returns nothing.
-          return await duckDuckGoSearch(userInput);
-        }
+        return "";
       } catch (error) {
         document.getElementById('spinner-container').style.display = 'none';
-        console.error(error);
-        return await duckDuckGoSearch(userInput);
+        console.error("DeepSeek error:", error);
+        return "";
       }
     }
     
-    // ---------- Response Generation ----------
+    async function duckDuckGoSearch(query) {
+      const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
+      try {
+        let response = await fetch(url);
+        let data = await response.json();
+        if (data.AbstractText && data.AbstractText.length > 0) {
+          return data.AbstractText;
+        }
+        return "";
+      } catch (error) {
+        console.error("DuckDuckGo error:", error);
+        return "";
+      }
+    }
+    
+    async function googleSearch(query) {
+      const googleApiKey = "YOUR_GOOGLE_API_KEY";
+      const googleCx = "YOUR_GOOGLE_CX";
+      const url = `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCx}&q=${encodeURIComponent(query)}`;
+      try {
+        let response = await fetch(url);
+        let data = await response.json();
+        if (data.items && data.items.length > 0) {
+          return data.items[0].snippet || data.items[0].title;
+        }
+        return "";
+      } catch (error) {
+        console.error("Google error:", error);
+        return "";
+      }
+    }
+    
+    function isAcceptable(answer) {
+      if (!answer) return false;
+      const clean = answer.trim().toLowerCase();
+      if (clean === "" || clean.includes("error") || clean === "i'm still yn so idk") {
+        return false;
+      }
+      return true;
+    }
+    
+    // Chain: Try DeepSeek → DuckDuckGo → Google → fallback message.
     async function generateResponse(userInput) {
-      let normalizedInput = userInput.trim().toLowerCase();
+      let answer = await deepSeekChat(userInput);
+      if (isAcceptable(answer)) return answer;
       
-      // Use taught corrections if available.
-      if (teachings[normalizedInput]) {
-        return teachings[normalizedInput];
-      }
+      answer = await duckDuckGoSearch(userInput);
+      if (isAcceptable(answer)) return answer;
       
-      // Clean the input for pattern matching.
-      let cleanInput = normalizedInput.replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+      answer = await googleSearch(userInput);
+      if (isAcceptable(answer)) return answer;
       
-      // If the cleaned input includes known math problem keywords (example).
-      if (
-        cleanInput.includes("6 sided die") &&
-        cleanInput.includes("p not even") &&
-        cleanInput.includes("percentage")
-      ) {
-        return "50%";
-      }
-      
-      // If the input starts with "search:" use DuckDuckGo.
-      if (normalizedInput.startsWith("search:")) {
-        const query = normalizedInput.substring(7).trim();
-        return await duckDuckGoSearch(query);
-      }
-      
-      // If the input appears to be a math expression.
-      if (isMathQuestion(normalizedInput)) {
-        const result = evaluateMath(normalizedInput);
-        return `The answer is ${result}.`;
-      }
-      
-      // Otherwise, query DeepSeek.
-      return await deepSeekChat(userInput);
+      return "can you repeat more clearly";
     }
     
-    // ---------- Chat Interaction Handling ----------
+    /***** CHAT INTERACTION *****/
     document.getElementById('send').addEventListener('click', async () => {
       const userInput = document.getElementById('userInput').value.trim();
       if (userInput === '') return;
@@ -392,7 +494,7 @@
       messages.scrollTop = messages.scrollHeight;
     });
     
-    // ---------- Image Pre-processing Function ----------
+    /***** IMAGE PRE-PROCESSING & UPLOAD (OCR + DeepSeek) *****/
     function preprocessImage(imageSrc) {
       return new Promise((resolve, reject) => {
         const canvas = document.createElement("canvas");
@@ -407,10 +509,10 @@
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
           for (let i = 0; i < data.length; i += 4) {
-            let avg = (data[i] + data[i+1] + data[i+2]) / 3;
+            let avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
             data[i] = avg;
-            data[i+1] = avg;
-            data[i+2] = avg;
+            data[i + 1] = avg;
+            data[i + 2] = avg;
           }
           ctx.putImageData(imageData, 0, 0);
           resolve(canvas.toDataURL());
@@ -419,7 +521,6 @@
       });
     }
     
-    // ---------- Image Upload with OCR and DeepSeek Integration ----------
     document.getElementById('uploadImageButton').addEventListener('click', () => {
       const fileInput = document.getElementById('imageFile');
       const file = fileInput.files[0];
@@ -446,7 +547,6 @@
             extractedTextDiv.textContent = "Extracted Text: " + text;
             resultDiv.appendChild(extractedTextDiv);
   
-            // Always send the cleaned OCR text to DeepSeek.
             const deepResponse = await deepSeekChat(text);
             const deepResultDiv = document.createElement('div');
             deepResultDiv.style.marginTop = "10px";
