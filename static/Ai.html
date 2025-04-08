@@ -6,6 +6,8 @@
   <title>Copilot Chat</title>
   <!-- Optional: Additional chatbot functionality from jsDelivr -->
   <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
+  <!-- Tesseract.js for OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
   <style>
     /* Basic styling retained from your original code. */
     body {
@@ -310,8 +312,15 @@
         });
         document.getElementById('spinner-container').style.display = 'none';
         const data = await response.json();
-        if (data && data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content) {
-          return data.choices[0].message.content;
+        console.log("DeepSeek API response:", data);
+        // Try several potential structures:
+        if (data && data.choices && data.choices.length > 0) {
+          const choice = data.choices[0];
+          return (choice.message && (choice.message.content || choice.message.text)) ||
+                 choice.text ||
+                 "No valid response structure from DeepSeek API.";
+        } else if (data && data.text) {
+          return data.text;
         } else {
           return "No response from DeepSeek API.";
         }
@@ -371,7 +380,7 @@
     });
   
     /* --------------------------
-       Image Upload using Free Alternative
+       Image Upload with OCR & Chatbot Response
        -------------------------- */
     document.getElementById('uploadImageButton').addEventListener('click', () => {
       const fileInput = document.getElementById('imageFile');
@@ -380,11 +389,44 @@
       resultDiv.innerHTML = '';
       if (file) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
+          // Display the uploaded image.
           const img = document.createElement('img');
           img.src = e.target.result;
           resultDiv.appendChild(img);
-        }
+  
+          // Perform OCR using Tesseract.
+          document.getElementById('spinner-container').style.display = 'flex';
+          try {
+            let { data: { text } } = await Tesseract.recognize(img.src, 'eng');
+            document.getElementById('spinner-container').style.display = 'none';
+  
+            // Display the extracted text.
+            const extractedTextDiv = document.createElement('div');
+            extractedTextDiv.style.marginTop = "10px";
+            extractedTextDiv.textContent = "Extracted Text: " + text;
+            resultDiv.appendChild(extractedTextDiv);
+  
+            // If the text is a math question, evaluate it.
+            if (isMathQuestion(text)) {
+              const result = evaluateMath(text);
+              const mathResultDiv = document.createElement('div');
+              mathResultDiv.style.marginTop = "10px";
+              mathResultDiv.textContent = `Detected math question answer: ${result}`;
+              resultDiv.appendChild(mathResultDiv);
+            } else {
+              // Otherwise, use DeepSeek to generate a response.
+              const deepResponse = await deepSeekChat(text);
+              const deepResultDiv = document.createElement('div');
+              deepResultDiv.style.marginTop = "10px";
+              deepResultDiv.textContent = "Chatbot Response: " + deepResponse;
+              resultDiv.appendChild(deepResultDiv);
+            }
+          } catch (err) {
+            document.getElementById('spinner-container').style.display = 'none';
+            resultDiv.appendChild(document.createTextNode("Error in OCR: " + err.message));
+          }
+        };
         reader.readAsDataURL(file);
       } else {
         resultDiv.textContent = "No file selected.";
