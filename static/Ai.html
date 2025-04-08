@@ -21,10 +21,36 @@
       text-align: center;
       color: #f1f1f1;
     }
+    /* Top Tab Bar */
+    #tabBar {
+      max-width: 600px;
+      margin: 0 auto 20px auto;
+      text-align: center;
+    }
+    .tabButton {
+      padding: 10px 20px;
+      margin: 0 5px;
+      border: 1px solid #444;
+      background-color: #333;
+      cursor: pointer;
+      border-radius: 5px;
+      color: #f1f1f1;
+    }
+    .tabButton.active {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    /* Tab Content Containers */
+    .tabContent {
+      display: none;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .tabContent.active {
+      display: block;
+    }
     /* Chat Container */
     #chat {
-      max-width: 600px;
-      margin: 20px auto;
       background: #2a2a2a;
       padding: 20px;
       border: 1px solid #444;
@@ -101,34 +127,6 @@
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
-    }
-    /* Tab Bar for Teach and Configure */
-    #tabBar {
-      max-width: 600px;
-      margin: 20px auto;
-      text-align: center;
-    }
-    .tabButton {
-      padding: 10px 20px;
-      margin: 0 5px;
-      border: 1px solid #444;
-      background-color: #333;
-      cursor: pointer;
-      border-radius: 5px;
-      color: #f1f1f1;
-    }
-    .tabButton.active {
-      background-color: #007bff;
-      color: #f1f1f1;
-      border-color: #007bff;
-    }
-    .tabContent {
-      display: none;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    .tabContent.active {
-      display: block;
     }
     /* Teach Chatbot Tab */
     #teachForm, #configForm {
@@ -209,7 +207,14 @@
 <body>
   <h1>Copilot Chat</h1>
   
-  <!-- Main Chat Tab -->
+  <!-- TOP TAB BAR -->
+  <div id="tabBar">
+    <button class="tabButton active" data-tab="chatTab">Chat</button>
+    <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
+    <button class="tabButton" data-tab="configureTab">Configure Chatbot</button>
+  </div>
+  
+  <!-- CHAT TAB CONTENT -->
   <div id="chatTab" class="tabContent active">
     <div id="chat">
       <ul id="messages"></ul>
@@ -217,14 +222,14 @@
         <input type="text" id="userInput" placeholder="Type your message here...">
         <button id="send">Send</button>
         <button id="voiceChat">Voice Chat</button>
-        <!-- Upload button with a plus sign -->
+        <!-- Plus sign button for image upload -->
         <button id="uploadBtn" title="Upload Image">＋</button>
         <input type="file" id="imageFile" accept="image/*">
       </div>
     </div>
   </div>
   
-  <!-- Teach Chatbot Tab -->
+  <!-- TEACH CHATBOT TAB CONTENT -->
   <div id="teachTab" class="tabContent">
     <h3>Teach Chatbot</h3>
     <p>Enter a question and its corresponding answer to update the chatbot’s responses.</p>
@@ -233,7 +238,7 @@
       <input type="text" id="teachAnswer" placeholder="Answer (e.g., 10000)" required>
       <button type="submit">Save Correction</button>
     </form>
-    <!-- Button to add basic teachings -->
+    <!-- Button for basic teachings -->
     <button id="teachBasic">Teach Chatbot Basics</button>
     <ul id="teachList"></ul>
     <!-- Import Teaching Data Section -->
@@ -245,24 +250,17 @@
     </div>
   </div>
   
-  <!-- Configure Chatbot Tab -->
+  <!-- CONFIGURE CHATBOT TAB CONTENT -->
   <div id="configureTab" class="tabContent">
     <h3>Configure Chatbot Personality</h3>
     <p>Enter a custom personality or configuration prompt for your chatbot. This will be used as the system instruction for DeepSeek.</p>
     <form id="configForm">
-      <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty, and knowledgeable assistant that loves helping students with school work." required></textarea>
+      <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty, knowledgeable assistant who loves helping students with school work." required></textarea>
       <button type="submit">Save Configuration</button>
     </form>
   </div>
   
-  <!-- Tab Bar for Teach & Configure -->
-  <div id="tabBar">
-    <button class="tabButton active" data-tab="chatTab">Chat</button>
-    <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
-    <button class="tabButton" data-tab="configureTab">Configure Chatbot</button>
-  </div>
-  
-  <!-- Spinner -->
+  <!-- SPINNER -->
   <div id="spinner-container" class="spinner-container">
     <div class="spinner"></div>
   </div>
@@ -270,7 +268,7 @@
   <script>
     /***** TEACHING DATA MANAGEMENT *****/
     let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
-    
+  
     function updateTeachList() {
       const teachList = document.getElementById('teachList');
       teachList.innerHTML = '';
@@ -281,7 +279,7 @@
       }
     }
     updateTeachList();
-    
+  
     document.getElementById('teachForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const question = document.getElementById('teachQuestion').value.trim().toLowerCase();
@@ -295,8 +293,8 @@
         document.getElementById('teachAnswer').value = '';
       }
     });
-    
-    // Teach Chatbot Basics: Pre-populate with some basic Q&A.
+  
+    // Teach Chatbot Basics
     document.getElementById('teachBasic').addEventListener('click', function() {
       const basics = {
         "what is 2+2": "4",
@@ -313,8 +311,8 @@
       updateTeachList();
       alert('Basic teachings added!');
     });
-    
-    // Import Teaching Data: Fetch content from a URL and store it under a subject.
+  
+    // Import Teaching Data
     document.getElementById('importButton').addEventListener('click', async function() {
       const subject = document.getElementById('importSubject').value.trim().toLowerCase();
       const url = document.getElementById('importLink').value.trim();
@@ -359,11 +357,11 @@
         alert("Error importing teaching data: " + err.message);
       }
     });
-    
+  
     /***** CONFIGURE CHATBOT PERSONALITY *****/
     let chatbotPersonality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
     document.getElementById('chatbotPersonality').value = chatbotPersonality;
-    
+  
     document.getElementById('configForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const personality = document.getElementById('chatbotPersonality').value.trim();
@@ -372,7 +370,7 @@
         alert("Chatbot personality updated!");
       }
     });
-    
+  
     /***** TAB SWITCHING LOGIC *****/
     const tabButtons = document.querySelectorAll('.tabButton');
     const tabContents = document.querySelectorAll('.tabContent');
@@ -384,12 +382,12 @@
         document.getElementById(this.getAttribute('data-tab')).classList.add('active');
       });
     });
-    
+  
     /***** HELPER FUNCTIONS *****/
     function isMathQuestion(input) {
       return /[0-9]/.test(input) && /[+\-*/]/.test(input);
     }
-    
+  
     function evaluateMath(expression) {
       try {
         expression = expression.trim();
@@ -564,10 +562,10 @@
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
           for (let i = 0; i < data.length; i += 4) {
-            let avg = (data[i] + data[i+1] + data[i+2]) / 3;
+            let avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
             data[i] = avg;
-            data[i+1] = avg;
-            data[i+2] = avg;
+            data[i + 1] = avg;
+            data[i + 2] = avg;
           }
           ctx.putImageData(imageData, 0, 0);
           resolve(canvas.toDataURL());
@@ -576,7 +574,7 @@
       });
     }
     
-    // When the upload button (plus sign) is clicked, trigger hidden file input.
+    // When the plus button is clicked, trigger the hidden file input.
     document.getElementById('uploadBtn').addEventListener('click', () => {
       document.getElementById('imageFile').click();
     });
@@ -584,12 +582,11 @@
     // When a file is selected, process the image.
     document.getElementById('imageFile').addEventListener('change', () => {
       const file = document.getElementById('imageFile').files[0];
-      const messages = document.getElementById('messages'); // Append image processing results as chat messages.
-      
+      const messages = document.getElementById('messages');
       if (file) {
         const reader = new FileReader();
         reader.onload = async function(e) {
-          // Create a chat message for the image.
+          // Post an image message.
           const imageMessage = document.createElement('li');
           imageMessage.textContent = "User sent an image:";
           const img = document.createElement('img');
@@ -597,19 +594,19 @@
           img.style.maxWidth = "100%";
           imageMessage.appendChild(img);
           messages.appendChild(imageMessage);
-          
+  
           try {
             const processedSrc = await preprocessImage(e.target.result);
             document.getElementById('spinner-container').style.display = 'flex';
             let { data: { text } } = await Tesseract.recognize(processedSrc, 'eng');
             document.getElementById('spinner-container').style.display = 'none';
-            
+  
             text = text.replace(/[«»‘’“”]/g, "").trim();
-            
+  
             const extractedTextMsg = document.createElement('li');
             extractedTextMsg.textContent = "Extracted Text from Image: " + text;
             messages.appendChild(extractedTextMsg);
-            
+  
             const deepResponse = await deepSeekChat(text);
             const deepResponseMsg = document.createElement('li');
             deepResponseMsg.textContent = "Chatbot: " + deepResponse;
@@ -629,3 +626,4 @@
   </script>
 </body>
 </html>
+
