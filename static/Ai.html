@@ -9,7 +9,7 @@
   <!-- Tesseract.js for OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
   <style>
-    /* Basic styling retained from your original code. */
+    /* Basic styling retained */
     body {
       font-family: Arial, sans-serif;
       background: #f7f7f7;
@@ -66,14 +66,13 @@
       background-color: gray;
       cursor: not-allowed;
     }
-    /* Spinner for API calls */
     .spinner-container {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      display: none; /* Only displayed when needed */
+      display: none;
       justify-content: center;
       align-items: center;
       background-color: rgba(0, 0, 0, 0.2);
@@ -206,9 +205,7 @@
   </div>
   
   <script>
-    /* --------------------------
-       Global Teaching Data Logic
-       -------------------------- */
+    // Teaching data – stored in localStorage
     let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
     function updateTeachList() {
       const teachList = document.getElementById('teachList');
@@ -234,9 +231,7 @@
       }
     });
   
-    /* --------------------------
-       Tab Switching Logic
-       -------------------------- */
+    // Tab switching logic
     const tabButtons = document.querySelectorAll('.tabButton');
     const tabContents = document.querySelectorAll('.tabContent');
     tabButtons.forEach(button => {
@@ -248,16 +243,12 @@
       });
     });
   
-    /* --------------------------
-       Chatbot Core Logic using DeepSeek API
-       -------------------------- */
-  
-    // Helper: Check if input appears to be a math expression.
+    // Helper: Check if input looks like a math expression
     function isMathQuestion(input) {
       return /[0-9]/.test(input) && /[+\-*/]/.test(input);
     }
   
-    // Helper: Evaluate math expression safely.
+    // Math evaluation helper
     function evaluateMath(expression) {
       try {
         const safeExpression = expression.replace(/[^0-9+\-*/().]/g, '');
@@ -268,9 +259,7 @@
       }
     }
   
-    /* --------------------------
-       DuckDuckGo Search Integration
-       -------------------------- */
+    // DuckDuckGo Instant Answer API integration
     async function duckDuckGoSearch(query) {
       const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
       try {
@@ -286,9 +275,7 @@
       }
     }
   
-    /* --------------------------
-       DeepSeek API Integration
-       -------------------------- */
+    // DeepSeek API integration with custom fallback message
     async function deepSeekChat(userInput) {
       const apiKey = "sk-5a079b5335564dba87a3f037274dc108";
       const url = "https://api.deepseek.com/chat/completions";
@@ -313,16 +300,15 @@
         document.getElementById('spinner-container').style.display = 'none';
         const data = await response.json();
         console.log("DeepSeek API response:", data);
-        // Try several potential structures:
         if (data && data.choices && data.choices.length > 0) {
           const choice = data.choices[0];
           return (choice.message && (choice.message.content || choice.message.text)) ||
                  choice.text ||
-                 "No valid response structure from DeepSeek API.";
+                 "I'm still YN so idk";
         } else if (data && data.text) {
           return data.text;
         } else {
-          return "No response from DeepSeek API.";
+          return "I'm still YN so idk";
         }
       } catch (error) {
         document.getElementById('spinner-container').style.display = 'none';
@@ -331,32 +317,28 @@
       }
     }
   
-    /* --------------------------
-       Generate Response Logic
-       -------------------------- */
+    // Generate a response based on user input
     async function generateResponse(userInput) {
       let normalizedInput = userInput.trim().toLowerCase();
       // Use taught corrections if available.
       if (teachings[normalizedInput]) {
         return teachings[normalizedInput];
       }
-      // Check if input starts with "search:" to use DuckDuckGo search.
+      // If the input starts with "search:" use DuckDuckGo.
       if (userInput.toLowerCase().startsWith("search:")) {
         const query = userInput.substring(7).trim();
         return await duckDuckGoSearch(query);
       }
-      // Check if input is a math expression.
+      // If the input looks like a math expression, evaluate it.
       if (isMathQuestion(userInput)) {
         const result = evaluateMath(userInput);
         return `The answer is ${result}.`;
       }
-      // Otherwise, use DeepSeek API for response.
+      // Otherwise, use DeepSeek API.
       return await deepSeekChat(userInput);
     }
   
-    /* --------------------------
-       Chat Interaction Event
-       -------------------------- */
+    // Chat message event handling
     document.getElementById('send').addEventListener('click', async () => {
       const userInput = document.getElementById('userInput').value.trim();
       if (userInput === '') return;
@@ -379,9 +361,7 @@
       messages.scrollTop = messages.scrollHeight;
     });
   
-    /* --------------------------
-       Image Upload with OCR & Chatbot Response
-       -------------------------- */
+    // Image upload with OCR and response generation
     document.getElementById('uploadImageButton').addEventListener('click', () => {
       const fileInput = document.getElementById('imageFile');
       const file = fileInput.files[0];
@@ -395,7 +375,7 @@
           img.src = e.target.result;
           resultDiv.appendChild(img);
   
-          // Perform OCR using Tesseract.
+          // Use Tesseract.js for OCR.
           document.getElementById('spinner-container').style.display = 'flex';
           try {
             let { data: { text } } = await Tesseract.recognize(img.src, 'eng');
@@ -407,7 +387,7 @@
             extractedTextDiv.textContent = "Extracted Text: " + text;
             resultDiv.appendChild(extractedTextDiv);
   
-            // If the text is a math question, evaluate it.
+            // If the extracted text is a math question, evaluate it.
             if (isMathQuestion(text)) {
               const result = evaluateMath(text);
               const mathResultDiv = document.createElement('div');
@@ -415,7 +395,7 @@
               mathResultDiv.textContent = `Detected math question answer: ${result}`;
               resultDiv.appendChild(mathResultDiv);
             } else {
-              // Otherwise, use DeepSeek to generate a response.
+              // Otherwise, send the extracted text to DeepSeek.
               const deepResponse = await deepSeekChat(text);
               const deepResultDiv = document.createElement('div');
               deepResultDiv.style.marginTop = "10px";
