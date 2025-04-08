@@ -16,12 +16,18 @@
       margin: 0;
       padding: 20px;
       color: #f1f1f1;
+      /* Overall body fade-in */
+      animation: bodyFadeIn 1.5s ease-out;
+    }
+    @keyframes bodyFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     h1 {
       text-align: center;
       color: #f1f1f1;
     }
-    /* Top Tab Bar */
+    /* TOP TAB BAR */
     #tabBar {
       max-width: 600px;
       margin: 0 auto 20px auto;
@@ -40,7 +46,7 @@
       background-color: #007bff;
       border-color: #007bff;
     }
-    /* Tab Content Containers */
+    /* TAB CONTENT CONTAINERS */
     .tabContent {
       display: none;
       max-width: 600px;
@@ -49,13 +55,18 @@
     .tabContent.active {
       display: block;
     }
-    /* Chat Container */
+    /* CHAT CONTAINER with Transition (Fade & Slide In) */
     #chat {
       background: #2a2a2a;
       padding: 20px;
       border: 1px solid #444;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      animation: fadeInSlide 1s ease-out;
+    }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     #messages {
       list-style-type: none;
@@ -103,7 +114,7 @@
     #imageFile {
       display: none;
     }
-    /* Spinner */
+    /* SPINNER */
     .spinner-container {
       position: fixed;
       top: 0;
@@ -126,9 +137,9 @@
     }
     @keyframes spin {
       0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      100% {transform: rotate(360deg); }
     }
-    /* Teach Chatbot Tab */
+    /* TEACH & CONFIGURE TABS: Teach Chatbot & Configure Chatbot remain unchanged */
     #teachForm, #configForm {
       display: flex;
       flex-direction: column;
@@ -161,7 +172,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    /* Import Teaching Data section */
+    /* Import Teaching Data */
     #importSection {
       margin-top: 20px;
       border-top: 1px solid #444;
@@ -183,7 +194,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    /* Teach List styling */
+    /* Teach List */
     #teachList {
       margin-top: 20px;
       list-style-type: none;
@@ -268,7 +279,7 @@
   <script>
     /***** TEACHING DATA MANAGEMENT *****/
     let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
-  
+    
     function updateTeachList() {
       const teachList = document.getElementById('teachList');
       teachList.innerHTML = '';
@@ -279,7 +290,7 @@
       }
     }
     updateTeachList();
-  
+    
     document.getElementById('teachForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const question = document.getElementById('teachQuestion').value.trim().toLowerCase();
@@ -293,7 +304,7 @@
         document.getElementById('teachAnswer').value = '';
       }
     });
-  
+    
     // Teach Chatbot Basics
     document.getElementById('teachBasic').addEventListener('click', function() {
       const basics = {
@@ -311,7 +322,7 @@
       updateTeachList();
       alert('Basic teachings added!');
     });
-  
+    
     // Import Teaching Data
     document.getElementById('importButton').addEventListener('click', async function() {
       const subject = document.getElementById('importSubject').value.trim().toLowerCase();
@@ -357,11 +368,11 @@
         alert("Error importing teaching data: " + err.message);
       }
     });
-  
+    
     /***** CONFIGURE CHATBOT PERSONALITY *****/
     let chatbotPersonality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
     document.getElementById('chatbotPersonality').value = chatbotPersonality;
-  
+    
     document.getElementById('configForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const personality = document.getElementById('chatbotPersonality').value.trim();
@@ -370,7 +381,7 @@
         alert("Chatbot personality updated!");
       }
     });
-  
+    
     /***** TAB SWITCHING LOGIC *****/
     const tabButtons = document.querySelectorAll('.tabButton');
     const tabContents = document.querySelectorAll('.tabContent');
@@ -382,12 +393,12 @@
         document.getElementById(this.getAttribute('data-tab')).classList.add('active');
       });
     });
-  
+    
     /***** HELPER FUNCTIONS *****/
     function isMathQuestion(input) {
       return /[0-9]/.test(input) && /[+\-*/]/.test(input);
     }
-  
+    
     function evaluateMath(expression) {
       try {
         expression = expression.trim();
@@ -480,7 +491,7 @@
       return true;
     }
     
-    // Chain: DeepSeek → DuckDuckGo → Google → fallback.
+    // Chain: DeepSeek -> DuckDuckGo -> Google -> Fallback.
     async function generateResponse(userInput) {
       let answer = await deepSeekChat(userInput);
       if (isAcceptable(answer)) return answer;
@@ -562,10 +573,10 @@
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
           for (let i = 0; i < data.length; i += 4) {
-            let avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            let avg = (data[i] + data[i+1] + data[i+2]) / 3;
             data[i] = avg;
-            data[i + 1] = avg;
-            data[i + 2] = avg;
+            data[i+1] = avg;
+            data[i+2] = avg;
           }
           ctx.putImageData(imageData, 0, 0);
           resolve(canvas.toDataURL());
@@ -579,14 +590,13 @@
       document.getElementById('imageFile').click();
     });
     
-    // When a file is selected, process the image.
+    // When a file is selected, process it.
     document.getElementById('imageFile').addEventListener('change', () => {
       const file = document.getElementById('imageFile').files[0];
       const messages = document.getElementById('messages');
       if (file) {
         const reader = new FileReader();
         reader.onload = async function(e) {
-          // Post an image message.
           const imageMessage = document.createElement('li');
           imageMessage.textContent = "User sent an image:";
           const img = document.createElement('img');
@@ -594,19 +604,19 @@
           img.style.maxWidth = "100%";
           imageMessage.appendChild(img);
           messages.appendChild(imageMessage);
-  
+          
           try {
             const processedSrc = await preprocessImage(e.target.result);
             document.getElementById('spinner-container').style.display = 'flex';
             let { data: { text } } = await Tesseract.recognize(processedSrc, 'eng');
             document.getElementById('spinner-container').style.display = 'none';
-  
+            
             text = text.replace(/[«»‘’“”]/g, "").trim();
-  
+            
             const extractedTextMsg = document.createElement('li');
             extractedTextMsg.textContent = "Extracted Text from Image: " + text;
             messages.appendChild(extractedTextMsg);
-  
+            
             const deepResponse = await deepSeekChat(text);
             const deepResponseMsg = document.createElement('li');
             deepResponseMsg.textContent = "Chatbot: " + deepResponse;
@@ -626,4 +636,3 @@
   </script>
 </body>
 </html>
-
