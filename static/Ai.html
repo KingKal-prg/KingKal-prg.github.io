@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>hello.html</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@latest"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #chat {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    #messages {
+      list-style: none;
+      padding: 0;
+    }
+    #messages li {
+      padding: 8px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+    #input {
+      display: flex;
+    }
+    #input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+    #input button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #input button:hover {
+      background-color: #0056b3;
+    }
+    #input button:disabled {
+      background-color: gray;
+      cursor: not-allowed;
+    }
+	
+/* Ensure the container takes up the full viewport */
+.spinner-container {
+  position: fixed; /* Fixed positioning to cover the entire viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  background-color: rgba(0, 0, 0, 0.2); /* Optional: Semi-transparent background */
+  z-index: 1000; /* Ensure it's on top of other content */
+}
+
+/* Spinner style */
+.spinner {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+/* Keyframes for spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+  </style>
+</head>
+<body>
+
+  
+  <div id="chat">
+    <ul id="messages"></ul>
+    <div id="input">
+      <input type="text" id="userInput" placeholder="Type your message here...">
+      <button id="send" disabled>Send</button>
+    </div>
+  </div>
+
+  <div id="spinner-container" class="spinner-container">
+	  <div class="spinner"></div>
+  </div>
+  
+  <script>
+  // Dữ liệu cần train
+  const intents = {
+   greeting: ["hello", "hi", "hey", "good morning", "good evening", "howdy"],
+   goodbye: ["bye", "goodbye", "see you later", "farewell", "catch you later"],
+   thanks: ["thank you", "thanks", "much appreciated", "thank you very much"],
+   };
+  const responses = {
+   greeting: "Hello! How can I help you today?",
+   goodbye: "Goodbye! Have a great day!",
+   thanks: "You're welcome! If you have any other questions, feel free to ask.",
+   }
+  //
+  // Load the Universal Sentence Encoder model
+	let model;
+	use.load().then((loadedModel) => {
+	  model = loadedModel;
+	  console.log("Model loaded");	    
+	  document.getElementById('send').disabled = false; // Enable send button once model is loaded
+	  document.getElementById('userInput').disabled = false; // Enable input field once model is loaded
+	  document.getElementById('spinner-container').style.display = 'none'; // Hide spinner once model is loaded
+	});
+   //
+    document.getElementById('send').disabled = true; // Disable send button initially
+	document.getElementById('userInput').disabled = true; // Disable input field initially
+	document.getElementById('spinner-container').style.display = 'flex'; // Show spinner
+   //
+   async function recognizeIntent(userInput) {
+	  if (!model) {
+		throw new Error("Model is not loaded yet.");
+	  }
+	  
+	  document.getElementById('spinner-container').style.display = 'flex';
+	  
+	  const userInputEmb = await model.embed([userInput]);
+	  let maxScore = -1;
+	  let recognizedIntent = null;
+		
+	  for (const [intent, examples] of Object.entries(intents)) {
+		const examplesEmb = await model.embed(examples);
+		const scores = await tf.matMul(userInputEmb, examplesEmb, false, true).data();
+		const maxExampleScore = Math.max(...scores);
+		if (maxExampleScore > maxScore) {
+		  maxScore = maxExampleScore;
+		  recognizedIntent = intent;
+		}
+	  }
+	  document.getElementById('spinner-container').style.display = 'none';
+	  return recognizedIntent;
+	}
+
+	async function generateResponse(userInput) {
+	  const intent = await recognizeIntent(userInput);
+	  if (intent && responses[intent]) {
+		return responses[intent];
+	  } else {
+		return "I'm sorry, I don't understand that. Can you please rephrase?";
+	  }
+	}
+
+	document.getElementById('send').addEventListener('click', async () => {
+	  const userInput = document.getElementById('userInput').value.trim();
+	  if (userInput === '') return;
+
+	  const messages = document.getElementById('messages');
+	  const userMessage = document.createElement('li');
+	  userMessage.textContent = `User: ${userInput}`;
+	  messages.appendChild(userMessage);
+
+	  try {
+		const response = await generateResponse(userInput);
+		const botMessage = document.createElement('li');
+		botMessage.textContent = `Chatbot: ${response}`;
+		messages.appendChild(botMessage);
+	  } catch (error) {
+		console.error(error);
+		const errorMessage = document.createElement('li');
+		errorMessage.textContent = `Chatbot: An error occurred. Please try again later.`;
+		messages.appendChild(errorMessage);
+	  }
+
+	  document.getElementById('userInput').value = '';
+	});
+  </script>
+</body>
+</html>
