@@ -1,144 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ultraviolet Browser</title>
+  <title>Flip 2.0</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background: radial-gradient(circle at center, #a100ff, #330066);
-      background-attachment: fixed;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0c001e;
       color: white;
+      overflow: hidden;
     }
 
-    #browser {
-      display: none;
-      flex-direction: column;
-      height: 100vh;
+    /* Animated Space Background */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at bottom, #1b0032 0%, #0c001e 100%);
+      z-index: -3;
     }
 
-    #tab-bar {
+    body::after {
+      content: "";
+      position: fixed;
+      width: 200%;
+      height: 200%;
+      background-image: url('https://raw.githubusercontent.com/IceMael7/cdn-assets/main/stars-loop.gif');
+      background-size: cover;
+      animation: moveStars 90s linear infinite;
+      z-index: -2;
+      opacity: 0.3;
+    }
+
+    @keyframes moveStars {
+      from { transform: translate(0, 0); }
+      to { transform: translate(-25%, -25%); }
+    }
+
+    header {
+      background: rgba(20, 0, 40, 0.8);
+      padding: 10px;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      padding: 5px;
-      background: rgba(0, 0, 0, 0.3);
-      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 2px solid #651bcd;
+    }
+
+    .tabs {
+      display: flex;
+      overflow-x: auto;
+      gap: 5px;
+      padding-bottom: 4px;
     }
 
     .tab {
+      background: #330066;
       padding: 6px 12px;
-      background: rgba(255, 255, 255, 0.1);
-      margin-right: 5px;
-      border-radius: 5px;
+      border-radius: 6px 6px 0 0;
       cursor: pointer;
+      display: flex;
+      align-items: center;
     }
 
     .tab.active {
-      background: rgba(255, 255, 255, 0.3);
+      background: #8f00ff;
     }
 
-    #new-tab-btn {
-      background: rgba(255, 255, 255, 0.2);
+    .tab span {
+      margin-right: 8px;
+    }
+
+    .tab button {
+      background: transparent;
+      border: none;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .actions button {
+      padding: 6px 10px;
+      font-size: 16px;
+      background: #aa00ff;
       color: white;
       border: none;
       border-radius: 5px;
-      padding: 6px;
       cursor: pointer;
     }
 
     #address-bar {
       display: flex;
       padding: 10px;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(40, 0, 80, 0.8);
+      border-bottom: 2px solid #651bcd;
     }
 
     #url {
       flex: 1;
-      padding: 8px;
-      font-size: 16px;
-      background: rgba(0, 0, 0, 0.6);
+      padding: 10px;
+      background: #2d006f;
+      border: none;
+      border-radius: 6px;
       color: white;
-      border: 1px solid #666;
-      border-radius: 5px;
     }
 
     #go-button {
-      padding: 8px 12px;
-      font-size: 16px;
-      background: #5500cc;
-      color: white;
+      margin-left: 10px;
+      padding: 10px 15px;
+      background: #bb00ff;
       border: none;
       border-radius: 5px;
+      color: white;
       cursor: pointer;
     }
 
     #content {
-      flex: 1;
-      background: transparent;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      height: calc(100vh - 112px);
+      background: black;
     }
 
     iframe {
-      width: 98%;
-      height: 96%;
+      width: 100%;
+      height: 100%;
       border: none;
-      background: #000;
-    }
-
-    #auth {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: radial-gradient(circle at center, #a100ff, #330066);
-    }
-
-    #auth input, #auth button {
-      margin: 10px;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: none;
-      width: 250px;
-    }
-
-    #auth button {
-      background: #5500cc;
-      color: white;
-      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <div id="auth">
-    <input type="text" id="name" placeholder="Name" />
-    <input type="number" id="age" placeholder="Age" />
-    <button onclick="signup()">Sign Up</button>
-    <button onclick="login()">Login</button>
+  <header>
+    <div class="tabs" id="tab-container"></div>
+    <div class="actions">
+      <button onclick="addTab()">+</button>
+    </div>
+  </header>
+
+  <div id="address-bar">
+    <input type="text" id="url" placeholder="Enter URL (e.g., https://example.com)" />
+    <button id="go-button">Go</button>
   </div>
 
-  <div id="browser">
-    <div id="tab-bar">
-      <button id="new-tab-btn">+</button>
-    </div>
-
-    <div id="address-bar">
-      <input type="text" id="url" placeholder="Enter URL (e.g., https://www.example.com)" />
-      <button id="go-button">Go</button>
-    </div>
-
-    <div id="content">
-      <iframe id="web-view" src=""></iframe>
-    </div>
+  <div id="content">
+    <iframe id="web-view" src=""></iframe>
   </div>
 
+  <!-- Include your original UV Scripts -->
   <script src="uv/uv.bundle.js" defer></script>
   <script src="uv/uv.config.js" defer></script>
   <script src="register-sw.js" defer></script>
@@ -147,83 +160,90 @@
   <script src="error.js" defer></script>
 
   <script>
-    const authDiv = document.getElementById("auth");
-    const browserDiv = document.getElementById("browser");
-    const iframe = document.getElementById("web-view");
+    const webview = document.getElementById("web-view");
     const urlInput = document.getElementById("url");
+    const tabContainer = document.getElementById("tab-container");
+    let tabs = JSON.parse(localStorage.getItem("tabs") || "[]");
+    let activeTab = 0;
 
-    window.onload = () => {
-      if (localStorage.getItem("user")) {
-        authDiv.style.display = "none";
-        browserDiv.style.display = "flex";
-        loadLastURL();
-      }
-    };
-
-    function signup() {
-      const name = document.getElementById("name").value.trim();
-      const age = document.getElementById("age").value.trim();
-      if (!name || !age) return alert("Fill in both fields");
-      localStorage.setItem("user", JSON.stringify({ name, age }));
-      authDiv.style.display = "none";
-      browserDiv.style.display = "flex";
-      loadLastURL();
-    }
-
-    function login() {
-      if (localStorage.getItem("user")) {
-        authDiv.style.display = "none";
-        browserDiv.style.display = "flex";
-        loadLastURL();
-      } else {
-        alert("No account found. Please sign up.");
-      }
-    }
-
-    function loadLastURL() {
-      const lastUrl = localStorage.getItem("lastUrl");
-      if (lastUrl) {
-        iframe.src = lastUrl;
-        urlInput.value = lastUrl;
-      }
-    }
-
-    const tabBar = document.getElementById("tab-bar");
-    let tabCount = 0;
-
-    function createTab(url = "") {
-      const tab = document.createElement("div");
-      tab.className = "tab";
-      tab.textContent = "Tab " + (++tabCount);
-      tab.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        iframe.src = url;
-        urlInput.value = url;
+    function renderTabs() {
+      tabContainer.innerHTML = "";
+      tabs.forEach((tab, index) => {
+        const div = document.createElement("div");
+        div.className = "tab" + (index === activeTab ? " active" : "");
+        const label = document.createElement("span");
+        label.textContent = tab.name || `Tab ${index + 1}`;
+        const close = document.createElement("button");
+        close.textContent = "×";
+        close.onclick = (e) => {
+          e.stopPropagation();
+          closeTab(index);
+        };
+        div.appendChild(label);
+        div.appendChild(close);
+        div.onclick = () => switchTab(index);
+        tabContainer.appendChild(div);
       });
-      tabBar.insertBefore(tab, document.getElementById("new-tab-btn"));
-      tab.click();
     }
 
-    document.getElementById("new-tab-btn").addEventListener("click", () => {
-      createTab();
-    });
+    function switchTab(index) {
+      activeTab = index;
+      urlInput.value = decodeUrl(tabs[index].url || "");
+      webview.src = tabs[index].url || "";
+      saveTabs();
+      renderTabs();
+    }
 
-    document.getElementById("go-button").addEventListener("click", function () {
-      const inputUrl = urlInput.value.trim();
-      if (inputUrl) {
-        const encodedUrl = self.__uv$config.encodeUrl(inputUrl);
-        const proxiedUrl = `${self.__uv$config.prefix}${encodedUrl}`;
-        iframe.src = proxiedUrl;
-        localStorage.setItem("lastUrl", proxiedUrl);
+    function closeTab(index) {
+      tabs.splice(index, 1);
+      if (activeTab >= tabs.length) activeTab = tabs.length - 1;
+      if (tabs.length === 0) addTab();
+      saveTabs();
+      renderTabs();
+      switchTab(activeTab);
+    }
+
+    function addTab() {
+      tabs.push({ name: `Tab ${tabs.length + 1}`, url: "" });
+      activeTab = tabs.length - 1;
+      saveTabs();
+      renderTabs();
+      switchTab(activeTab);
+    }
+
+    function saveTabs() {
+      localStorage.setItem("tabs", JSON.stringify(tabs));
+    }
+
+    function encodeUrl(url) {
+      return `${self.__uv$config.prefix}${Ultraviolet.codec.xor.encode(url)}`;
+    }
+
+    function decodeUrl(fullUrl) {
+      if (fullUrl.startsWith(self.__uv$config.prefix)) {
+        return Ultraviolet.codec.xor.decode(fullUrl.replace(self.__uv$config.prefix, ""));
+      }
+      return fullUrl;
+    }
+
+    document.getElementById("go-button").addEventListener("click", () => {
+      const raw = urlInput.value.trim();
+      if (raw) {
+        const encoded = encodeUrl(raw);
+        webview.src = encoded;
+        tabs[activeTab].url = encoded;
+        saveTabs();
+        renderTabs();
       }
     });
 
-    urlInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        document.getElementById("go-button").click();
-      }
+    urlInput.addEventListener("keypress", e => {
+      if (e.key === "Enter") document.getElementById("go-button").click();
     });
+
+    if (tabs.length === 0) addTab();
+    else renderTabs();
+    switchTab(activeTab);
   </script>
 
 </body>
