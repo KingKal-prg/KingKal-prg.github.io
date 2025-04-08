@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Copilot Chat</title>
-  <!-- Optional chatbot functionality (if needed) -->
+  <!-- Optional: Additional chatbot functionality -->
   <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
   <!-- Tesseract.js for OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
@@ -45,8 +45,9 @@
     }
     #input {
       display: flex;
+      align-items: center;
     }
-    #input input {
+    #input input[type="text"] {
       flex: 1;
       padding: 10px;
       border: 1px solid #555;
@@ -55,18 +56,19 @@
       background: #333;
       color: #f1f1f1;
     }
-    #input button {
+    #send, #voiceChat, #uploadBtn {
       padding: 10px 20px;
       border: none;
       background-color: #007bff;
       color: #f1f1f1;
       border-radius: 5px;
       cursor: pointer;
+      margin-right: 5px;
     }
-    #input button:hover {
+    #send:hover, #voiceChat:hover, #uploadBtn:hover {
       background-color: #0056b3;
     }
-    #input button:disabled {
+    #send:disabled, #voiceChat:disabled, #uploadBtn:disabled {
       background-color: #555;
       cursor: not-allowed;
     }
@@ -79,7 +81,7 @@
       display: none;
       justify-content: center;
       align-items: center;
-      background-color: rgba(0,0,0,0.4);
+      background-color: rgba(0, 0, 0, 0.4);
       z-index: 1000;
     }
     .spinner {
@@ -94,7 +96,7 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    /* Tab Bar */
+    /* Tab Bar for Teach and Configure */
     #tabBar {
       max-width: 600px;
       margin: 20px auto;
@@ -123,19 +125,20 @@
       display: block;
     }
     /* Teach Chatbot Tab */
-    #teachForm {
+    #teachForm, #configForm {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-    #teachForm input, #teachForm textarea {
+    #teachForm input, #teachForm textarea,
+    #configForm textarea {
       padding: 8px;
       border: 1px solid #444;
       border-radius: 5px;
       background: #333;
       color: #f1f1f1;
     }
-    #teachForm button {
+    #teachForm button, #configForm button {
       align-self: flex-start;
       padding: 8px 16px;
       border: none;
@@ -187,59 +190,24 @@
       border-bottom: 1px solid #444;
     }
     /* Configure Chatbot Tab */
-    #configForm {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
     #configForm textarea {
-      padding: 8px;
-      border: 1px solid #444;
-      border-radius: 5px;
-      background: #333;
-      color: #f1f1f1;
       width: 100%;
       min-height: 100px;
     }
     #configForm button {
-      align-self: flex-start;
-      padding: 8px 16px;
-      border: none;
       background-color: #ffc107;
       color: #1e1e1e;
-      border-radius: 5px;
-      cursor: pointer;
     }
-    /* Image Upload Tab */
-    #imageUploadResult img {
-      max-width: 100%;
-      height: auto;
-      margin-top: 10px;
-    }
-    /* Extra voice chat styling */
-    #voiceChat {
-      padding: 10px 20px;
-      border: none;
-      background-color: #17a2b8;
-      color: #f1f1f1;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-left: 10px;
+    /* Hide file input (for image upload) */
+    #imageFile {
+      display: none;
     }
   </style>
 </head>
 <body>
   <h1>Copilot Chat</h1>
   
-  <!-- Tab Bar -->
-  <div id="tabBar">
-    <button class="tabButton active" data-tab="chatTab">Chat</button>
-    <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
-    <button class="tabButton" data-tab="configureTab">Configure Chatbot</button>
-    <button class="tabButton" data-tab="uploadTab">Image Upload</button>
-  </div>
-  
-  <!-- Chat Tab -->
+  <!-- Main Chat Tab -->
   <div id="chatTab" class="tabContent active">
     <div id="chat">
       <ul id="messages"></ul>
@@ -247,6 +215,9 @@
         <input type="text" id="userInput" placeholder="Type your message here...">
         <button id="send">Send</button>
         <button id="voiceChat">Voice Chat</button>
+        <!-- Upload button with a plus sign -->
+        <button id="uploadBtn" title="Upload Image">＋</button>
+        <input type="file" id="imageFile" accept="image/*">
       </div>
     </div>
   </div>
@@ -275,25 +246,18 @@
   <!-- Configure Chatbot Tab -->
   <div id="configureTab" class="tabContent">
     <h3>Configure Chatbot Personality</h3>
-    <p>Enter a custom personality or configuration prompt for your chatbot. This will be used as the system instruction.</p>
+    <p>Enter a custom personality or configuration prompt for your chatbot. This will be used as the system instruction for DeepSeek.</p>
     <form id="configForm">
       <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty, and knowledgeable assistant that loves helping students with school work." required></textarea>
       <button type="submit">Save Configuration</button>
     </form>
   </div>
   
-  <!-- Image Upload Tab -->
-  <div id="uploadTab" class="tabContent">
-    <h3>Image Upload</h3>
-    <p>
-      Upload an image using a free image hosting alternative.
-      For production, you might use 
-      <a href="https://postimages.org" target="_blank" style="color:#007bff;">Postimages</a> or 
-      <a href="https://imagekit.io" target="_blank" style="color:#007bff;">ImageKit</a>, both offering free tiers.
-    </p>
-    <input type="file" id="imageFile" accept="image/*">
-    <button id="uploadImageButton">Upload Image</button>
-    <div id="imageUploadResult"></div>
+  <!-- Tab Bar for Teach & Configure -->
+  <div id="tabBar">
+    <button class="tabButton active" data-tab="chatTab">Chat</button>
+    <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
+    <button class="tabButton" data-tab="configureTab">Configure Chatbot</button>
   </div>
   
   <!-- Spinner -->
@@ -395,7 +359,7 @@
     });
     
     /***** CONFIGURE CHATBOT PERSONALITY *****/
-    // Load existing personality if available
+    // Load existing personality if available.
     let chatbotPersonality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
     document.getElementById('chatbotPersonality').value = chatbotPersonality;
     
@@ -442,7 +406,6 @@
     async function deepSeekChat(userInput) {
       const apiKey = "sk-5a079b5335564dba87a3f037274dc108";
       const url = "https://api.deepseek.com/chat/completions";
-      // Use the configured personality if available.
       const personality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
       const payload = {
         model: "deepseek-chat",
@@ -518,7 +481,7 @@
       return true;
     }
     
-    // Chain: Try DeepSeek → DuckDuckGo → Google → fallback.
+    // Chain: DeepSeek → DuckDuckGo → Google → fallback.
     async function generateResponse(userInput) {
       let answer = await deepSeekChat(userInput);
       if (isAcceptable(answer)) return answer;
@@ -533,7 +496,6 @@
     }
     
     /***** VOICE CHAT *****/
-    // Use the Web Speech API for speech recognition and synthesis.
     window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
     if (window.SpeechRecognition) {
       const recognition = new window.SpeechRecognition();
@@ -548,7 +510,6 @@
       recognition.onresult = async (event) => {
         const transcript = event.results[0][0].transcript;
         document.getElementById('userInput').value = transcript;
-        // Trigger send button click programmatically.
         document.getElementById('send').click();
       };
       
@@ -556,7 +517,6 @@
         console.error("Speech recognition error", event);
       };
     } else {
-      // If the browser doesn't support speech recognition, disable the button.
       document.getElementById('voiceChat').disabled = true;
       document.getElementById('voiceChat').textContent = "Voice Chat Not Supported";
     }
@@ -574,7 +534,6 @@
         const botMessage = document.createElement('li');
         botMessage.textContent = `Chatbot: ${response}`;
         messages.appendChild(botMessage);
-        // Optionally, use SpeechSynthesis to speak the answer
         if (window.speechSynthesis) {
           const utterance = new SpeechSynthesisUtterance(response);
           speechSynthesis.speak(utterance);
@@ -604,10 +563,10 @@
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
           for (let i = 0; i < data.length; i += 4) {
-            let avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            let avg = (data[i] + data[i+1] + data[i+2]) / 3;
             data[i] = avg;
-            data[i + 1] = avg;
-            data[i + 2] = avg;
+            data[i+1] = avg;
+            data[i+2] = avg;
           }
           ctx.putImageData(imageData, 0, 0);
           resolve(canvas.toDataURL());
@@ -616,17 +575,27 @@
       });
     }
     
-    document.getElementById('uploadImageButton').addEventListener('click', () => {
-      const fileInput = document.getElementById('imageFile');
-      const file = fileInput.files[0];
-      const resultDiv = document.getElementById('imageUploadResult');
-      resultDiv.innerHTML = '';
+    // When the upload button is clicked, trigger hidden file input.
+    document.getElementById('uploadBtn').addEventListener('click', () => {
+      document.getElementById('imageFile').click();
+    });
+    
+    // When a file is selected, process and send it.
+    document.getElementById('imageFile').addEventListener('change', () => {
+      const file = document.getElementById('imageFile').files[0];
+      const resultDiv = document.getElementById('messages'); // Append image processing results as chat messages.
+      
       if (file) {
         const reader = new FileReader();
         reader.onload = async function(e) {
+          // Create a message for the image
+          const imageMessage = document.createElement('li');
           const img = document.createElement('img');
           img.src = e.target.result;
-          resultDiv.appendChild(img);
+          img.style.maxWidth = "100%";
+          imageMessage.textContent = "User sent an image:";
+          imageMessage.appendChild(img);
+          resultDiv.appendChild(imageMessage);
   
           try {
             const processedSrc = await preprocessImage(e.target.result);
@@ -636,24 +605,24 @@
   
             text = text.replace(/[«»‘’“”]/g, "").trim();
   
-            const extractedTextDiv = document.createElement('div');
-            extractedTextDiv.style.marginTop = "10px";
-            extractedTextDiv.textContent = "Extracted Text: " + text;
-            resultDiv.appendChild(extractedTextDiv);
+            const extractedTextMsg = document.createElement('li');
+            extractedTextMsg.textContent = "Extracted Text from Image: " + text;
+            resultDiv.appendChild(extractedTextMsg);
   
             const deepResponse = await deepSeekChat(text);
-            const deepResultDiv = document.createElement('div');
-            deepResultDiv.style.marginTop = "10px";
-            deepResultDiv.textContent = "Chatbot Response: " + deepResponse;
-            resultDiv.appendChild(deepResultDiv);
+            const deepResponseMsg = document.createElement('li');
+            deepResponseMsg.textContent = "Chatbot: " + deepResponse;
+            resultDiv.appendChild(deepResponseMsg);
           } catch (err) {
             document.getElementById('spinner-container').style.display = 'none';
-            resultDiv.appendChild(document.createTextNode("Error in OCR or pre-processing: " + err.message));
+            const errorMsg = document.createElement('li');
+            errorMsg.textContent = "Error in OCR or pre-processing: " + err.message;
+            resultDiv.appendChild(errorMsg);
           }
         };
         reader.readAsDataURL(file);
       } else {
-        resultDiv.textContent = "No file selected.";
+        alert("No file selected.");
       }
     });
   </script>
