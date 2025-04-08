@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Copilot Chat</title>
-  <!-- Optional: Additional chatbot functionality -->
+  <!-- Optional chatbot functionality (if needed) -->
   <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
   <!-- Tesseract.js for OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
   <style>
-    /* DARK THEME STYLING */
+    /* Dark theme styling */
     body {
       font-family: Arial, sans-serif;
       background: #1e1e1e;
@@ -21,7 +21,7 @@
       text-align: center;
       color: #f1f1f1;
     }
-    /* Chat Container */
+    /* Chat container */
     #chat {
       max-width: 600px;
       margin: 20px auto;
@@ -79,7 +79,7 @@
       display: none;
       justify-content: center;
       align-items: center;
-      background-color: rgba(0, 0, 0, 0.4);
+      background-color: rgba(0,0,0,0.4);
       z-index: 1000;
     }
     .spinner {
@@ -144,7 +144,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    /* Button to import basic teachings */
+    /* Button to load basic teachings */
     #teachBasic {
       margin-top: 10px;
       padding: 8px 16px;
@@ -186,11 +186,45 @@
       padding: 5px;
       border-bottom: 1px solid #444;
     }
+    /* Configure Chatbot Tab */
+    #configForm {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #configForm textarea {
+      padding: 8px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background: #333;
+      color: #f1f1f1;
+      width: 100%;
+      min-height: 100px;
+    }
+    #configForm button {
+      align-self: flex-start;
+      padding: 8px 16px;
+      border: none;
+      background-color: #ffc107;
+      color: #1e1e1e;
+      border-radius: 5px;
+      cursor: pointer;
+    }
     /* Image Upload Tab */
     #imageUploadResult img {
       max-width: 100%;
       height: auto;
       margin-top: 10px;
+    }
+    /* Extra voice chat styling */
+    #voiceChat {
+      padding: 10px 20px;
+      border: none;
+      background-color: #17a2b8;
+      color: #f1f1f1;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 10px;
     }
   </style>
 </head>
@@ -201,6 +235,7 @@
   <div id="tabBar">
     <button class="tabButton active" data-tab="chatTab">Chat</button>
     <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
+    <button class="tabButton" data-tab="configureTab">Configure Chatbot</button>
     <button class="tabButton" data-tab="uploadTab">Image Upload</button>
   </div>
   
@@ -211,6 +246,7 @@
       <div id="input">
         <input type="text" id="userInput" placeholder="Type your message here...">
         <button id="send">Send</button>
+        <button id="voiceChat">Voice Chat</button>
       </div>
     </div>
   </div>
@@ -224,7 +260,7 @@
       <input type="text" id="teachAnswer" placeholder="Answer (e.g., 10000)" required>
       <button type="submit">Save Correction</button>
     </form>
-    <!-- Button to load basic teachings -->
+    <!-- Button to add basic teachings -->
     <button id="teachBasic">Teach Chatbot Basics</button>
     <ul id="teachList"></ul>
     <!-- Import Teaching Data Section -->
@@ -236,6 +272,16 @@
     </div>
   </div>
   
+  <!-- Configure Chatbot Tab -->
+  <div id="configureTab" class="tabContent">
+    <h3>Configure Chatbot Personality</h3>
+    <p>Enter a custom personality or configuration prompt for your chatbot. This will be used as the system instruction.</p>
+    <form id="configForm">
+      <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty, and knowledgeable assistant that loves helping students with school work." required></textarea>
+      <button type="submit">Save Configuration</button>
+    </form>
+  </div>
+  
   <!-- Image Upload Tab -->
   <div id="uploadTab" class="tabContent">
     <h3>Image Upload</h3>
@@ -243,7 +289,7 @@
       Upload an image using a free image hosting alternative.
       For production, you might use 
       <a href="https://postimages.org" target="_blank" style="color:#007bff;">Postimages</a> or 
-      <a href="https://imagekit.io" target="_blank" style="color:#007bff;">ImageKit</a>, both of which offer free tiers.
+      <a href="https://imagekit.io" target="_blank" style="color:#007bff;">ImageKit</a>, both offering free tiers.
     </p>
     <input type="file" id="imageFile" accept="image/*">
     <button id="uploadImageButton">Upload Image</button>
@@ -284,17 +330,17 @@
       }
     });
     
-    // Teach Chatbot Basics: Pre-populate with some basic Q&A.
+    // Teach Chatbot Basics
     document.getElementById('teachBasic').addEventListener('click', function() {
       const basics = {
         "what is 2+2": "4",
         "what is 10 divided by 2": "5",
         "who discovered america": "Christopher Columbus",
         "when did world war ii end": "1945",
-        "what is photosynthesis": "It is the process by which green plants use sunlight to synthesize foods from CO₂ and water.",
+        "what is photosynthesis": "Photosynthesis is the process by which green plants use sunlight to synthesize foods from CO₂ and water.",
         "what is gravity": "Gravity is the force of attraction between two masses.",
-        "what is a thesis statement": "A concise summary of the main point of an essay or research paper.",
-        "what is an essay": "A short piece of writing on a particular subject."
+        "what is a thesis statement": "A thesis statement is a concise summary of the main point of an essay or research paper.",
+        "what is an essay": "An essay is a short piece of writing on a particular subject."
       };
       teachings = { ...basics, ...teachings };
       localStorage.setItem('teachings', JSON.stringify(teachings));
@@ -302,7 +348,7 @@
       alert('Basic teachings added!');
     });
     
-    // Import Teaching Data: Fetch link and store contents under the given subject.
+    // Import Teaching Data
     document.getElementById('importButton').addEventListener('click', async function() {
       const subject = document.getElementById('importSubject').value.trim().toLowerCase();
       const url = document.getElementById('importLink').value.trim();
@@ -315,7 +361,7 @@
         const response = await fetch(url);
         document.getElementById('spinner-container').style.display = 'none';
         if (!response.ok) {
-          alert("Failed to fetch the content from the URL.");
+          alert("Failed to fetch content from the URL.");
           return;
         }
         const contentType = response.headers.get("content-type");
@@ -332,7 +378,6 @@
           alert("No teaching data was found at the provided URL.");
           return;
         }
-        // If the subject already exists, append; otherwise, create new.
         if (teachings[subject]) {
           teachings[subject] += "\n" + importedContent;
         } else {
@@ -349,7 +394,21 @@
       }
     });
     
-    /***** TAB SWITCHING *****/
+    /***** CONFIGURE CHATBOT PERSONALITY *****/
+    // Load existing personality if available
+    let chatbotPersonality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
+    document.getElementById('chatbotPersonality').value = chatbotPersonality;
+    
+    document.getElementById('configForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const personality = document.getElementById('chatbotPersonality').value.trim();
+      if (personality) {
+        localStorage.setItem('chatbot_personality', personality);
+        alert("Chatbot personality updated!");
+      }
+    });
+    
+    /***** TAB SWITCHING LOGIC *****/
     const tabButtons = document.querySelectorAll('.tabButton');
     const tabContents = document.querySelectorAll('.tabContent');
     tabButtons.forEach(button => {
@@ -379,14 +438,16 @@
       }
     }
     
-    // ---------- DATA SOURCES ----------
+    /***** DATA SOURCES *****/
     async function deepSeekChat(userInput) {
       const apiKey = "sk-5a079b5335564dba87a3f037274dc108";
       const url = "https://api.deepseek.com/chat/completions";
+      // Use the configured personality if available.
+      const personality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
       const payload = {
         model: "deepseek-chat",
         messages: [
-          { role: "system", content: "You are a helpful assistant. If unsure, provide your best informed guess." },
+          { role: "system", content: personality },
           { role: "user", content: userInput }
         ],
         stream: false
@@ -457,7 +518,7 @@
       return true;
     }
     
-    // Chain: Try DeepSeek → DuckDuckGo → Google → fallback message.
+    // Chain: Try DeepSeek → DuckDuckGo → Google → fallback.
     async function generateResponse(userInput) {
       let answer = await deepSeekChat(userInput);
       if (isAcceptable(answer)) return answer;
@@ -469,6 +530,35 @@
       if (isAcceptable(answer)) return answer;
       
       return "can you repeat more clearly";
+    }
+    
+    /***** VOICE CHAT *****/
+    // Use the Web Speech API for speech recognition and synthesis.
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+    if (window.SpeechRecognition) {
+      const recognition = new window.SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+      
+      document.getElementById('voiceChat').addEventListener('click', () => {
+        recognition.start();
+      });
+      
+      recognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('userInput').value = transcript;
+        // Trigger send button click programmatically.
+        document.getElementById('send').click();
+      };
+      
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error", event);
+      };
+    } else {
+      // If the browser doesn't support speech recognition, disable the button.
+      document.getElementById('voiceChat').disabled = true;
+      document.getElementById('voiceChat').textContent = "Voice Chat Not Supported";
     }
     
     /***** CHAT INTERACTION *****/
@@ -484,6 +574,11 @@
         const botMessage = document.createElement('li');
         botMessage.textContent = `Chatbot: ${response}`;
         messages.appendChild(botMessage);
+        // Optionally, use SpeechSynthesis to speak the answer
+        if (window.speechSynthesis) {
+          const utterance = new SpeechSynthesisUtterance(response);
+          speechSynthesis.speak(utterance);
+        }
       } catch (error) {
         console.error(error);
         const errorMessage = document.createElement('li');
@@ -494,7 +589,7 @@
       messages.scrollTop = messages.scrollHeight;
     });
     
-    /***** IMAGE PRE-PROCESSING & UPLOAD (OCR + DeepSeek) *****/
+    /***** IMAGE PRE-PROCESSING & OCR *****/
     function preprocessImage(imageSrc) {
       return new Promise((resolve, reject) => {
         const canvas = document.createElement("canvas");
@@ -539,7 +634,6 @@
             let { data: { text } } = await Tesseract.recognize(processedSrc, 'eng');
             document.getElementById('spinner-container').style.display = 'none';
   
-            // Clean the OCR text.
             text = text.replace(/[«»‘’“”]/g, "").trim();
   
             const extractedTextDiv = document.createElement('div');
