@@ -251,7 +251,7 @@
     // Improved math evaluation helper.
     function evaluateMath(expression) {
       try {
-        // Trim, then remove all characters except digits, operators, and parentheses.
+        // Trim, then remove all characters except digits, operators, parentheses, and decimals.
         expression = expression.trim();
         const safeExpression = expression.replace(/[^0-9+\-*/().]/g, '');
         if (!safeExpression || !/\d/.test(safeExpression)) {
@@ -279,7 +279,7 @@
       }
     }
   
-    // DeepSeek API integration with fallback message.
+    // DeepSeek API integration with custom fallback message.
     async function deepSeekChat(userInput) {
       const apiKey = "sk-5a079b5335564dba87a3f037274dc108";
       const url = "https://api.deepseek.com/chat/completions";
@@ -365,57 +365,7 @@
       messages.scrollTop = messages.scrollHeight;
     });
   
-    // Image upload with OCR and response generation.
+    // Image upload with OCR and DeepSeek integration.
     document.getElementById('uploadImageButton').addEventListener('click', () => {
       const fileInput = document.getElementById('imageFile');
-      const file = fileInput.files[0];
-      const resultDiv = document.getElementById('imageUploadResult');
-      resultDiv.innerHTML = '';
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = async function(e) {
-          // Display the uploaded image.
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          resultDiv.appendChild(img);
-  
-          // Use Tesseract.js for OCR.
-          document.getElementById('spinner-container').style.display = 'flex';
-          try {
-            let { data: { text } } = await Tesseract.recognize(img.src, 'eng');
-            document.getElementById('spinner-container').style.display = 'none';
-  
-            // Display the extracted text.
-            const extractedTextDiv = document.createElement('div');
-            extractedTextDiv.style.marginTop = "10px";
-            extractedTextDiv.textContent = "Extracted Text: " + text;
-            resultDiv.appendChild(extractedTextDiv);
-  
-            // If extracted text is a math expression, evaluate it.
-            if (isMathQuestion(text)) {
-              const result = evaluateMath(text);
-              const mathResultDiv = document.createElement('div');
-              mathResultDiv.style.marginTop = "10px";
-              mathResultDiv.textContent = `Detected math question answer: ${result}`;
-              resultDiv.appendChild(mathResultDiv);
-            } else {
-              // Otherwise, send the extracted text to DeepSeek.
-              const deepResponse = await deepSeekChat(text);
-              const deepResultDiv = document.createElement('div');
-              deepResultDiv.style.marginTop = "10px";
-              deepResultDiv.textContent = "Chatbot Response: " + deepResponse;
-              resultDiv.appendChild(deepResultDiv);
-            }
-          } catch (err) {
-            document.getElementById('spinner-container').style.display = 'none';
-            resultDiv.appendChild(document.createTextNode("Error in OCR: " + err.message));
-          }
-        };
-        reader.readAsDataURL(file);
-      } else {
-        resultDiv.textContent = "No file selected.";
-      }
-    });
-  </script>
-</body>
-</html>
+      const
