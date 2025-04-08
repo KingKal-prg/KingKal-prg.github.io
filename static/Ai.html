@@ -9,25 +9,27 @@
   <!-- Tesseract.js for OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
   <style>
-    /* Basic styling retained */
+    /* Dark theme styling */
     body {
       font-family: Arial, sans-serif;
-      background: #f7f7f7;
+      background: #1e1e1e;
       margin: 0;
       padding: 20px;
+      color: #f1f1f1; /* Light text for contrast */
     }
     h1 {
       text-align: center;
-      color: #333;
+      color: #f1f1f1;
     }
+    /* Chat container dark background */
     #chat {
       max-width: 600px;
       margin: 20px auto;
-      background: white;
+      background: #2a2a2a;
       padding: 20px;
-      border: 1px solid #ccc;
+      border: 1px solid #444;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
     #messages {
       list-style-type: none;
@@ -39,7 +41,7 @@
     #messages li {
       padding: 10px;
       margin-bottom: 10px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #444;
     }
     #input {
       display: flex;
@@ -47,15 +49,17 @@
     #input input {
       flex: 1;
       padding: 10px;
-      border: 1px solid #ccc;
+      border: 1px solid #555;
       border-radius: 5px;
       margin-right: 10px;
+      background: #333;
+      color: #f1f1f1;
     }
     #input button {
       padding: 10px 20px;
       border: none;
       background-color: #007bff;
-      color: white;
+      color: #f1f1f1;
       border-radius: 5px;
       cursor: pointer;
     }
@@ -63,7 +67,7 @@
       background-color: #0056b3;
     }
     #input button:disabled {
-      background-color: gray;
+      background-color: #555;
       cursor: not-allowed;
     }
     .spinner-container {
@@ -75,12 +79,12 @@
       display: none;
       justify-content: center;
       align-items: center;
-      background-color: rgba(0,0,0,0.2);
+      background-color: rgba(0, 0, 0, 0.4);
       z-index: 1000;
     }
     .spinner {
-      border: 16px solid #f3f3f3;
-      border-top: 16px solid #3498db;
+      border: 16px solid #333;
+      border-top: 16px solid #007bff;
       border-radius: 50%;
       width: 120px;
       height: 120px;
@@ -90,7 +94,7 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    /* Tab bar styles */
+    /* Tab Bar */
     #tabBar {
       max-width: 600px;
       margin: 20px auto;
@@ -99,14 +103,15 @@
     .tabButton {
       padding: 10px 20px;
       margin: 0 5px;
-      border: 1px solid #ccc;
-      background-color: #f1f1f1;
+      border: 1px solid #444;
+      background-color: #333;
       cursor: pointer;
       border-radius: 5px;
+      color: #f1f1f1;
     }
     .tabButton.active {
       background-color: #007bff;
-      color: white;
+      color: #f1f1f1;
       border-color: #007bff;
     }
     .tabContent {
@@ -117,7 +122,7 @@
     .tabContent.active {
       display: block;
     }
-    /* Teach Chatbot Tab styling */
+    /* Teach Chatbot Tab */
     #teachForm {
       display: flex;
       flex-direction: column;
@@ -125,15 +130,17 @@
     }
     #teachForm input, #teachForm textarea {
       padding: 8px;
-      border: 1px solid #ccc;
+      border: 1px solid #444;
       border-radius: 5px;
+      background: #333;
+      color: #f1f1f1;
     }
     #teachForm button {
       align-self: flex-start;
       padding: 8px 16px;
       border: none;
       background-color: #007bff;
-      color: white;
+      color: #f1f1f1;
       border-radius: 5px;
       cursor: pointer;
     }
@@ -144,9 +151,9 @@
     }
     #teachList li {
       padding: 5px;
-      border-bottom: 1px solid #ccc;
+      border-bottom: 1px solid #444;
     }
-    /* Image Upload Tab styling */
+    /* Image Upload Tab */
     #imageUploadResult img {
       max-width: 100%;
       height: auto;
@@ -192,7 +199,8 @@
     <h3>Image Upload</h3>
     <p>
       Upload an image using a free image hosting alternative.
-      For a production solution you might use <a href="https://postimages.org" target="_blank">Postimages</a> or <a href="https://imagekit.io" target="_blank">ImageKit</a>, both offering free tiers.
+      For production you might use <a href="https://postimages.org" target="_blank" style="color:#007bff;">Postimages</a> or 
+      <a href="https://imagekit.io" target="_blank" style="color:#007bff;">ImageKit</a>, both offering free tiers.
     </p>
     <input type="file" id="imageFile" accept="image/*">
     <button id="uploadImageButton">Upload Image</button>
@@ -330,11 +338,10 @@
         return teachings[normalizedInput];
       }
       
-      // Remove punctuation and extra spaces for a clean version.
+      // Clean the input (remove punctuation, extra spaces).
       let cleanInput = normalizedInput.replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
       
-      // If the cleaned input includes known math keywords, return the preset answer.
-      // For the specific problem: "You roll a 6-sided die. What is P(not even)? Write your answer as a percentage."
+      // If the cleaned input includes known math problem keywords.
       if (
         cleanInput.includes("6 sided die") &&
         cleanInput.includes("p not even") &&
@@ -343,19 +350,19 @@
         return "50%";
       }
       
-      // If the user starts with "search:" use DuckDuckGo.
+      // If input starts with "search:" use DuckDuckGo.
       if (normalizedInput.startsWith("search:")) {
         const query = normalizedInput.substring(7).trim();
         return await duckDuckGoSearch(query);
       }
       
-      // If the input appears to be a math expression, try evaluating it.
+      // If input appears to be a math expression.
       if (isMathQuestion(normalizedInput)) {
         const result = evaluateMath(normalizedInput);
         return `The answer is ${result}.`;
       }
       
-      // Otherwise, use DeepSeek API.
+      // Otherwise, ask DeepSeek.
       return await deepSeekChat(userInput);
     }
     
@@ -383,7 +390,6 @@
     });
     
     // ---------- Image Pre-processing Function ----------
-    // Preprocess the image via a hidden canvas to convert it to grayscale.
     function preprocessImage(imageSrc) {
       return new Promise((resolve, reject) => {
         const canvas = document.createElement("canvas");
@@ -437,7 +443,7 @@
             extractedTextDiv.textContent = "Extracted Text: " + text;
             resultDiv.appendChild(extractedTextDiv);
   
-            // Always send the cleaned OCR text to DeepSeek.
+            // Always send cleaned OCR text to DeepSeek.
             const deepResponse = await deepSeekChat(text);
             const deepResultDiv = document.createElement('div');
             deepResultDiv.style.marginTop = "10px";
