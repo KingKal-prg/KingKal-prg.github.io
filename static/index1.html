@@ -3,22 +3,48 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Flip 2.0</title>
+  <title>Flip 3.0</title>
   <style>
-    * { box-sizing: border-box; }
-    body {
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
       margin: 0;
+      padding: 0;
       font-family: 'Segoe UI', sans-serif;
       background: #0c001e;
       color: white;
       overflow: hidden;
-      transition: background-color 0.5s, color 0.5s;
     }
-    body.light-theme {
-      background-color: #f0f0f0;
-      color: #333;
+
+    /* Star background + nebula parallax */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at bottom, #1b0032 0%, #0c001e 100%);
+      z-index: -3;
     }
-    /* Same styles as before... */
+
+    body::after {
+      content: "";
+      position: fixed;
+      width: 200%;
+      height: 200%;
+      background-image: url('https://raw.githubusercontent.com/IceMael7/cdn-assets/main/stars-loop.gif');
+      background-size: cover;
+      animation: moveStars 90s linear infinite;
+      z-index: -2;
+      opacity: 0.3;
+    }
+
+    @keyframes moveStars {
+      from { transform: translate(0, 0); }
+      to { transform: translate(-25%, -25%); }
+    }
+
     header {
       background: rgba(20, 0, 40, 0.8);
       padding: 10px;
@@ -27,159 +53,260 @@
       align-items: center;
       border-bottom: 2px solid #651bcd;
     }
-    /* Add games tab in header */
-    .games-tab {
+
+    .tabs {
+      display: flex;
+      overflow-x: auto;
+      gap: 5px;
+      padding-bottom: 4px;
+    }
+
+    .tab {
+      background: #330066;
+      padding: 6px 12px;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+
+    .tab.active {
+      background: #8f00ff;
+    }
+
+    .tab span {
+      margin-right: 8px;
+    }
+
+    .tab button {
+      background: transparent;
+      border: none;
       color: white;
       font-weight: bold;
       cursor: pointer;
     }
-    /* Dark/light theme button */
-    .theme-switcher {
-      padding: 8px 16px;
-      background: #651bcd;
+
+    .actions button {
+      padding: 6px 10px;
+      font-size: 16px;
+      background: #aa00ff;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
     }
-    .theme-switcher:hover {
-      background: #8f00ff;
+
+    #address-bar {
+      display: flex;
+      padding: 10px;
+      background: rgba(40, 0, 80, 0.8);
+      border-bottom: 2px solid #651bcd;
+    }
+
+    #url {
+      flex: 1;
+      padding: 10px;
+      background: #2d006f;
+      border: none;
+      border-radius: 6px;
+      color: white;
+    }
+
+    #go-button {
+      margin-left: 10px;
+      padding: 10px 15px;
+      background: #bb00ff;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+    }
+
+    #content {
+      height: calc(100vh - 112px);
+      background: black;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Intro Splash */
+    #intro {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #0c001e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      animation: fadeOut 3s forwards;
+      animation-delay: 2.5s;
+    }
+
+    #intro h1 {
+      font-size: 50px;
+      color: #bb00ff;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    /* Music Toggle */
+    #music-toggle {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      background: #8800cc;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      z-index: 999;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="tabs" id="tab-container"></div>
-    <div class="actions">
-      <button onclick="addTab()">+</button>
-      <button class="theme-switcher" onclick="toggleTheme()">Switch Theme</button>
-    </div>
-    <div class="games-tab" onclick="openGames()">Games</div>
-  </header>
 
-  <div id="address-bar">
-    <input type="text" id="url" placeholder="Enter URL (e.g., https://example.com)" />
-    <button id="go-button">Go</button>
+<div id="intro">
+  <h1>Flip 3.0</h1>
+</div>
+
+<audio id="bg-music" loop>
+  <source src="https://cdn.pixabay.com/audio/2023/07/14/audio_6311c60165.mp3" type="audio/mpeg">
+</audio>
+<button id="music-toggle">Toggle Music</button>
+
+<header>
+  <div class="tabs" id="tab-container"></div>
+  <div class="actions">
+    <button onclick="addTab()">+</button>
   </div>
+</header>
 
-  <div id="content">
-    <iframe id="web-view" src=""></iframe>
-  </div>
+<div id="address-bar">
+  <input type="text" id="url" placeholder="Enter URL (e.g., https://example.com)" />
+  <button id="go-button">Go</button>
+</div>
 
-  <!-- Scripts -->
-  <script>
-    const webview = document.getElementById("web-view");
-    const urlInput = document.getElementById("url");
-    const tabContainer = document.getElementById("tab-container");
-    let tabs = JSON.parse(localStorage.getItem("tabs") || "[]");
-    let activeTab = 0;
+<div id="content">
+  <iframe id="web-view" src=""></iframe>
+</div>
 
-    function renderTabs() {
-      tabContainer.innerHTML = "";
-      tabs.forEach((tab, index) => {
-        const div = document.createElement("div");
-        div.className = "tab" + (index === activeTab ? " active" : "");
-        const label = document.createElement("span");
-        label.textContent = tab.name || `Tab ${index + 1}`;
-        const close = document.createElement("button");
-        close.textContent = "×";
-        close.onclick = (e) => {
-          e.stopPropagation();
-          closeTab(index);
-        };
-        div.appendChild(label);
-        div.appendChild(close);
-        div.onclick = () => switchTab(index);
-        tabContainer.appendChild(div);
-      });
-    }
+<script src="uv/uv.bundle.js" defer></script>
+<script src="uv/uv.config.js" defer></script>
+<script src="register-sw.js" defer></script>
+<script src="search.js" defer></script>
+<script src="index.js" defer></script>
+<script src="error.js" defer></script>
 
-    function switchTab(index) {
-      activeTab = index;
-      urlInput.value = decodeUrl(tabs[index].url || "");
-      webview.src = tabs[index].url || "";
-      saveTabs();
-      renderTabs();
-    }
+<script>
+  const webview = document.getElementById("web-view");
+  const urlInput = document.getElementById("url");
+  const tabContainer = document.getElementById("tab-container");
+  let tabs = JSON.parse(localStorage.getItem("tabs") || "[]");
+  let activeTab = 0;
 
-    function closeTab(index) {
-      tabs.splice(index, 1);
-      if (activeTab >= tabs.length) activeTab = tabs.length - 1;
-      if (tabs.length === 0) addTab();
-      saveTabs();
-      renderTabs();
-      switchTab(activeTab);
-    }
-
-    function addTab() {
-      tabs.push({ name: `Tab ${tabs.length + 1}`, url: "" });
-      activeTab = tabs.length - 1;
-      saveTabs();
-      renderTabs();
-      switchTab(activeTab);
-    }
-
-    function saveTabs() {
-      localStorage.setItem("tabs", JSON.stringify(tabs));
-    }
-
-    function encodeUrl(url) {
-      return `${self.__uv$config.prefix}${Ultraviolet.codec.xor.encode(url)}`;
-    }
-
-    function decodeUrl(fullUrl) {
-      if (fullUrl.startsWith(self.__uv$config.prefix)) {
-        return Ultraviolet.codec.xor.decode(fullUrl.replace(self.__uv$config.prefix, ""));
-      }
-      return fullUrl;
-    }
-
-    document.getElementById("go-button").addEventListener("click", () => {
-      const raw = urlInput.value.trim();
-      if (raw) {
-        const encoded = encodeUrl(raw);
-        webview.src = encoded;
-        tabs[activeTab].url = encoded;
-        saveTabs();
-        renderTabs();
-      }
+  function renderTabs() {
+    tabContainer.innerHTML = "";
+    tabs.forEach((tab, index) => {
+      const div = document.createElement("div");
+      div.className = "tab" + (index === activeTab ? " active" : "");
+      const label = document.createElement("span");
+      label.textContent = tab.name || `Tab ${index + 1}`;
+      const close = document.createElement("button");
+      close.textContent = "×";
+      close.onclick = (e) => {
+        e.stopPropagation();
+        closeTab(index);
+      };
+      div.appendChild(label);
+      div.appendChild(close);
+      div.onclick = () => switchTab(index);
+      tabContainer.appendChild(div);
     });
+  }
 
-    urlInput.addEventListener("keypress", e => {
-      if (e.key === "Enter") document.getElementById("go-button").click();
-    });
+  function switchTab(index) {
+    activeTab = index;
+    urlInput.value = decodeUrl(tabs[index].url || "");
+    webview.src = tabs[index].url || "";
+    saveTabs();
+    renderTabs();
+  }
 
-    // Theme Toggle
-    function toggleTheme() {
-      document.body.classList.toggle("light-theme");
-      saveTheme();
-    }
-
-    function saveTheme() {
-      const theme = document.body.classList.contains("light-theme") ? "light" : "dark";
-      localStorage.setItem("theme", theme);
-    }
-
-    function loadTheme() {
-      const savedTheme = localStorage.getItem("theme");
-      if (savedTheme === "light") {
-        document.body.classList.add("light-theme");
-      } else {
-        document.body.classList.remove("light-theme");
-      }
-    }
-
-    // Games Tab Action
-    function openGames() {
-      window.open("https://example-game-link.com", "_blank");  // Replace with your Unity game link
-    }
-
-    // On Page Load
-    loadTheme();
-
+  function closeTab(index) {
+    tabs.splice(index, 1);
+    if (activeTab >= tabs.length) activeTab = tabs.length - 1;
     if (tabs.length === 0) addTab();
-    else renderTabs();
+    saveTabs();
+    renderTabs();
     switchTab(activeTab);
-  </script>
+  }
+
+  function addTab() {
+    tabs.push({ name: `Tab ${tabs.length + 1}`, url: "" });
+    activeTab = tabs.length - 1;
+    saveTabs();
+    renderTabs();
+    switchTab(activeTab);
+  }
+
+  function saveTabs() {
+    localStorage.setItem("tabs", JSON.stringify(tabs));
+  }
+
+  function encodeUrl(url) {
+    return `${self.__uv$config.prefix}${Ultraviolet.codec.xor.encode(url)}`;
+  }
+
+  function decodeUrl(fullUrl) {
+    if (fullUrl.startsWith(self.__uv$config.prefix)) {
+      return Ultraviolet.codec.xor.decode(fullUrl.replace(self.__uv$config.prefix, ""));
+    }
+    return fullUrl;
+  }
+
+  document.getElementById("go-button").addEventListener("click", () => {
+    const raw = urlInput.value.trim();
+    if (raw) {
+      const encoded = encodeUrl(raw);
+      webview.src = encoded;
+      tabs[activeTab].url = encoded;
+      saveTabs();
+      renderTabs();
+    }
+  });
+
+  urlInput.addEventListener("keypress", e => {
+    if (e.key === "Enter") document.getElementById("go-button").click();
+  });
+
+  // Background music toggle
+  const music = document.getElementById("bg-music");
+  const toggleBtn = document.getElementById("music-toggle");
+  let playing = false;
+
+  toggleBtn.onclick = () => {
+    playing = !playing;
+    if (playing) music.play();
+    else music.pause();
+  };
+
+  if (tabs.length === 0) addTab();
+  else renderTabs();
+  switchTab(activeTab);
+</script>
 </body>
 </html>
