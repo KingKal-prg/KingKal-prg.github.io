@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Copilot Chat</title>
+  <!-- Optional: Additional chatbot functionality -->
+  <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
+  <!-- Tesseract.js for OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
+  <style>
+    /* DARK THEME STYLING */
+    body {
+      font-family: Arial, sans-serif;
+      background: #1e1e1e;
+      margin: 0;
+      padding: 20px;
+      color: #f1f1f1;
+      animation: bodyFadeIn 1.5s ease-out;
+    }
+    @keyframes bodyFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    h1 {
+      text-align: center;
+      color: #f1f1f1;
+    }
+    /* TOP TAB BAR */
+    #tabBar {
+      max-width: 600px;
+      margin: 0 auto 20px auto;
+      text-align: center;
+    }
+    .tabButton {
+      padding: 10px 20px;
+      margin: 0 5px;
+      border: 1px solid #444;
+      background-color: #333;
+      cursor: pointer;
+      border-radius: 5px;
+      color: #f1f1f1;
+    }
+    .tabButton.active {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    /* TAB CONTENT CONTAINERS */
+    .tabContent {
+      display: none;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .tabContent.active {
+      display: block;
+    }
+    /* CHAT CONTAINER with Transition (Fade & Slide In) */
+    #chat {
+      background: #2a2a2a;
+      padding: 20px;
+      border: 1px solid #444;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      animation: fadeInSlide 1s ease-out;
+    }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #messages {
+      list-style-type: none;
+      padding: 0;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+    #messages li {
+      padding: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #444;
+    }
+    /* Chat Input Row with Integrated Image Upload */
+    #input {
+      display: flex;
+      align-items: center;
+    }
+    #input input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #555;
+      border-radius: 5px;
+      margin-right: 10px;
+      background: #333;
+      color: #f1f1f1;
+    }
+    #send, #voiceChat, #uploadBtn {
+      padding: 10px 20px;
+      border: none;
+      background-color: #007bff;
+      color: #f1f1f1;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    #send:hover, #voiceChat:hover, #uploadBtn:hover {
+      background-color: #0056b3;
+    }
+    #send:disabled, #voiceChat:disabled, #uploadBtn:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+    /* Hide the file input element */
+    #imageFile { display: none; }
+    /* SPINNER */
+    .spinner-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0,0,0,0.4);
+      z-index: 1000;
+    }
+    .spinner {
+      border: 16px solid #333;
+      border-top: 16px solid #007bff;
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* TEACH & CONFIGURE TABS STYLING */
+    #teachForm, #configForm {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #teachForm input, #teachForm textarea,
+    #configForm textarea {
+      padding: 8px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background: #333;
+      color: #f1f1f1;
+    }
+    #teachForm button, #configForm button {
+      align-self: flex-start;
+      padding: 8px 16px;
+      border: none;
+      background-color: #007bff;
+      color: #f1f1f1;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    /* Button to Load Basic Teachings */
+    #teachBasic {
+      margin-top: 10px;
+      padding: 8px 16px;
+      border: none;
+      background-color: #28a745;
+      color: #f1f1f1;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    /* Import Teaching Data Section */
+    #importSection {
+      margin-top: 20px;
+      border-top: 1px solid #444;
+      padding-top: 10px;
+    }
+    #importSection input {
+      padding: 8px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background: #333;
+      color: #f1f1f1;
+      margin-right: 10px;
+    }
+    #importButton {
+      padding: 8px 16px;
+      border: none;
+      background-color: #17a2b8;
+      color: #f1f1f1;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    /* Teach List Styling */
+    #teachList {
+      margin-top: 20px;
+      list-style-type: none;
+      padding: 0;
+    }
+    #teachList li {
+      padding: 5px;
+      border-bottom: 1px solid #444;
+    }
+    /* Configure Chatbot Tab Styling */
+    #configForm textarea {
+      width: 100%;
+      min-height: 100px;
+    }
+    #configForm button {
+      background-color: #ffc107;
+      color: #1e1e1e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Copilot Chat</h1>
+  
+  <!-- TOP TAB BAR -->
+  <div id="tabBar">
+    <button class="tabButton active" data-tab="chatTab">Chat</button>
+    <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
+    <button class="tabButton" data-tab="configureTab">Configure Chatbot</button>
+  </div>
+  
+  <!-- CHAT TAB CONTENT -->
+  <div id="chatTab" class="tabContent active">
+    <div id="chat">
+      <ul id="messages"></ul>
+      <div id="input">
+        <input type="text" id="userInput" placeholder="Type your message here...">
+        <button id="send">Send</button>
+        <button id="voiceChat">Voice Chat</button>
+        <button id="uploadBtn" title="Upload Image">＋</button>
+        <input type="file" id="imageFile" accept="image/*">
+      </div>
+    </div>
+  </div>
+  
+  <!-- TEACH CHATBOT TAB CONTENT -->
+  <div id="teachTab" class="tabContent">
+    <h3>Teach Chatbot</h3>
+    <p>Enter a question and its corresponding answer to update the chatbot’s responses.</p>
+    <form id="teachForm">
+      <input type="text" id="teachQuestion" placeholder="Question (e.g., what's 100x100?)" required>
+      <input type="text" id="teachAnswer" placeholder="Answer (e.g., 10000)" required>
+      <button type="submit">Save Correction</button>
+    </form>
+    <button id="teachBasic">Teach Chatbot Basics</button>
+    <ul id="teachList"></ul>
+    <div id="importSection">
+      <h4>Import Teaching Data</h4>
+      <input type="text" id="importSubject" placeholder="Subject (e.g., math)" required>
+      <input type="url" id="importLink" placeholder="URL to import teaching data" required>
+      <button id="importButton">Import Teaching Data</button>
+    </div>
+  </div>
+  
+  <!-- CONFIGURE CHATBOT TAB CONTENT -->
+  <div id="configureTab" class="tabContent">
+    <h3>Configure Chatbot Personality</h3>
+    <p>Enter a custom personality or configuration prompt for your chatbot. This will be used as the system instruction for DeepSeek and as context for ChatGPT fallback.</p>
+    <form id="configForm">
+      <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty, knowledgeable assistant who loves helping students with school work." required></textarea>
+      <button type="submit">Save Configuration</button>
+    </form>
+  </div>
+  
+  <!-- SPINNER -->
+  <div id="spinner-container" class="spinner-container">
+    <div class="spinner"></div>
+  </div>
+  
+  <script>
+    /***** TEACHING DATA MANAGEMENT *****/
+    let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
+    function updateTeachList() {
+      const teachList = document.getElementById('teachList');
+      teachList.innerHTML = '';
+      for (let key in teachings) {
+        const li = document.createElement('li');
+        li.textContent = `${key} --> ${teachings[key]}`;
+        teachList.appendChild(li);
+      }
+    }
+    updateTeachList();
+    
+    document.getElementById('teachForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const question = document.getElementById('teachQuestion').value.trim().toLowerCase();
+      const answer = document.getElementById('teachAnswer').value.trim();
+      if (question && answer) {
+        teachings[question] = answer;
+        localStorage.setItem('teachings', JSON.stringify(teachings));
+        updateTeachList();
+        alert('Teaching saved!');
+        document.getElementById('teachQuestion').value = '';
+        document.getElementById('teachAnswer').value = '';
+      }
+    });
+    
+    // Teach Chatbot Basics
+    document.getElementById('teachBasic').addEventListener('click', function() {
+      const basics = {
+        "what is 2+2": "4",
+        "what is 10 divided by 2": "5",
+        "who discovered america": "Christopher Columbus",
+        "when did world war ii end": "1945",
+        "what is photosynthesis": "Photosynthesis is the process by which green plants use sunlight to synthesize foods from CO₂ and water.",
+        "what is gravity": "Gravity is the force of attraction between two masses.",
+        "what is a thesis statement": "A thesis statement is a concise summary of the main point of an essay or research paper.",
+        "what is an essay": "An essay is a short piece of writing on a particular subject."
+      };
+      teachings = { ...basics, ...teachings };
+      localStorage.setItem('teachings', JSON.stringify(teachings));
+      updateTeachList();
+      alert('Basic teachings added!');
+    });
+    
+    // Import Teaching Data (Manual)
+    document.getElementById('importButton').addEventListener('click', async function() {
+      const subject = document.getElementById('importSubject').value.trim().toLowerCase();
+      const url = document.getElementById('importLink').value.trim();
+      if (!subject || !url) {
+        alert("Please enter both a subject and a URL.");
+        return;
+      }
+      try {
+        document.getElementById('spinner-container').style.display = 'flex';
+        const response = await fetch(url);
+        document.getElementById('spinner-container').style.display = 'none';
+        if (!response.ok) {
+          alert("Failed to fetch content from the URL.");
+          return;
+        }
+        const contentType = response.headers.get("content-type");
+        let importedContent = "";
+        if (contentType && contentType.includes("text/html")) {
+          const htmlText = await response.text();
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(htmlText, "text/html");
+          importedContent = doc.body.innerText;
+        } else {
+          importedContent = await response.text();
+        }
+        if (!importedContent) {
+          alert("No teaching data was found at the provided URL.");
+          return;
+        }
+        // Check that the content is related to the subject.
+        if (!importedContent.toLowerCase().includes(subject)) {
+          alert("Warning: The imported content does not appear to relate to the subject.");
+        }
+        if (teachings[subject]) {
+          teachings[subject] += "\n" + importedContent;
+        } else {
+          teachings[subject] = importedContent;
+        }
+        localStorage.setItem('teachings', JSON.stringify(teachings));
+        updateTeachList();
+        alert("Teaching data imported successfully!");
+        document.getElementById('importSubject').value = "";
+        document.getElementById('importLink').value = "";
+      } catch (err) {
+        document.getElementById('spinner-container').style.display = 'none';
+        alert("Error importing teaching data: " + err.message);
+      }
+    });
+    
+    /***** DEFAULT TEACHING DATA SYNC *****/
+    async function loadDefaultTeachingData() {
+      const defaultData = [
+        // Adjust these URLs to point to resources that contain text data.
+        { subject: "math", url: "https://www.education.com/resources/math/" },
+        { subject: "science", url: "https://undsci.berkeley.edu/understanding-science-101/what-is-science/" },
+        { subject: "history", url: "https://www.worldhistory.org/" },
+        { subject: "study skills", url: "https://www.britannica.com/topic/education" }
+      ];
+      for (let item of defaultData) {
+        let subject = item.subject.toLowerCase();
+        if (!teachings[subject]) {
+          try {
+            const res = await fetch(item.url);
+            if (res.ok) {
+              let content;
+              const contentType = res.headers.get("content-type");
+              if (contentType && contentType.includes("text/html")) {
+                const htmlText = await res.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, "text/html");
+                content = doc.body.innerText;
+              } else {
+                content = await res.text();
+              }
+              teachings[subject] = content;
+              localStorage.setItem('teachings', JSON.stringify(teachings));
+              updateTeachList();
+            } else {
+              console.log("Failed to fetch default data for subject:", subject);
+            }
+          } catch (e) {
+            console.error("Error fetching default data for subject:", subject, e);
+          }
+        }
+      }
+    }
+    loadDefaultTeachingData();
+    
+    /***** CONFIGURE CHATBOT PERSONALITY *****/
+    let chatbotPersonality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
+    document.getElementById('chatbotPersonality').value = chatbotPersonality;
+    
+    document.getElementById('configForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const personality = document.getElementById('chatbotPersonality').value.trim();
+      if (personality) {
+        localStorage.setItem('chatbot_personality', personality);
+        alert("Chatbot personality updated!");
+      }
+    });
+    
+    /***** TAB SWITCHING LOGIC *****/
+    const tabButtons = document.querySelectorAll('.tabButton');
+    const tabContents = document.querySelectorAll('.tabContent');
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById(this.getAttribute('data-tab')).classList.add('active');
+      });
+    });
+    
+    /***** HELPER FUNCTIONS *****/
+    // Check if the input is a math expression (only digits, operators, spaces, parentheses, decimals)
+    function isMathExpression(input) {
+      return /^[\d\s+\-*/().]+$/.test(input);
+    }
+    
+    function evaluateMath(expression) {
+      try {
+        expression = expression.trim();
+        const safeExpression = expression.replace(/[^0-9+\-*/().]/g, '');
+        if (!safeExpression || !/\d/.test(safeExpression)) {
+          return "error evaluating the math expression";
+        }
+        return eval(safeExpression);
+      } catch (error) {
+        return "error evaluating the math expression";
+      }
+    }
+    
+    /***** CHATGPT FALLBACK (Using GPT-4) *****/
+    async function chatGPT(userInput) {
+      const apiKey = "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";
+      const apiUrl = "https://api.openai.com/v1/chat/completions";
+      const payload = {
+        model: "gpt-4",
+        messages: [
+          { role: "system", content: localStorage.getItem('chatbot_personality') || "You are a helpful assistant." },
+          { role: "user", content: userInput }
+        ]
+      };
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + apiKey
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (data.choices && data.choices.length > 0) {
+          return data.choices[0].message.content.trim();
+        }
+        return "";
+      } catch (e) {
+        console.error("ChatGPT error:", e);
+        return "";
+      }
+    }
+    
+    /***** DATA SOURCES *****/
+    async function deepSeekChat(userInput) {
+      const apiKey = "sk-5a079b5335564dba87a3f037274dc108";
+      const url = "https://api.deepseek.com/chat/completions";
+      const personality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
+      const payload = {
+        model: "deepseek-chat",
+        messages: [
+          { role: "system", content: personality },
+          { role: "user", content: userInput }
+        ],
+        stream: false
+      };
+      try {
+        document.getElementById('spinner-container').style.display = 'flex';
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + apiKey
+          },
+          body: JSON.stringify(payload)
+        });
+        document.getElementById('spinner-container').style.display = 'none';
+        const data = await response.json();
+        console.log("DeepSeek API response:", data);
+        if (data && data.choices && data.choices.length > 0) {
+          const answer = data.choices[0].message.content || data.choices[0].text || "";
+          return answer.trim();
+        }
+        return "";
+      } catch (error) {
+        document.getElementById('spinner-container').style.display = 'none';
+        console.error("DeepSeek error:", error);
+        return "";
+      }
+    }
+    
+    async function duckDuckGoSearch(query) {
+      const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
+      try {
+        let response = await fetch(url);
+        let data = await response.json();
+        if (data.AbstractText && data.AbstractText.length > 0) {
+          return data.AbstractText;
+        }
+        return "";
+      } catch (error) {
+        console.error("DuckDuckGo error:", error);
+        return "";
+      }
+    }
+    
+    // Hypothetical duck.ai search function
+    async function duckAISearch(query) {
+      try {
+        // Replace the URL with the actual endpoint for duck.ai if available.
+        const url = `https://api.duck.ai/search?q=${encodeURIComponent(query)}`;
+        let response = await fetch(url);
+        let data = await response.json();
+        // Assume the result is in data.result
+        if (data.result && data.result.length > 0) {
+          return data.result;
+        }
+        return "";
+      } catch (error) {
+        console.error("duck.ai error:", error);
+        return "";
+      }
+    }
+    
+    // Hypothetical Escosia search function
+    async function escosiaSearch(query) {
+      try {
+        // Replace the URL with the actual endpoint for Escosia if available.
+        const url = `https://api.escosia.com/search?q=${encodeURIComponent(query)}`;
+        let response = await fetch(url);
+        let data = await response.json();
+        // Assume the result is in data.answer
+        if (data.answer && data.answer.length > 0) {
+          return data.answer;
+        }
+        return "";
+      } catch (error) {
+        console.error("Escosia error:", error);
+        return "";
+      }
+    }
+    
+    // Hypothetical Tor search function
+    async function torSearch(query) {
+      try {
+        // Replace the URL with the actual endpoint for Tor search if available.
+        const url = `https://api.torsearch.com/search?q=${encodeURIComponent(query)}`;
+        let response = await fetch(url);
+        let data = await response.json();
+        // Assume the result is in data.result
+        if (data.result && data.result.length > 0) {
+          return data.result;
+        }
+        return "";
+      } catch (error) {
+        console.error("Tor search error:", error);
+        return "";
+      }
+    }
+    
+    // Fetch conversational dataset from GitHub (PolyAI-LDN)
+    async function conversationDatasetSearch(query) {
+      try {
+        const datasetUrl = "https://raw.githubusercontent.com/PolyAI-LDN/conversational-datasets/master/conversations.json";
+        let response = await fetch(datasetUrl);
+        let data = await response.json();
+        for (let conv of data) {
+          if (conv.question && conv.answer && conv.question.toLowerCase().includes(query.toLowerCase())) {
+            return conv.answer;
+          }
+        }
+        return "";
+      } catch (e) {
+        console.error("Conversation dataset error:", e);
+        return "";
+      }
+    }
+    
+    function isAcceptable(answer) {
+      if (!answer) return false;
+      const clean = answer.trim().toLowerCase();
+      if (clean === "" || clean.includes("error") || clean === "i'm still yn so idk") {
+        return false;
+      }
+      return true;
+    }
+    
+    // Check if the input is a greeting.
+    function isGreeting(input) {
+      let lower = input.trim().toLowerCase().replace(/[!.,?]/g, "");
+      const greetings = ["hi", "hello", "hey", "howdy", "hola"];
+      return greetings.includes(lower);
+    }
+    
+    // Final Response Chain:
+    // 1. If greeting → friendly greeting.
+    // 2. If math expression → evaluate it.
+    // 3. Otherwise, try sources in this order:
+    //    ChatGPT (GPT‑4) → DeepSeek → duck.ai → DuckDuckGo → Google → Escosia → Tor → fallback.
+    async function generateResponse(userInput) {
+      if (isGreeting(userInput)) {
+        return "Hello! How can I help you today?";
+      }
+      
+      if (isMathExpression(userInput)) {
+        let result = evaluateMath(userInput);
+        return "The answer is " + result;
+      }
+      
+      let answer = await chatGPT(userInput);
+      if (isAcceptable(answer)) return answer;
+      
+      answer = await deepSeekChat(userInput);
+      if (isAcceptable(answer)) return answer;
+      
+      answer = await duckAISearch(userInput);
+      if (isAcceptable(answer)) return answer;
+      
+      answer = await duckDuckGoSearch(userInput);
+      if (isAcceptable(answer)) return answer;
+      
+      answer = await googleSearch(userInput);
+      if (isAcceptable(answer)) return answer;
+      
+      answer = await escosiaSearch(userInput);
+      if (isAcceptable(answer)) return answer;
+      
+      answer = await torSearch(userInput);
+      if (isAcceptable(answer)) return answer;
+      
+      return "can you repeat more clearly";
+    }
+    
+    /***** VOICE CHAT *****/
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+    if (window.SpeechRecognition) {
+      const recognition = new window.SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+      document.getElementById('voiceChat').addEventListener('click', () => {
+        recognition.start();
+      });
+      recognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('userInput').value = transcript;
+        document.getElementById('send').click();
+      };
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error", event);
+      };
+    } else {
+      document.getElementById('voiceChat').disabled = true;
+      document.getElementById('voiceChat').textContent = "Voice Chat Not Supported";
+    }
+    
+    /***** CHAT INTERACTION *****/
+    document.getElementById('send').addEventListener('click', async () => {
+      const userInput = document.getElementById('userInput').value.trim();
+      if (userInput === '') return;
+      const messages = document.getElementById('messages');
+      const userMessage = document.createElement('li');
+      userMessage.textContent = `User: ${userInput}`;
+      messages.appendChild(userMessage);
+      try {
+        const response = await generateResponse(userInput);
+        const botMessage = document.createElement('li');
+        botMessage.textContent = `Chatbot: ${response}`;
+        messages.appendChild(botMessage);
+        if (window.speechSynthesis) {
+          const utterance = new SpeechSynthesisUtterance(response);
+          speechSynthesis.speak(utterance);
+        }
+      } catch (error) {
+        console.error(error);
+        const errorMessage = document.createElement('li');
+        errorMessage.textContent = `Chatbot: An error occurred. Please try again later.`;
+        messages.appendChild(errorMessage);
+      }
+      document.getElementById('userInput').value = '';
+      messages.scrollTop = messages.scrollHeight;
+    });
+    
+    /***** IMAGE PRE-PROCESSING & OCR *****/
+    function preprocessImage(imageSrc) {
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.src = imageSrc;
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+          for (let i = 0; i < data.length; i += 4) {
+            let avg = (data[i] + data[i+1] + data[i+2]) / 3;
+            data[i] = avg;
+            data[i+1] = avg;
+            data[i+2] = avg;
+          }
+          ctx.putImageData(imageData, 0, 0);
+          resolve(canvas.toDataURL());
+        };
+        img.onerror = (err) => reject(err);
+      });
+    }
+    
+    // When the plus button is clicked, trigger the hidden file input.
+    document.getElementById('uploadBtn').addEventListener('click', () => {
+      document.getElementById('imageFile').click();
+    });
+    
+    // When a file is selected, process it using OCR and query DeepSeek.
+    document.getElementById('imageFile').addEventListener('change', () => {
+      const file = document.getElementById('imageFile').files[0];
+      const messages = document.getElementById('messages');
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          const imageMessage = document.createElement('li');
+          imageMessage.textContent = "User sent an image:";
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.maxWidth = "100%";
+          imageMessage.appendChild(img);
+          messages.appendChild(imageMessage);
+          try {
+            const processedSrc = await preprocessImage(e.target.result);
+            document.getElementById('spinner-container').style.display = 'flex';
+            let { data: { text } } = await Tesseract.recognize(processedSrc, 'eng');
+            document.getElementById('spinner-container').style.display = 'none';
+            text = text.replace(/[«»‘’“”]/g, "").trim();
+            const extractedTextMsg = document.createElement('li');
+            extractedTextMsg.textContent = "Extracted Text from Image: " + text;
+            messages.appendChild(extractedTextMsg);
+            const deepResponse = await deepSeekChat(text);
+            const deepResponseMsg = document.createElement('li');
+            deepResponseMsg.textContent = "Chatbot: " + deepResponse;
+            messages.appendChild(deepResponseMsg);
+          } catch (err) {
+            document.getElementById('spinner-container').style.display = 'none';
+            const errorMsg = document.createElement('li');
+            errorMsg.textContent = "Error in OCR or pre-processing: " + err.message;
+            messages.appendChild(errorMsg);
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert("No file selected.");
+      }
+    });
+  </script>
+</body>
+</html>
