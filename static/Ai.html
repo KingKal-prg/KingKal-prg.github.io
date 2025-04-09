@@ -12,6 +12,8 @@
     <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="apple-touch-icon.png" />
 
+    <!-- Include Math.js for enhanced math evaluation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
     <!-- Optional: Add-to-Homescreen CSS (from owner’s example) -->
     <link rel="stylesheet" href="./dist/add-to-homescreen.min.css" />
 
@@ -264,11 +266,7 @@
       <div id="chat">
         <ul id="messages"></ul>
         <div id="input">
-          <input
-            type="text"
-            id="userInput"
-            placeholder="Type your message here..."
-          />
+          <input type="text" id="userInput" placeholder="Type your message here..." />
           <button id="send">Send</button>
           <button id="voiceChat">Voice Chat</button>
           <button id="uploadBtn" title="Upload Image">＋</button>
@@ -281,40 +279,19 @@
     <div id="teachTab" class="tabContent">
       <h3>Teach Chatbot</h3>
       <p>
-        Enter a question and its corresponding answer to update the chatbot’s
-        responses.
+        Enter a question and its corresponding answer to update the chatbot’s responses.
       </p>
       <form id="teachForm">
-        <input
-          type="text"
-          id="teachQuestion"
-          placeholder="Question (e.g., what's 100x100?)"
-          required
-        />
-        <input
-          type="text"
-          id="teachAnswer"
-          placeholder="Answer (e.g., 10000)"
-          required
-        />
+        <input type="text" id="teachQuestion" placeholder="Question (e.g., what's 100x100?)" required />
+        <input type="text" id="teachAnswer" placeholder="Answer (e.g., 10000)" required />
         <button type="submit">Save Correction</button>
       </form>
       <button id="teachBasic">Teach Chatbot Basics</button>
       <ul id="teachList"></ul>
       <div id="importSection">
         <h4>Import Teaching Data</h4>
-        <input
-          type="text"
-          id="importSubject"
-          placeholder="Subject (e.g., math)"
-          required
-        />
-        <input
-          type="url"
-          id="importLink"
-          placeholder="URL to import teaching data"
-          required
-        />
+        <input type="text" id="importSubject" placeholder="Subject (e.g., math)" required />
+        <input type="url" id="importLink" placeholder="URL to import teaching data" required />
         <button id="importButton">Import Teaching Data</button>
       </div>
     </div>
@@ -324,15 +301,10 @@
       <h3>Configure Chatbot Personality</h3>
       <p>
         Enter a custom personality or configuration prompt for your chatbot.
-        This will be used as the system instruction for DeepSeek and as context
-        for ChatGPT fallback.
+        This will be used as the system instruction for DeepSeek and as context for ChatGPT fallback.
       </p>
       <form id="configForm">
-        <textarea
-          id="chatbotPersonality"
-          placeholder="For example: You are a friendly, witty, knowledgeable assistant who loves helping students with school work."
-          required
-        ></textarea>
+        <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty, knowledgeable assistant who loves helping students with school work." required></textarea>
         <button type="submit">Save Configuration</button>
       </form>
     </div>
@@ -505,19 +477,22 @@
       });
 
       /***** HELPER FUNCTIONS *****/
-      // Check if the input is a math expression (only digits, operators, spaces, parentheses, decimals)
+      // Updated isMathExpression to allow letters "x" (for multiplication)
       function isMathExpression(input) {
-        return /^[\d\s+\-*/().]+$/.test(input);
+        return /^[\d\s+\-*/().x]+$/i.test(input);
       }
 
+      // Updated evaluateMath to use Math.js for robust evaluation and fraction formatting
       function evaluateMath(expression) {
         try {
-          expression = expression.trim();
-          const safeExpression = expression.replace(/[^0-9+\-*/().]/g, "");
-          if (!safeExpression || !/\d/.test(safeExpression)) {
-            return "error evaluating the math expression";
+          expression = expression.trim().replace(/x/gi, "*");
+          let result = math.evaluate(expression);
+          // Convert result to fraction if applicable
+          let frac = math.fraction(result);
+          if (frac.d !== 1) {
+            return math.format(frac);
           }
-          return eval(safeExpression);
+          return result.toString();
         } catch (error) {
           return "error evaluating the math expression";
         }
@@ -589,8 +564,7 @@
           const data = await response.json();
           console.log("DeepSeek API response:", data);
           if (data && data.choices && data.choices.length > 0) {
-            const answer =
-              data.choices[0].message.content || data.choices[0].text || "";
+            const answer = data.choices[0].message.content || data.choices[0].text || "";
             return answer.trim();
           }
           return "";
@@ -602,9 +576,7 @@
       }
 
       async function duckDuckGoSearch(query) {
-        const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(
-          query
-        )}&format=json`;
+        const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
         try {
           let response = await fetch(url);
           let data = await response.json();
@@ -863,8 +835,7 @@
             } catch (err) {
               document.getElementById("spinner-container").style.display = "none";
               const errorMsg = document.createElement("li");
-              errorMsg.textContent =
-                "Error in OCR or pre-processing: " + err.message;
+              errorMsg.textContent = "Error in OCR or pre-processing: " + err.message;
               messages.appendChild(errorMsg);
             }
           };
