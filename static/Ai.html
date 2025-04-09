@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Copilot Chat</title>
-  <!-- Optional: Additional chatbot functionality -->
+  <!-- Optional chatbot functionality -->
   <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
   <!-- Tesseract.js for OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
@@ -252,7 +252,7 @@
     <ul id="teachList"></ul>
     <div id="importSection">
       <h4>Import Teaching Data</h4>
-      <input type="text" id="importSubject" placeholder="Subject (e.g., math basics)" required>
+      <input type="text" id="importSubject" placeholder="Subject (e.g., math)" required>
       <input type="url" id="importLink" placeholder="URL to import teaching data" required>
       <button id="importButton">Import Teaching Data</button>
     </div>
@@ -276,7 +276,6 @@
   <script>
     /***** TEACHING DATA MANAGEMENT *****/
     let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
-    
     function updateTeachList() {
       const teachList = document.getElementById('teachList');
       teachList.innerHTML = '';
@@ -320,7 +319,7 @@
       alert('Basic teachings added!');
     });
     
-    // Import Teaching Data
+    // Import Teaching Data (advanced)
     document.getElementById('importButton').addEventListener('click', async function() {
       const subject = document.getElementById('importSubject').value.trim().toLowerCase();
       const url = document.getElementById('importLink').value.trim();
@@ -349,6 +348,10 @@
         if (!importedContent) {
           alert("No teaching data was found at the provided URL.");
           return;
+        }
+        // Ensure the imported content includes the subject name.
+        if (!importedContent.toLowerCase().includes(subject)) {
+          alert("Warning: The imported content does not appear to relate to the subject.");
         }
         if (teachings[subject]) {
           teachings[subject] += "\n" + importedContent;
@@ -392,8 +395,9 @@
     });
     
     /***** HELPER FUNCTIONS *****/
-    function isMathQuestion(input) {
-      return /[0-9]/.test(input) && /[+\-*/]/.test(input);
+    // Check if input contains only valid math characters.
+    function isMathExpression(input) {
+      return /^[\d\s+\-*/().]+$/.test(input);
     }
     
     function evaluateMath(expression) {
@@ -479,15 +483,14 @@
       }
     }
     
-    // New: Fetch conversational dataset from GitHub as a fallback for conversational data.
+    // Fetch conversational dataset from GitHub (PolyAI-LDN)
     async function conversationDatasetSearch(query) {
       try {
-        // Note: Adjust this URL to point to a proper raw JSON file from the repository.
+        // Replace with the correct raw URL of a JSON conversational dataset.
         const datasetUrl = "https://raw.githubusercontent.com/PolyAI-LDN/conversational-datasets/master/conversations.json";
         let response = await fetch(datasetUrl);
         let data = await response.json();
-        // Assume data is an array of conversation objects with "question" and "answer" properties.
-        // Do a simple search: return the answer from the first object whose question includes the query (case-insensitive).
+        // Assume data is an array of objects with "question" and "answer" properties.
         for (let conv of data) {
           if (conv.question && conv.answer && conv.question.toLowerCase().includes(query.toLowerCase())) {
             return conv.answer;
@@ -511,15 +514,23 @@
     
     // Check if the input is a simple greeting.
     function isGreeting(input) {
-      let lower = input.trim().toLowerCase().replace(/[!.,?]/g, "");  // Remove punctuation for comparison
+      let lower = input.trim().toLowerCase().replace(/[!.,?]/g, "");
       const greetings = ["hi", "hello", "hey", "howdy", "hola"];
       return greetings.includes(lower);
     }
     
-    // Chain: if greeting then friendly response; else DeepSeek -> Conversation Dataset -> DuckDuckGo -> Google -> fallback.
+    // Final Response Chain:
+    // 1. If greeting - return friendly greeting.
+    // 2. If pure math expression - evaluate and return result.
+    // 3. Otherwise, try DeepSeek → conversationDatasetSearch → DuckDuckGo → Google → fallback.
     async function generateResponse(userInput) {
       if (isGreeting(userInput)) {
         return "Hello! How can I help you today?";
+      }
+      
+      if (isMathExpression(userInput)) {
+        let result = evaluateMath(userInput);
+        return "The answer is " + result;
       }
       
       let answer = await deepSeekChat(userInput);
@@ -622,7 +633,7 @@
       document.getElementById('imageFile').click();
     });
     
-    // When a file is selected, process it with OCR and query DeepSeek.
+    // When a file is selected, process it using OCR and query DeepSeek.
     document.getElementById('imageFile').addEventListener('change', () => {
       const file = document.getElementById('imageFile').files[0];
       const messages = document.getElementById('messages');
