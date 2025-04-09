@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Copilot Chat</title>
-  <!-- Optional chatbot functionality -->
+  <!-- Optional: Additional chatbot functionality -->
   <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
   <!-- Tesseract.js for OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
@@ -110,9 +110,7 @@
       cursor: not-allowed;
     }
     /* Hide the file input element */
-    #imageFile {
-      display: none;
-    }
+    #imageFile { display: none; }
     /* SPINNER */
     .spinner-container {
       position: fixed;
@@ -134,10 +132,7 @@
       height: 120px;
       animation: spin 2s linear infinite;
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     /* TEACH & CONFIGURE TABS STYLING */
     #teachForm, #configForm {
       display: flex;
@@ -261,7 +256,7 @@
   <!-- CONFIGURE CHATBOT TAB CONTENT -->
   <div id="configureTab" class="tabContent">
     <h3>Configure Chatbot Personality</h3>
-    <p>Enter a custom personality or configuration prompt for your chatbot. This will be used as the system instruction for DeepSeek.</p>
+    <p>Enter a custom personality or configuration prompt for your chatbot. This will be used as the system instruction for DeepSeek (and as context for ChatGPT fallback).</p>
     <form id="configForm">
       <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty, knowledgeable assistant who loves helping students with school work." required></textarea>
       <button type="submit">Save Configuration</button>
@@ -276,6 +271,7 @@
   <script>
     /***** TEACHING DATA MANAGEMENT *****/
     let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
+    
     function updateTeachList() {
       const teachList = document.getElementById('teachList');
       teachList.innerHTML = '';
@@ -319,7 +315,7 @@
       alert('Basic teachings added!');
     });
     
-    // Import Teaching Data (advanced)
+    // Import Teaching Data (manual via Teach Tab)
     document.getElementById('importButton').addEventListener('click', async function() {
       const subject = document.getElementById('importSubject').value.trim().toLowerCase();
       const url = document.getElementById('importLink').value.trim();
@@ -349,7 +345,7 @@
           alert("No teaching data was found at the provided URL.");
           return;
         }
-        // Ensure the imported content includes the subject name.
+        // Ensure the imported content relates to the subject.
         if (!importedContent.toLowerCase().includes(subject)) {
           alert("Warning: The imported content does not appear to relate to the subject.");
         }
@@ -368,6 +364,46 @@
         alert("Error importing teaching data: " + err.message);
       }
     });
+    
+    /***** DEFAULT TEACHING DATA SYNC *****/
+    async function loadDefaultTeachingData() {
+      const defaultData = [
+        // Replace these URLs with your preferred default resource URLs.
+        { subject: "math", url: "https://example.com/math-data.txt" },
+        { subject: "science", url: "https://example.com/science-data.txt" },
+        { subject: "history", url: "https://example.com/history-data.txt" },
+        { subject: "study skills", url: "https://example.com/studyskills-data.txt" }
+      ];
+      for (let item of defaultData) {
+        let subject = item.subject.toLowerCase();
+        if (!teachings[subject]) {
+          try {
+            const res = await fetch(item.url);
+            if (res.ok) {
+              let content;
+              const contentType = res.headers.get("content-type");
+              if (contentType && contentType.includes("text/html")) {
+                const htmlText = await res.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, "text/html");
+                content = doc.body.innerText;
+              } else {
+                content = await res.text();
+              }
+              teachings[subject] = content;
+              localStorage.setItem('teachings', JSON.stringify(teachings));
+              updateTeachList();
+            } else {
+              console.log("Failed to fetch default data for subject:", subject);
+            }
+          } catch (e) {
+            console.error("Error fetching default data for subject:", subject, e);
+          }
+        }
+      }
+    }
+    // Run default data sync on page load.
+    loadDefaultTeachingData();
     
     /***** CONFIGURE CHATBOT PERSONALITY *****/
     let chatbotPersonality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
@@ -395,7 +431,6 @@
     });
     
     /***** HELPER FUNCTIONS *****/
-    // Check if input contains only valid math characters.
     function isMathExpression(input) {
       return /^[\d\s+\-*/().]+$/.test(input);
     }
@@ -410,6 +445,38 @@
         return eval(safeExpression);
       } catch (error) {
         return "error evaluating the math expression";
+      }
+    }
+    
+    /***** CHATGPT FALLBACK *****/
+    async function chatGPT(userInput) {
+      // Use the provided ChatGPT API key.
+      const apiKey = "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";
+      const apiUrl = "https://api.openai.com/v1/chat/completions";
+      const payload = {
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: localStorage.getItem('chatbot_personality') || "You are a helpful assistant." },
+          { role: "user", content: userInput }
+        ]
+      };
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + apiKey
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (data.choices && data.choices.length > 0) {
+          return data.choices[0].message.content.trim();
+        }
+        return "";
+      } catch (e) {
+        console.error("ChatGPT error:", e);
+        return "";
       }
     }
     
@@ -486,11 +553,9 @@
     // Fetch conversational dataset from GitHub (PolyAI-LDN)
     async function conversationDatasetSearch(query) {
       try {
-        // Replace with the correct raw URL of a JSON conversational dataset.
         const datasetUrl = "https://raw.githubusercontent.com/PolyAI-LDN/conversational-datasets/master/conversations.json";
         let response = await fetch(datasetUrl);
         let data = await response.json();
-        // Assume data is an array of objects with "question" and "answer" properties.
         for (let conv of data) {
           if (conv.question && conv.answer && conv.question.toLowerCase().includes(query.toLowerCase())) {
             return conv.answer;
@@ -520,9 +585,9 @@
     }
     
     // Final Response Chain:
-    // 1. If greeting - return friendly greeting.
-    // 2. If pure math expression - evaluate and return result.
-    // 3. Otherwise, try DeepSeek → conversationDatasetSearch → DuckDuckGo → Google → fallback.
+    // 1. If greeting → friendly greeting.
+    // 2. If pure math expression → evaluate and return result.
+    // 3. Otherwise, try DeepSeek → ChatGPT fallback → Conversation dataset → DuckDuckGo → Google → fallback.
     async function generateResponse(userInput) {
       if (isGreeting(userInput)) {
         return "Hello! How can I help you today?";
@@ -533,9 +598,15 @@
         return "The answer is " + result;
       }
       
+      // Try DeepSeek first
       let answer = await deepSeekChat(userInput);
       if (isAcceptable(answer)) return answer;
       
+      // If DeepSeek fails, try ChatGPT with your provided API key
+      let chatGPTAnswer = await chatGPT(userInput);
+      if (isAcceptable(chatGPTAnswer)) return chatGPTAnswer;
+      
+      // Then try the conversational dataset
       let convAnswer = await conversationDatasetSearch(userInput);
       if (isAcceptable(convAnswer)) return convAnswer;
       
