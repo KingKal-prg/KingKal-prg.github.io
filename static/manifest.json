@@ -1,6 +1,6 @@
 {
-  "short_name": "Aardvark",
-  "name": "Aardvark: the app for aardvarks (add to homescreen test page)",
+  "short_name": "Kelvin",
+  "name": "Kelvin: the app for Kelvin (add to homescreen test page)",
   "display": "standalone",
   "id": "/static/Ai.html",
   "start_url": "/static/Ai.html",
