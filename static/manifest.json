@@ -1,8 +1,9 @@
 {
-  "name": "My PWA App",
-  "short_name": "MyApp",
+  "name": "AI Chatbot",
+  "short_name": "AI Chat",
   "start_url": "Ai.html",
-  "display": "standalone",
+  "display": "fullscreen",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "icons": [
