@@ -1,21 +1,17 @@
 {
-  "name": "AI Chatbot",
-  "short_name": "AI Chat",
-  "start_url": "Ai.html",
-  "display": "fullscreen",
-  "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "short_name": "Aardvark",
+  "name": "Aardvark: the app for aardvarks (add to homescreen test page)",
+  "display": "standalone",
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
   "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "favicon.ico",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+      {
+          "src": "apple-touch-icon.png",
+          "sizes": "any",
+          "type": "image/png",
+          "purpose": "any"
+      }
   ]
 }
+
+  
