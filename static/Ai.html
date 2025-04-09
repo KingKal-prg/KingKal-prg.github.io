@@ -20,7 +20,7 @@
     }
     @keyframes bodyFadeIn {
       from { opacity: 0; }
-      to   { opacity: 1; }
+      to { opacity: 1; }
     }
     h1 {
       text-align: center;
@@ -227,7 +227,6 @@
         <input type="text" id="userInput" placeholder="Type your message here...">
         <button id="send">Send</button>
         <button id="voiceChat">Voice Chat</button>
-        <!-- Plus sign button for image upload -->
         <button id="uploadBtn" title="Upload Image">＋</button>
         <input type="file" id="imageFile" accept="image/*">
       </div>
@@ -256,7 +255,7 @@
   <!-- CONFIGURE CHATBOT TAB CONTENT -->
   <div id="configureTab" class="tabContent">
     <h3>Configure Chatbot Personality</h3>
-    <p>Enter a custom personality or configuration prompt for your chatbot. This will be used as the system instruction for DeepSeek (and as context for ChatGPT fallback).</p>
+    <p>Enter a custom personality or configuration prompt for your chatbot. This will be used as the system instruction for DeepSeek and as context for ChatGPT fallback.</p>
     <form id="configForm">
       <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty, knowledgeable assistant who loves helping students with school work." required></textarea>
       <button type="submit">Save Configuration</button>
@@ -271,7 +270,6 @@
   <script>
     /***** TEACHING DATA MANAGEMENT *****/
     let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
-    
     function updateTeachList() {
       const teachList = document.getElementById('teachList');
       teachList.innerHTML = '';
@@ -315,7 +313,7 @@
       alert('Basic teachings added!');
     });
     
-    // Import Teaching Data (manual via Teach Tab)
+    // Import Teaching Data (Manual)
     document.getElementById('importButton').addEventListener('click', async function() {
       const subject = document.getElementById('importSubject').value.trim().toLowerCase();
       const url = document.getElementById('importLink').value.trim();
@@ -345,7 +343,7 @@
           alert("No teaching data was found at the provided URL.");
           return;
         }
-        // Ensure the imported content relates to the subject.
+        // Check that the content is related to the subject.
         if (!importedContent.toLowerCase().includes(subject)) {
           alert("Warning: The imported content does not appear to relate to the subject.");
         }
@@ -368,7 +366,7 @@
     /***** DEFAULT TEACHING DATA SYNC *****/
     async function loadDefaultTeachingData() {
       const defaultData = [
-        // Replace these URLs with your preferred default resource URLs.
+        // Adjust these URLs to point to resources that contain text data.
         { subject: "math", url: "https://example.com/math-data.txt" },
         { subject: "science", url: "https://example.com/science-data.txt" },
         { subject: "history", url: "https://example.com/history-data.txt" },
@@ -402,7 +400,6 @@
         }
       }
     }
-    // Run default data sync on page load.
     loadDefaultTeachingData();
     
     /***** CONFIGURE CHATBOT PERSONALITY *****/
@@ -431,6 +428,7 @@
     });
     
     /***** HELPER FUNCTIONS *****/
+    // Check if the input is a math expression (only digits, operators, spaces, parentheses, decimals)
     function isMathExpression(input) {
       return /^[\d\s+\-*/().]+$/.test(input);
     }
@@ -448,13 +446,12 @@
       }
     }
     
-    /***** CHATGPT FALLBACK *****/
+    /***** CHATGPT FALLBACK (Using GPT-4) *****/
     async function chatGPT(userInput) {
-      // Use the provided ChatGPT API key.
       const apiKey = "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";
       const apiUrl = "https://api.openai.com/v1/chat/completions";
       const payload = {
-        model: "gpt-3.5-turbo",
+        model: "gpt-4",
         messages: [
           { role: "system", content: localStorage.getItem('chatbot_personality') || "You are a helpful assistant." },
           { role: "user", content: userInput }
@@ -533,19 +530,56 @@
       }
     }
     
-    async function googleSearch(query) {
-      const googleApiKey = "YOUR_GOOGLE_API_KEY";
-      const googleCx = "YOUR_GOOGLE_CX";
-      const url = `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCx}&q=${encodeURIComponent(query)}`;
+    // Hypothetical duck.ai search function
+    async function duckAISearch(query) {
       try {
+        // Replace the URL with the actual endpoint for duck.ai if available.
+        const url = `https://api.duck.ai/search?q=${encodeURIComponent(query)}`;
         let response = await fetch(url);
         let data = await response.json();
-        if (data.items && data.items.length > 0) {
-          return data.items[0].snippet || data.items[0].title;
+        // Assume the result is in data.result
+        if (data.result && data.result.length > 0) {
+          return data.result;
         }
         return "";
       } catch (error) {
-        console.error("Google error:", error);
+        console.error("duck.ai error:", error);
+        return "";
+      }
+    }
+    
+    // Hypothetical Escosia search function
+    async function escosiaSearch(query) {
+      try {
+        // Replace the URL with the actual endpoint for Escosia if available.
+        const url = `https://api.escosia.com/search?q=${encodeURIComponent(query)}`;
+        let response = await fetch(url);
+        let data = await response.json();
+        // Assume the result is in data.answer
+        if (data.answer && data.answer.length > 0) {
+          return data.answer;
+        }
+        return "";
+      } catch (error) {
+        console.error("Escosia error:", error);
+        return "";
+      }
+    }
+    
+    // Hypothetical Tor search function
+    async function torSearch(query) {
+      try {
+        // Replace the URL with the actual endpoint for Tor search if available.
+        const url = `https://api.torsearch.com/search?q=${encodeURIComponent(query)}`;
+        let response = await fetch(url);
+        let data = await response.json();
+        // Assume the result is in data.result
+        if (data.result && data.result.length > 0) {
+          return data.result;
+        }
+        return "";
+      } catch (error) {
+        console.error("Tor search error:", error);
         return "";
       }
     }
@@ -577,7 +611,7 @@
       return true;
     }
     
-    // Check if the input is a simple greeting.
+    // Check if the input is a greeting.
     function isGreeting(input) {
       let lower = input.trim().toLowerCase().replace(/[!.,?]/g, "");
       const greetings = ["hi", "hello", "hey", "howdy", "hola"];
@@ -586,8 +620,9 @@
     
     // Final Response Chain:
     // 1. If greeting → friendly greeting.
-    // 2. If pure math expression → evaluate and return result.
-    // 3. Otherwise, try DeepSeek → ChatGPT fallback → Conversation dataset → DuckDuckGo → Google → fallback.
+    // 2. If math expression → evaluate it.
+    // 3. Otherwise, try sources in this order:
+    //    ChatGPT (GPT‑4) → DeepSeek → duck.ai → DuckDuckGo → Google → Escosia → Tor → fallback.
     async function generateResponse(userInput) {
       if (isGreeting(userInput)) {
         return "Hello! How can I help you today?";
@@ -598,22 +633,25 @@
         return "The answer is " + result;
       }
       
-      // Try DeepSeek first
-      let answer = await deepSeekChat(userInput);
+      let answer = await chatGPT(userInput);
       if (isAcceptable(answer)) return answer;
       
-      // If DeepSeek fails, try ChatGPT with your provided API key
-      let chatGPTAnswer = await chatGPT(userInput);
-      if (isAcceptable(chatGPTAnswer)) return chatGPTAnswer;
+      answer = await deepSeekChat(userInput);
+      if (isAcceptable(answer)) return answer;
       
-      // Then try the conversational dataset
-      let convAnswer = await conversationDatasetSearch(userInput);
-      if (isAcceptable(convAnswer)) return convAnswer;
+      answer = await duckAISearch(userInput);
+      if (isAcceptable(answer)) return answer;
       
       answer = await duckDuckGoSearch(userInput);
       if (isAcceptable(answer)) return answer;
       
       answer = await googleSearch(userInput);
+      if (isAcceptable(answer)) return answer;
+      
+      answer = await escosiaSearch(userInput);
+      if (isAcceptable(answer)) return answer;
+      
+      answer = await torSearch(userInput);
       if (isAcceptable(answer)) return answer;
       
       return "can you repeat more clearly";
@@ -626,17 +664,14 @@
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.lang = "en-US";
-      
       document.getElementById('voiceChat').addEventListener('click', () => {
         recognition.start();
       });
-      
       recognition.onresult = async (event) => {
         const transcript = event.results[0][0].transcript;
         document.getElementById('userInput').value = transcript;
         document.getElementById('send').click();
       };
-      
       recognition.onerror = (event) => {
         console.error("Speech recognition error", event);
       };
@@ -718,19 +753,15 @@
           img.style.maxWidth = "100%";
           imageMessage.appendChild(img);
           messages.appendChild(imageMessage);
-  
           try {
             const processedSrc = await preprocessImage(e.target.result);
             document.getElementById('spinner-container').style.display = 'flex';
             let { data: { text } } = await Tesseract.recognize(processedSrc, 'eng');
             document.getElementById('spinner-container').style.display = 'none';
-  
             text = text.replace(/[«»‘’“”]/g, "").trim();
-  
             const extractedTextMsg = document.createElement('li');
             extractedTextMsg.textContent = "Extracted Text from Image: " + text;
             messages.appendChild(extractedTextMsg);
-  
             const deepResponse = await deepSeekChat(text);
             const deepResponseMsg = document.createElement('li');
             deepResponseMsg.textContent = "Chatbot: " + deepResponse;
