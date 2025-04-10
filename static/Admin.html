@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Copilot Chat Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f1f1;
+      padding: 20px;
+      color: #333;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 15px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    input[type="text"], input[type="url"] {
+      width: 80%;
+      padding: 8px;
+      margin: 5px 0;
+    }
+    button {
+      padding: 8px 16px;
+      margin: 5px 0;
+      cursor: pointer;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      padding: 5px;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Copilot Chat Admin Panel</h1>
+    
+    <!-- Section: Unsolved Questions -->
+    <div class="section" id="unsolvedSection">
+      <h2>Unsolved Questions</h2>
+      <button id="clearUnsolved">Clear Unsolved Questions</button>
+      <ul id="unsolvedList"></ul>
+    </div>
+    
+    <!-- Section: Learning Links -->
+    <div class="section">
+      <h2>Add Learning Dataset</h2>
+      <p>
+        Paste a URL that provides a JSON dataset of Q&A pairs. (Example format:
+        [ { "question": "What is 2+2?", "answer": "4" }, ... ] )
+      </p>
+      <input type="url" id="datasetUrl" placeholder="Dataset URL" />
+      <button id="addDataset">Add Learning Link</button>
+      <h3>Existing Learning Links</h3>
+      <ul id="datasetList"></ul>
+      <button id="fetchDatasets">Fetch Datasets and Update Teaching Data</button>
+    </div>
+  </div>
+  
+  <script>
+    // Retrieve unsolved questions from localStorage
+    function getUnsolvedQuestions() {
+      let unsolved = localStorage.getItem("unsolvedQuestions");
+      if (!unsolved) return [];
+      try {
+        return JSON.parse(unsolved);
+      } catch (e) {
+        return [];
+      }
+    }
+    function updateUnsolvedList() {
+      const unsolvedList = document.getElementById("unsolvedList");
+      unsolvedList.innerHTML = "";
+      const unsolved = getUnsolvedQuestions();
+      if (unsolved.length === 0) {
+        unsolvedList.innerHTML = "<li>No unsolved questions.</li>";
+      } else {
+        unsolved.forEach(q => {
+          const li = document.createElement("li");
+          li.textContent = q;
+          unsolvedList.appendChild(li);
+        });
+      }
+    }
+    updateUnsolvedList();
+
+    // Clear unsolved questions
+    document.getElementById("clearUnsolved").addEventListener("click", () => {
+      localStorage.removeItem("unsolvedQuestions");
+      updateUnsolvedList();
+    });
+
+    // Learning Links management
+    function getLearningLinks() {
+      let links = localStorage.getItem("learningLinks");
+      if (!links) return [];
+      try {
+        return JSON.parse(links);
+      } catch (e) {
+        return [];
+      }
+    }
+    function updateLearningLinks() {
+      const datasetList = document.getElementById("datasetList");
+      datasetList.innerHTML = "";
+      const links = getLearningLinks();
+      if (links.length === 0) {
+        datasetList.innerHTML = "<li>No learning links added yet.</li>";
+      } else {
+        links.forEach((link, index) => {
+          const li = document.createElement("li");
+          li.textContent = link;
+          datasetList.appendChild(li);
+        });
+      }
+    }
+    updateLearningLinks();
+
+    document.getElementById("addDataset").addEventListener("click", () => {
+      const url = document.getElementById("datasetUrl").value.trim();
+      if (!url) {
+        alert("Please enter a valid URL.");
+        return;
+      }
+      let links = getLearningLinks();
+      if (!links.includes(url)) {
+        links.push(url);
+        localStorage.setItem("learningLinks", JSON.stringify(links));
+        updateLearningLinks();
+        alert("Learning link added.");
+        document.getElementById("datasetUrl").value = "";
+      } else {
+        alert("This link is already added.");
+      }
+    });
+
+    // Fetch each dataset and update teaching data
+    document.getElementById("fetchDatasets").addEventListener("click", async () => {
+      let links = getLearningLinks();
+      if (links.length === 0) {
+        alert("No learning links to fetch.");
+        return;
+      }
+      let teachings = localStorage.getItem("teachings");
+      teachings = teachings ? JSON.parse(teachings) : {};
+      for (let url of links) {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            alert("Failed to fetch dataset from " + url);
+            continue;
+          }
+          const data = await response.json();
+          if (Array.isArray(data)) {
+            data.forEach(pair => {
+              if (pair.question && pair.answer) {
+                teachings[pair.question.toLowerCase()] = pair.answer;
+              }
+            });
+          }
+        } catch (e) {
+          console.error("Error fetching dataset from " + url, e);
+          alert("Error fetching dataset from " + url);
+        }
+      }
+      localStorage.setItem("teachings", JSON.stringify(teachings));
+      alert("Datasets fetched and teaching data updated.");
+    });
+  </script>
+</body>
+</html>
