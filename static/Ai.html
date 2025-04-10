@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Copilot Chat</title>
-  
+
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
 
@@ -14,16 +14,16 @@
 
   <!-- Math.js for enhanced math evaluation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
-  
+
   <!-- Optional: Add-to-Homescreen CSS -->
   <link rel="stylesheet" href="./dist/add-to-homescreen.min.css" />
 
   <!-- Additional libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
-  
+
   <style>
-    /* Common styling taken from your original ai.html */
+    /* Common styling taken from your original Ai.html */
     body {
       font-family: Arial, sans-serif;
       background: #1e1e1e;
@@ -114,8 +114,8 @@
       cursor: not-allowed;
     }
     /* Hide the file input element */
-    #imageFile { 
-      display: none; 
+    #imageFile {
+      display: none;
     }
     /* SPINNER */
     .spinner-container {
@@ -138,9 +138,9 @@
       height: 120px;
       animation: spin 2s linear infinite;
     }
-    @keyframes spin { 
-      0% { transform: rotate(0deg); } 
-      100% { transform: rotate(360deg); } 
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     /* TEACH & CONFIGURE TABS STYLING */
     #teachForm, #configForm {
@@ -219,7 +219,7 @@
   </style>
 </head>
 <body>
-  <!-- Chat Interface (immediately visible) -->
+  <!-- Chat Interface (displayed immediately) -->
   <div id="chatInterface">
     <h1>Copilot Chat</h1>
     <div id="tabBar">
@@ -258,7 +258,7 @@
     </div>
     <div id="configureTab" class="tabContent">
       <h3>Configure Chatbot Personality</h3>
-      <p>Enter a custom personality / instruction for your chatbot.</p>
+      <p>Enter a custom personality or instruction for your chatbot. This will be used as context for fallback sources.</p>
       <form id="configForm">
         <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty assistant who loves helping with school work." required></textarea>
         <button type="submit">Save Configuration</button>
@@ -337,7 +337,6 @@
           const parser = new DOMParser();
           const doc = parser.parseFromString(htmlText, "text/html");
           importedContent = doc.body.innerText;
-          // Extract equations (if any) and append them to the content
           const equations = extractEquations(importedContent);
           if (equations.length > 0) {
             importedContent += "\nExtracted Equations:\n" + equations.join("\n");
@@ -566,7 +565,7 @@
     }
     
     async function googleSearch(query) {
-      // Placeholder for Google Custom Search API integration inside this demo.
+      // Placeholder for Google Custom Search API integration.
       return "";
     }
     
@@ -600,7 +599,7 @@
       return true;
     }
     
-    // Fuzzy matching function: Look for similar questions in teachings.
+    // Fuzzy matching: Try to find a similar question from teachings.
     function findMatchingTeaching(query) {
       query = query.toLowerCase();
       let queryWords = query.split(/\s+/);
@@ -608,9 +607,8 @@
       let highestScore = 0;
       for (let key in teachings) {
         let keyWords = key.toLowerCase().split(/\s+/);
-        // Count common words between query and training key.
         let commonCount = queryWords.filter(word => keyWords.includes(word)).length;
-        if (commonCount > highestScore && commonCount >= 2) { // Threshold is set to 2 common words
+        if (commonCount > highestScore && commonCount >= 2) {
           highestScore = commonCount;
           bestMatch = teachings[key];
         }
@@ -619,7 +617,7 @@
     }
     
     async function generateResponse(userInput) {
-      // First, check if there is a matching teaching
+      // First, try fuzzy matching to see if a similar teaching exists.
       let match = findMatchingTeaching(userInput);
       if (match) {
         return match;
