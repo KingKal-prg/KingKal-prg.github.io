@@ -1,30 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Copilot Chat</title>
-  <!-- Optional: Additional chatbot functionality -->
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Apple Touch Icons -->
+  <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="apple-touch-icon.png" />
+
+  <!-- Math.js for enhanced math evaluation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+  
+  <!-- Optional: Add-to-Homescreen CSS -->
+  <link rel="stylesheet" href="./dist/add-to-homescreen.min.css" />
+
+  <!-- Additional libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
-  <!-- Tesseract.js for OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
+  
   <style>
-    /* DARK THEME STYLING */
+    /* Common styling */
     body {
       font-family: Arial, sans-serif;
       background: #1e1e1e;
       margin: 0;
       padding: 20px;
       color: #f1f1f1;
-      animation: bodyFadeIn 1.5s ease-out;
-    }
-    @keyframes bodyFadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
     }
     h1 {
       text-align: center;
-      color: #f1f1f1;
     }
     /* TOP TAB BAR */
     #tabBar {
@@ -54,18 +62,13 @@
     .tabContent.active {
       display: block;
     }
-    /* CHAT CONTAINER with Transition (Fade & Slide In) */
+    /* CHAT CONTAINER */
     #chat {
       background: #2a2a2a;
       padding: 20px;
       border: 1px solid #444;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      animation: fadeInSlide 1s ease-out;
-    }
-    @keyframes fadeInSlide {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
+      margin-bottom: 20px;
     }
     #messages {
       list-style-type: none;
@@ -79,7 +82,7 @@
       margin-bottom: 10px;
       border-bottom: 1px solid #444;
     }
-    /* Chat Input Row with Integrated Image Upload */
+    /* Chat Input Row */
     #input {
       display: flex;
       align-items: center;
@@ -87,9 +90,9 @@
     #input input[type="text"] {
       flex: 1;
       padding: 10px;
+      margin-right: 10px;
       border: 1px solid #555;
       border-radius: 5px;
-      margin-right: 10px;
       background: #333;
       color: #f1f1f1;
     }
@@ -99,8 +102,8 @@
       background-color: #007bff;
       color: #f1f1f1;
       border-radius: 5px;
-      cursor: pointer;
       margin-right: 5px;
+      cursor: pointer;
     }
     #send:hover, #voiceChat:hover, #uploadBtn:hover {
       background-color: #0056b3;
@@ -210,65 +213,60 @@
   </style>
 </head>
 <body>
-  <h1>Copilot Chat</h1>
-  
-  <!-- TOP TAB BAR -->
-  <div id="tabBar">
-    <button class="tabButton active" data-tab="chatTab">Chat</button>
-    <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
-    <button class="tabButton" data-tab="configureTab">Configure Chatbot</button>
-  </div>
-  
-  <!-- CHAT TAB CONTENT -->
-  <div id="chatTab" class="tabContent active">
-    <div id="chat">
-      <ul id="messages"></ul>
-      <div id="input">
-        <input type="text" id="userInput" placeholder="Type your message here...">
-        <button id="send">Send</button>
-        <button id="voiceChat">Voice Chat</button>
-        <button id="uploadBtn" title="Upload Image">＋</button>
-        <input type="file" id="imageFile" accept="image/*">
+  <!-- Chat Interface (displayed immediately) -->
+  <div id="chatInterface">
+    <h1>Copilot Chat</h1>
+    <div id="tabBar">
+      <button class="tabButton active" data-tab="chatTab">Chat</button>
+      <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
+      <button class="tabButton" data-tab="configureTab">Configure Chatbot</button>
+    </div>
+    <div id="chatTab" class="tabContent active">
+      <div id="chat">
+        <ul id="messages"></ul>
+        <div id="input">
+          <input type="text" id="userInput" placeholder="Type your message here..." />
+          <button id="send">Send</button>
+          <button id="voiceChat">Voice Chat</button>
+          <button id="uploadBtn" title="Upload Image">＋</button>
+          <input type="file" id="imageFile" accept="image/*" />
+        </div>
       </div>
     </div>
-  </div>
-  
-  <!-- TEACH CHATBOT TAB CONTENT -->
-  <div id="teachTab" class="tabContent">
-    <h3>Teach Chatbot</h3>
-    <p>Enter a question and its corresponding answer to update the chatbot’s responses.</p>
-    <form id="teachForm">
-      <input type="text" id="teachQuestion" placeholder="Question (e.g., what's 100x100?)" required>
-      <input type="text" id="teachAnswer" placeholder="Answer (e.g., 10000)" required>
-      <button type="submit">Save Correction</button>
-    </form>
-    <button id="teachBasic">Teach Chatbot Basics</button>
-    <ul id="teachList"></ul>
-    <div id="importSection">
-      <h4>Import Teaching Data</h4>
-      <input type="text" id="importSubject" placeholder="Subject (e.g., math)" required>
-      <input type="url" id="importLink" placeholder="URL to import teaching data" required>
-      <button id="importButton">Import Teaching Data</button>
+    <div id="teachTab" class="tabContent">
+      <h3>Teach Chatbot</h3>
+      <p>Enter a question and its corresponding answer to update the chatbot’s responses.</p>
+      <form id="teachForm">
+        <input type="text" id="teachQuestion" placeholder="Question (e.g., what's 100x100?)" required />
+        <input type="text" id="teachAnswer" placeholder="Answer (e.g., 10000)" required />
+        <button type="submit">Save Correction</button>
+      </form>
+      <button id="teachBasic">Teach Chatbot Basics</button>
+      <ul id="teachList"></ul>
+      <div id="importSection">
+        <h4>Import Teaching Data</h4>
+        <input type="text" id="importSubject" placeholder="Subject (e.g., math)" required />
+        <input type="url" id="importLink" placeholder="URL to import teaching data" required />
+        <button id="importButton">Import Teaching Data</button>
+      </div>
+    </div>
+    <div id="configureTab" class="tabContent">
+      <h3>Configure Chatbot Personality</h3>
+      <p>Enter a custom personality / instruction for your chatbot.</p>
+      <form id="configForm">
+        <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty assistant who loves helping with school work." required></textarea>
+        <button type="submit">Save Configuration</button>
+      </form>
     </div>
   </div>
   
-  <!-- CONFIGURE CHATBOT TAB CONTENT -->
-  <div id="configureTab" class="tabContent">
-    <h3>Configure Chatbot Personality</h3>
-    <p>Enter a custom personality or configuration prompt for your chatbot. This will be used as the system instruction for DeepSeek and as context for ChatGPT fallback.</p>
-    <form id="configForm">
-      <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty, knowledgeable assistant who loves helping students with school work." required></textarea>
-      <button type="submit">Save Configuration</button>
-    </form>
-  </div>
-  
-  <!-- SPINNER -->
   <div id="spinner-container" class="spinner-container">
     <div class="spinner"></div>
   </div>
   
   <script>
     /***** TEACHING DATA MANAGEMENT *****/
+    // Global "brain" is stored using localStorage key "teachings"
     let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
     function updateTeachList() {
       const teachList = document.getElementById('teachList');
@@ -295,7 +293,6 @@
       }
     });
     
-    // Teach Chatbot Basics
     document.getElementById('teachBasic').addEventListener('click', function() {
       const basics = {
         "what is 2+2": "4",
@@ -313,7 +310,6 @@
       alert('Basic teachings added!');
     });
     
-    // Import Teaching Data (Manual)
     document.getElementById('importButton').addEventListener('click', async function() {
       const subject = document.getElementById('importSubject').value.trim().toLowerCase();
       const url = document.getElementById('importLink').value.trim();
@@ -336,6 +332,11 @@
           const parser = new DOMParser();
           const doc = parser.parseFromString(htmlText, "text/html");
           importedContent = doc.body.innerText;
+          // Additionally, extract equations from the content
+          const equations = extractEquations(importedContent);
+          if (equations.length > 0) {
+            importedContent += "\nExtracted Equations:\n" + equations.join("\n");
+          }
         } else {
           importedContent = await response.text();
         }
@@ -343,7 +344,7 @@
           alert("No teaching data was found at the provided URL.");
           return;
         }
-        // Check that the content is related to the subject.
+        // Optionally, warn if the subject doesn't appear in the content
         if (!importedContent.toLowerCase().includes(subject)) {
           alert("Warning: The imported content does not appear to relate to the subject.");
         }
@@ -366,7 +367,6 @@
     /***** DEFAULT TEACHING DATA SYNC *****/
     async function loadDefaultTeachingData() {
       const defaultData = [
-        // Adjust these URLs to point to resources that contain text data.
         { subject: "math", url: "https://www.education.com/resources/math/" },
         { subject: "science", url: "https://undsci.berkeley.edu/understanding-science-101/what-is-science/" },
         { subject: "history", url: "https://www.worldhistory.org/" },
@@ -385,6 +385,11 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlText, "text/html");
                 content = doc.body.innerText;
+                // Also extract equations
+                const equations = extractEquations(content);
+                if (equations.length > 0) {
+                  content += "\nExtracted Equations:\n" + equations.join("\n");
+                }
               } else {
                 content = await res.text();
               }
@@ -418,35 +423,25 @@
     /***** TAB SWITCHING LOGIC *****/
     const tabButtons = document.querySelectorAll('.tabButton');
     const tabContents = document.querySelectorAll('.tabContent');
-    tabButtons.forEach(button => {
+    tabButtons.forEach((button) => {
       button.addEventListener('click', function() {
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        tabContents.forEach(content => content.classList.remove('active'));
+        tabButtons.forEach((btn) => btn.classList.remove('active'));
+        tabContents.forEach((content) => content.classList.remove('active'));
         this.classList.add('active');
         document.getElementById(this.getAttribute('data-tab')).classList.add('active');
       });
     });
     
-    /***** HELPER FUNCTIONS *****/
-    // Check if the input is a math expression (only digits, operators, spaces, parentheses, decimals)
-    function isMathExpression(input) {
-      return /^[\d\s+\-*/().]+$/.test(input);
+    /***** Helper: Extract Equations from Text *****/
+    function extractEquations(text) {
+      // This regex extracts simple math equations, e.g. "2+2", "3 * 4", "5-2", "6/3"
+      // Adjust the regex as needed for more robust extraction.
+      const regex = /[0-9]+(?:\.[0-9]+)?\s*[\+\-\*\/=]\s*[0-9]+(?:\.[0-9]+)?/g;
+      const matches = text.match(regex);
+      return matches ? matches : [];
     }
     
-    function evaluateMath(expression) {
-      try {
-        expression = expression.trim();
-        const safeExpression = expression.replace(/[^0-9+\-*/().]/g, '');
-        if (!safeExpression || !/\d/.test(safeExpression)) {
-          return "error evaluating the math expression";
-        }
-        return eval(safeExpression);
-      } catch (error) {
-        return "error evaluating the math expression";
-      }
-    }
-    
-    /***** CHATGPT FALLBACK (Using GPT-4) *****/
+    /***** CHATBOT FUNCTIONALITY *****/
     async function chatGPT(userInput) {
       const apiKey = "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";
       const apiUrl = "https://api.openai.com/v1/chat/completions";
@@ -477,7 +472,6 @@
       }
     }
     
-    /***** DATA SOURCES *****/
     async function deepSeekChat(userInput) {
       const apiKey = "sk-5a079b5335564dba87a3f037274dc108";
       const url = "https://api.deepseek.com/chat/completions";
@@ -530,14 +524,11 @@
       }
     }
     
-    // Hypothetical duck.ai search function
     async function duckAISearch(query) {
       try {
-        // Replace the URL with the actual endpoint for duck.ai if available.
         const url = `https://api.duck.ai/search?q=${encodeURIComponent(query)}`;
         let response = await fetch(url);
         let data = await response.json();
-        // Assume the result is in data.result
         if (data.result && data.result.length > 0) {
           return data.result;
         }
@@ -548,14 +539,11 @@
       }
     }
     
-    // Hypothetical Escosia search function
     async function escosiaSearch(query) {
       try {
-        // Replace the URL with the actual endpoint for Escosia if available.
         const url = `https://api.escosia.com/search?q=${encodeURIComponent(query)}`;
         let response = await fetch(url);
         let data = await response.json();
-        // Assume the result is in data.answer
         if (data.answer && data.answer.length > 0) {
           return data.answer;
         }
@@ -566,14 +554,11 @@
       }
     }
     
-    // Hypothetical Tor search function
     async function torSearch(query) {
       try {
-        // Replace the URL with the actual endpoint for Tor search if available.
         const url = `https://api.torsearch.com/search?q=${encodeURIComponent(query)}`;
         let response = await fetch(url);
         let data = await response.json();
-        // Assume the result is in data.result
         if (data.result && data.result.length > 0) {
           return data.result;
         }
@@ -584,14 +569,22 @@
       }
     }
     
-    // Fetch conversational dataset from GitHub (PolyAI-LDN)
+    async function googleSearch(query) {
+      // Placeholder for Google Custom Search API integration.
+      return "";
+    }
+    
     async function conversationDatasetSearch(query) {
       try {
         const datasetUrl = "https://raw.githubusercontent.com/PolyAI-LDN/conversational-datasets/master/conversations.json";
         let response = await fetch(datasetUrl);
         let data = await response.json();
         for (let conv of data) {
-          if (conv.question && conv.answer && conv.question.toLowerCase().includes(query.toLowerCase())) {
+          if (
+            conv.question &&
+            conv.answer &&
+            conv.question.toLowerCase().includes(query.toLowerCase())
+          ) {
             return conv.answer;
           }
         }
@@ -611,21 +604,15 @@
       return true;
     }
     
-    // Check if the input is a greeting.
-    function isGreeting(input) {
-      let lower = input.trim().toLowerCase().replace(/[!.,?]/g, "");
-      const greetings = ["hi", "hello", "hey", "howdy", "hola"];
-      return greetings.includes(lower);
-    }
-    
-    // Final Response Chain:
-    // 1. If greeting → friendly greeting.
-    // 2. If math expression → evaluate it.
-    // 3. Otherwise, try sources in this order:
-    //    ChatGPT (GPT‑4) → DeepSeek → duck.ai → DuckDuckGo → Google → Escosia → Tor → fallback.
     async function generateResponse(userInput) {
-      if (isGreeting(userInput)) {
-        return "Hello! How can I help you today?";
+      const greetingParts = processGreeting(userInput);
+      if (greetingParts) {
+        if (greetingParts.query.trim() === "") {
+          return "Hello! How can I help you today?";
+        } else {
+          const answerForQuery = await generateResponse(greetingParts.query);
+          return "Hello! " + answerForQuery;
+        }
       }
       
       if (isMathExpression(userInput)) {
@@ -654,30 +641,10 @@
       answer = await torSearch(userInput);
       if (isAcceptable(answer)) return answer;
       
+      answer = await conversationDatasetSearch(userInput);
+      if (isAcceptable(answer)) return answer;
+      
       return "can you repeat more clearly";
-    }
-    
-    /***** VOICE CHAT *****/
-    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
-    if (window.SpeechRecognition) {
-      const recognition = new window.SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = "en-US";
-      document.getElementById('voiceChat').addEventListener('click', () => {
-        recognition.start();
-      });
-      recognition.onresult = async (event) => {
-        const transcript = event.results[0][0].transcript;
-        document.getElementById('userInput').value = transcript;
-        document.getElementById('send').click();
-      };
-      recognition.onerror = (event) => {
-        console.error("Speech recognition error", event);
-      };
-    } else {
-      document.getElementById('voiceChat').disabled = true;
-      document.getElementById('voiceChat').textContent = "Voice Chat Not Supported";
     }
     
     /***** CHAT INTERACTION *****/
@@ -700,7 +667,7 @@
       } catch (error) {
         console.error(error);
         const errorMessage = document.createElement('li');
-        errorMessage.textContent = `Chatbot: An error occurred. Please try again later.`;
+        errorMessage.textContent = "Chatbot: An error occurred. Please try again later.";
         messages.appendChild(errorMessage);
       }
       document.getElementById('userInput').value = '';
@@ -734,12 +701,10 @@
       });
     }
     
-    // When the plus button is clicked, trigger the hidden file input.
     document.getElementById('uploadBtn').addEventListener('click', () => {
       document.getElementById('imageFile').click();
     });
     
-    // When a file is selected, process it using OCR and query DeepSeek.
     document.getElementById('imageFile').addEventListener('change', () => {
       const file = document.getElementById('imageFile').files[0];
       const messages = document.getElementById('messages');
@@ -756,7 +721,7 @@
           try {
             const processedSrc = await preprocessImage(e.target.result);
             document.getElementById('spinner-container').style.display = 'flex';
-            let { data: { text } } = await Tesseract.recognize(processedSrc, 'eng');
+            let { data: { text } } = await Tesseract.recognize(processedSrc, "eng");
             document.getElementById('spinner-container').style.display = 'none';
             text = text.replace(/[«»‘’“”]/g, "").trim();
             const extractedTextMsg = document.createElement('li');
@@ -778,6 +743,28 @@
         alert("No file selected.");
       }
     });
+    
+    // Add-to-Homescreen code (unchanged)
+    window.addEventListener("load", function () {
+      if (window.AddToHomeScreen) {
+        window.AddToHomeScreenInstance = window.AddToHomeScreen({
+          appName: "Copilot Chat",
+          appIconUrl: "apple-touch-icon.png",
+          appNameDisplay: "standalone",
+          assetUrl: "./dist/assets/",
+          maxModalDisplayCount: -1,
+          displayOptions: { showMobile: true, showDesktop: true },
+          allowClose: true,
+          showArrow: false
+        });
+        window.AddToHomeScreenInstance.show();
+      }
+    });
+    
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js")
+        .then(() => console.log("Service Worker registered!"))
+        .catch(err => console.error("Service Worker registration failed!", err));
   </script>
 </body>
 </html>
