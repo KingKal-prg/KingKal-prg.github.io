@@ -11,18 +11,31 @@
   <!-- Apple Touch Icons -->
   <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png" />
   <link rel="apple-touch-icon" sizes="512x512" href="apple-touch-icon.png" />
-
+  
   <!-- Math.js for enhanced math evaluation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
   
   <!-- Optional: Add-to-Homescreen CSS -->
   <link rel="stylesheet" href="./dist/add-to-homescreen.min.css" />
-
+  
+  <!-- Particles.js (ensure your file is in the correct path) -->
+  <script src="particles.js"></script>
+  
   <!-- Additional libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
   
   <style>
+    /* Particles.js background container */
+    #particles-js {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    
     /* COMMON STYLING */
     body {
       font-family: Arial, sans-serif;
@@ -46,9 +59,13 @@
       margin: 0 5px;
       border: 1px solid #444;
       background-color: #333;
-      cursor: pointer;
       border-radius: 5px;
       color: #f1f1f1;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .tabButton:hover {
+      transform: scale(1.05);
     }
     .tabButton.active {
       background-color: #007bff;
@@ -89,7 +106,7 @@
       margin-bottom: 10px;
       border-bottom: 1px solid #444;
     }
-    /* Chat Input Row */
+    /* CHAT INPUT ROW */
     #input {
       display: flex;
       align-items: center;
@@ -102,6 +119,7 @@
       border-radius: 5px;
       background: #333;
       color: #f1f1f1;
+      transition: border-color 0.3s ease;
     }
     #send, #voiceChat, #uploadBtn {
       padding: 10px 20px;
@@ -111,18 +129,18 @@
       border-radius: 5px;
       margin-right: 5px;
       cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
     #send:hover, #voiceChat:hover, #uploadBtn:hover {
       background-color: #0056b3;
+      transform: scale(1.05);
     }
     #send:disabled, #voiceChat:disabled, #uploadBtn:disabled {
       background-color: #555;
       cursor: not-allowed;
     }
-    /* Hide file input */
-    #imageFile {
-      display: none;
-    }
+    /* Hide file input element */
+    #imageFile { display: none; }
     /* SPINNER */
     .spinner-container {
       position: fixed;
@@ -144,11 +162,11 @@
       height: 120px;
       animation: spin 2s linear infinite;
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    @keyframes spin { 
+      0% { transform: rotate(0deg); } 
+      100% { transform: rotate(360deg); } 
     }
-    /* TEACH & CONFIGURE TABS STYLING */
+    /* TEACH & CONFIGURE STYLING */
     #teachForm, #configForm {
       display: flex;
       flex-direction: column;
@@ -161,6 +179,7 @@
       border-radius: 5px;
       background: #333;
       color: #f1f1f1;
+      transition: border-color 0.3s ease;
     }
     #teachForm button, #configForm button {
       align-self: flex-start;
@@ -170,8 +189,13 @@
       color: #f1f1f1;
       border-radius: 5px;
       cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
-    /* Button to Load Basic Teachings */
+    #teachForm button:hover, #configForm button:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+    /* Button to load basic teachings */
     #teachBasic {
       margin-top: 10px;
       padding: 8px 16px;
@@ -180,6 +204,11 @@
       color: #f1f1f1;
       border-radius: 5px;
       cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    #teachBasic:hover {
+      background-color: #218838;
+      transform: scale(1.05);
     }
     /* Import Teaching Data Section */
     #importSection {
@@ -194,6 +223,7 @@
       background: #333;
       color: #f1f1f1;
       margin-right: 10px;
+      transition: border-color 0.3s ease;
     }
     #importButton {
       padding: 8px 16px;
@@ -202,18 +232,23 @@
       color: #f1f1f1;
       border-radius: 5px;
       cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
-    /* Teach List Styling */
+    #importButton:hover {
+      background-color: #138496;
+      transform: scale(1.05);
+    }
+    /* Teach List */
     #teachList {
       margin-top: 20px;
-      list-style-type: none;
+      list-style: none;
       padding: 0;
     }
     #teachList li {
       padding: 5px;
       border-bottom: 1px solid #444;
     }
-    /* Configure Chatbot Tab Styling */
+    /* Configure Chatbot Tab */
     #configForm textarea {
       width: 100%;
       min-height: 100px;
@@ -221,11 +256,19 @@
     #configForm button {
       background-color: #ffc107;
       color: #1e1e1e;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    #configForm button:hover {
+      background-color: #e0a800;
+      transform: scale(1.05);
     }
   </style>
 </head>
 <body>
-  <!-- Chat Interface (displayed immediately) -->
+  <!-- Particles.js container -->
+  <div id="particles-js"></div>
+  
+  <!-- Chat Interface -->
   <div id="chatInterface">
     <h1>Copilot Chat</h1>
     <div id="tabBar">
@@ -247,7 +290,7 @@
     </div>
     <div id="teachTab" class="tabContent">
       <h3>Teach Chatbot</h3>
-      <p>Enter a question and its corresponding answer to update the chatbot’s responses.</p>
+      <p>Enter a question and its answer to update the chatbot’s responses.</p>
       <form id="teachForm">
         <input type="text" id="teachQuestion" placeholder="Question (e.g., what's 100x100?)" required />
         <input type="text" id="teachAnswer" placeholder="Answer (e.g., 10000)" required />
@@ -264,9 +307,9 @@
     </div>
     <div id="configureTab" class="tabContent">
       <h3>Configure Chatbot Personality</h3>
-      <p>Enter a custom personality or configuration prompt for your chatbot. This is used as context for fallback sources.</p>
+      <p>Enter a custom personality or configuration prompt for your chatbot. This context is used for fallback queries.</p>
       <form id="configForm">
-        <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty assistant who loves helping with school work." required></textarea>
+        <textarea id="chatbotPersonality" placeholder="For example: You are a clever, knowledgeable assistant who answers accurately." required></textarea>
         <button type="submit">Save Configuration</button>
       </form>
     </div>
@@ -277,18 +320,45 @@
   </div>
   
   <script>
-    // Wrap everything in a DOMContentLoaded event to ensure all elements are loaded
     document.addEventListener("DOMContentLoaded", function() {
       
-      /***** TEACHING DATA MANAGEMENT ******/
-      // Load the "brain" of the chatbot from localStorage
-      let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
+      /***** PARTICLES.JS INITIALIZATION *****/
+      if (window.particlesJS) {
+        particlesJS("particles-js", {
+          "particles": {
+            "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+            "color": { "value": "#ffffff" },
+            "shape": { "type": "circle" },
+            "opacity": { "value": 0.5, "random": false },
+            "size": { "value": 3, "random": true },
+            "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.4, "width": 1 },
+            "move": { "enable": true, "speed": 6 }
+          },
+          "interactivity": {
+            "events": {
+              "onhover": { "enable": true, "mode": "repulse" },
+              "onclick": { "enable": true, "mode": "push" },
+              "resize": true
+            },
+            "modes": {
+              "repulse": { "distance": 200 },
+              "push": { "particles_nb": 4 }
+            }
+          },
+          "retina_detect": true
+        });
+      }
       
-      // Preload basic teaching data if not present
+      /***** TEACHING DATA MANAGEMENT ******/
+      let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
+      // Preload basic teachings if none exist.
       const basicTeachings = {
         "who was the first president of the usa": "George Washington",
+        "what is 1 plus 1": "2",
         "what is 2+2": "4",
-        "what is the capital of france": "Paris"
+        "what is the capital of france": "Paris",
+        "hi": "Hello! How can I help you today?",
+        "hello": "Hello! How can I help you today?"
       };
       teachings = { ...basicTeachings, ...teachings };
       localStorage.setItem('teachings', JSON.stringify(teachings));
@@ -302,10 +372,8 @@
           teachList.appendChild(li);
         }
       }
-      
       updateTeachList();
       
-      // Teach a new Q&A pair manually
       document.getElementById('teachForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const question = document.getElementById('teachQuestion').value.trim().toLowerCase();
@@ -320,10 +388,10 @@
         }
       });
       
-      // Load basic teachings on button click
       document.getElementById('teachBasic').addEventListener('click', function() {
         const basics = {
           "who was the first president of the usa": "George Washington",
+          "what is 1 plus 1": "2",
           "what is 2+2": "4",
           "what is 10 divided by 2": "5",
           "who discovered america": "Christopher Columbus",
@@ -339,7 +407,6 @@
         alert('Basic teachings added!');
       });
       
-      // Import teaching data from a given URL
       document.getElementById('importButton').addEventListener('click', async function() {
         const subject = document.getElementById('importSubject').value.trim().toLowerCase();
         const url = document.getElementById('importLink').value.trim();
@@ -362,7 +429,7 @@
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlText, "text/html");
             importedContent = doc.body.innerText;
-            // Extract equations (if any)
+            // Optionally, extract math equations from the content
             const equations = extractEquations(importedContent);
             if (equations.length > 0) {
               importedContent += "\nExtracted Equations:\n" + equations.join("\n");
@@ -393,12 +460,12 @@
         }
       });
       
-      // Optional: Load a set of default teachings from external sites if not already present.
       async function loadDefaultTeachingData() {
         const defaultData = [
           { subject: "math", url: "https://www.education.com/resources/math/" },
           { subject: "science", url: "https://undsci.berkeley.edu/understanding-science-101/what-is-science/" },
           { subject: "history", url: "https://www.worldhistory.org/" },
+          { subject: "trappers work tools", url: "https://www.unco.edu/hewit/doing-history/trappers-traders/trappers/trappers-work-tools.aspx" },
           { subject: "study skills", url: "https://www.britannica.com/topic/education" }
         ];
         for (let item of defaultData) {
@@ -436,7 +503,7 @@
       loadDefaultTeachingData();
       
       /***** CONFIGURE CHATBOT PERSONALITY ******/
-      let chatbotPersonality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
+      let chatbotPersonality = localStorage.getItem('chatbot_personality') || "You are a clever, knowledgeable assistant. Answer questions accurately and clearly.";
       document.getElementById('chatbotPersonality').value = chatbotPersonality;
       
       document.getElementById('configForm').addEventListener('submit', function(e) {
@@ -469,26 +536,43 @@
       
       /***** CHATBOT FUNCTIONALITY ******/
       
-      // Function to call an external source, store answer if acceptable, and update teachings.
+      // Fuzzy matching: Search stored teachings for similar question.
+      function findMatchingTeaching(query) {
+        query = query.toLowerCase();
+        let queryWords = query.split(/\s+/);
+        let bestMatch = null;
+        let highestScore = 0;
+        for (let key in teachings) {
+          let keyWords = key.toLowerCase().split(/\s+/);
+          let commonCount = queryWords.filter(word => keyWords.includes(word)).length;
+          if (commonCount > highestScore && commonCount >= 2) {  // threshold: at least 2 common words
+            highestScore = commonCount;
+            bestMatch = teachings[key];
+          }
+        }
+        return bestMatch;
+      }
+      
+      // Helper: Try an external source then store the answer if acceptable.
       async function getAndStoreAnswer(userInput, fetchFunction) {
-        let answer = await fetchFunction(userInput);
-        if (isAcceptable(answer)) {
-          teachings[userInput.toLowerCase()] = answer;
+        let ans = await fetchFunction(userInput);
+        if (isAcceptable(ans)) {
+          teachings[userInput.trim().toLowerCase()] = ans;
           localStorage.setItem('teachings', JSON.stringify(teachings));
           updateTeachList();
-          return answer;
+          return ans;
         }
         return "";
       }
       
-      // ChatGPT: primary external API
+      // ChatGPT function (primary source)
       async function chatGPT(userInput) {
         const apiKey = "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";
         const apiUrl = "https://api.openai.com/v1/chat/completions";
         const payload = {
           model: "gpt-4",
           messages: [
-            { role: "system", content: localStorage.getItem('chatbot_personality') || "You are a helpful assistant." },
+            { role: "system", content: localStorage.getItem('chatbot_personality') || "You are a clever, knowledgeable assistant. Answer questions accurately." },
             { role: "user", content: userInput }
           ]
         };
@@ -512,7 +596,7 @@
         }
       }
       
-      // DuckDuckGo search: fallback if ChatGPT doesn't return an acceptable answer.
+      // Fallback source: DuckDuckGo search
       async function duckDuckGoSearch(query) {
         const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
         try {
@@ -528,6 +612,29 @@
         }
       }
       
+      // Conversation dataset search (optional fallback)
+      async function conversationDatasetSearch(query) {
+        try {
+          const datasetUrl = "https://raw.githubusercontent.com/PolyAI-LDN/conversational-datasets/master/conversations.json";
+          let response = await fetch(datasetUrl);
+          let data = await response.json();
+          for (let conv of data) {
+            if (
+              conv.question &&
+              conv.answer &&
+              conv.question.toLowerCase().includes(query.toLowerCase())
+            ) {
+              return conv.answer;
+            }
+          }
+          return "";
+        } catch (e) {
+          console.error("Conversation dataset error:", e);
+          return "";
+        }
+      }
+      
+      // Check if an answer is acceptable (non-empty and doesn't indicate error)
       function isAcceptable(answer) {
         if (!answer) return false;
         const clean = answer.trim().toLowerCase();
@@ -537,37 +644,28 @@
         return true;
       }
       
-      // Fuzzy matching: try to find a similar question in teachings.
-      function findMatchingTeaching(query) {
-        query = query.toLowerCase();
-        let queryWords = query.split(/\s+/);
-        let bestMatch = null;
-        let highestScore = 0;
-        for (let key in teachings) {
-          let keyWords = key.toLowerCase().split(/\s+/);
-          let commonCount = queryWords.filter(word => keyWords.includes(word)).length;
-          if (commonCount > highestScore && commonCount >= 2) { // threshold: at least 2 words
-            highestScore = commonCount;
-            bestMatch = teachings[key];
-          }
-        }
-        return bestMatch;
-      }
-      
       async function generateResponse(userInput) {
-        // Check for a fuzzy match in stored teachings first.
-        let match = findMatchingTeaching(userInput);
-        if (match) return match;
+        // 1. Try fuzzy matching from local teachings.
+        let fuzzyMatch = findMatchingTeaching(userInput);
+        if (fuzzyMatch) return fuzzyMatch;
         
-        // If not found, try ChatGPT.
+        // 2. Try searching a conversation dataset.
+        let convAnswer = await conversationDatasetSearch(userInput);
+        if (isAcceptable(convAnswer)) {
+          teachings[userInput.trim().toLowerCase()] = convAnswer;
+          localStorage.setItem('teachings', JSON.stringify(teachings));
+          updateTeachList();
+          return convAnswer;
+        }
+        
+        // 3. Try ChatGPT.
         let answer = await getAndStoreAnswer(userInput, chatGPT);
         if (isAcceptable(answer)) return answer;
         
-        // If ChatGPT fails, try DuckDuckGo as fallback.
+        // 4. Fall back to DuckDuckGo.
         answer = await getAndStoreAnswer(userInput, duckDuckGoSearch);
         if (isAcceptable(answer)) return answer;
         
-        // Default fallback:
         return "Sorry, I didn't understand that. Could you please rephrase?";
       }
       
@@ -667,7 +765,7 @@
         });
       }
       
-      // Listen for storage events (sync from admin.html)
+      // Listen for changes in localStorage "teachings" (sync with admin panel)
       window.addEventListener('storage', function(e) {
         if (e.key === 'teachings') {
           teachings = JSON.parse(e.newValue) || {};
@@ -675,7 +773,7 @@
         }
       });
       
-      // Add-to-Homescreen code (unchanged)
+      // Add-to-Homescreen (if available)
       window.addEventListener("load", function() {
         if (window.AddToHomeScreen) {
           window.AddToHomeScreenInstance = window.AddToHomeScreen({
@@ -696,8 +794,6 @@
         navigator.serviceWorker.register("/service-worker.js")
           .then(() => console.log("Service Worker registered!"))
           .catch(err => console.error("Service Worker registration failed!", err));
-    
-      }
     });
   </script>
 </body>
