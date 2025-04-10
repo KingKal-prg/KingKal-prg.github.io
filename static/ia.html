@@ -7,17 +7,17 @@
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
-  
+
   <!-- Apple Touch Icons -->
   <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png" />
   <link rel="apple-touch-icon" sizes="512x512" href="apple-touch-icon.png" />
-  
+
   <!-- Math.js for enhanced math evaluation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
   
   <!-- Optional: Add-to-Homescreen CSS -->
   <link rel="stylesheet" href="./dist/add-to-homescreen.min.css" />
-  
+
   <!-- Additional libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
@@ -119,7 +119,7 @@
       background-color: #555;
       cursor: not-allowed;
     }
-    /* Hide the file input element */
+    /* Hide file input */
     #imageFile {
       display: none;
     }
@@ -264,7 +264,7 @@
     </div>
     <div id="configureTab" class="tabContent">
       <h3>Configure Chatbot Personality</h3>
-      <p>Enter a custom personality or configuration prompt for your chatbot. This text is saved so that fallback sources use this context.</p>
+      <p>Enter a custom personality or configuration prompt for your chatbot. This is used as context for fallback sources.</p>
       <form id="configForm">
         <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty assistant who loves helping with school work." required></textarea>
         <button type="submit">Save Configuration</button>
@@ -277,14 +277,14 @@
   </div>
   
   <script>
-    // Wrap everything in DOMContentLoaded to ensure the DOM is ready
+    // Wrap everything in a DOMContentLoaded event to ensure all elements are loaded
     document.addEventListener("DOMContentLoaded", function() {
       
       /***** TEACHING DATA MANAGEMENT ******/
-      // Load existing teachings or initialize with basic data.
+      // Load the "brain" of the chatbot from localStorage
       let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
-
-      // Preload some basic teachings if they don't exist.
+      
+      // Preload basic teaching data if not present
       const basicTeachings = {
         "who was the first president of the usa": "George Washington",
         "what is 2+2": "4",
@@ -302,8 +302,10 @@
           teachList.appendChild(li);
         }
       }
+      
       updateTeachList();
       
+      // Teach a new Q&A pair manually
       document.getElementById('teachForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const question = document.getElementById('teachQuestion').value.trim().toLowerCase();
@@ -318,6 +320,7 @@
         }
       });
       
+      // Load basic teachings on button click
       document.getElementById('teachBasic').addEventListener('click', function() {
         const basics = {
           "who was the first president of the usa": "George Washington",
@@ -336,6 +339,7 @@
         alert('Basic teachings added!');
       });
       
+      // Import teaching data from a given URL
       document.getElementById('importButton').addEventListener('click', async function() {
         const subject = document.getElementById('importSubject').value.trim().toLowerCase();
         const url = document.getElementById('importLink').value.trim();
@@ -358,7 +362,7 @@
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlText, "text/html");
             importedContent = doc.body.innerText;
-            // Extract equations from the page—for example, simple math equations.
+            // Extract equations (if any)
             const equations = extractEquations(importedContent);
             if (equations.length > 0) {
               importedContent += "\nExtracted Equations:\n" + equations.join("\n");
@@ -389,6 +393,7 @@
         }
       });
       
+      // Optional: Load a set of default teachings from external sites if not already present.
       async function loadDefaultTeachingData() {
         const defaultData = [
           { subject: "math", url: "https://www.education.com/resources/math/" },
@@ -430,7 +435,7 @@
       }
       loadDefaultTeachingData();
       
-      /***** CONFIGURE CHATBOT PERSONALITY *****/
+      /***** CONFIGURE CHATBOT PERSONALITY ******/
       let chatbotPersonality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
       document.getElementById('chatbotPersonality').value = chatbotPersonality;
       
@@ -443,7 +448,7 @@
         }
       });
       
-      /***** TAB SWITCHING LOGIC *****/
+      /***** TAB SWITCHING LOGIC ******/
       const tabButtons = document.querySelectorAll('.tabButton');
       const tabContents = document.querySelectorAll('.tabContent');
       tabButtons.forEach((button) => {
@@ -455,22 +460,20 @@
         });
       });
       
-      /***** Helper: Extract Equations from Text *****/
+      /***** Helper: Extract Equations from Text ******/
       function extractEquations(text) {
-        // This regex extracts simple math equations, e.g., "2+2", "3 * 4", etc.
         const regex = /[0-9]+(?:\.[0-9]+)?\s*[\+\-\*\/=]\s*[0-9]+(?:\.[0-9]+)?/g;
         const matches = text.match(regex);
         return matches ? matches : [];
       }
       
-      /***** CHATBOT FUNCTIONALITY *****/
+      /***** CHATBOT FUNCTIONALITY ******/
       
-      // When calling any external API, if an acceptable answer is returned,
-      // store that answer (using the user input as the key) so that the "brain" expands.
-      async function getAndStoreAnswer(userInput, fetchFunc) {
-        let answer = await fetchFunc(userInput);
+      // Function to call an external source, store answer if acceptable, and update teachings.
+      async function getAndStoreAnswer(userInput, fetchFunction) {
+        let answer = await fetchFunction(userInput);
         if (isAcceptable(answer)) {
-          teachings[userInput.trim().toLowerCase()] = answer;
+          teachings[userInput.toLowerCase()] = answer;
           localStorage.setItem('teachings', JSON.stringify(teachings));
           updateTeachList();
           return answer;
@@ -478,8 +481,9 @@
         return "";
       }
       
+      // ChatGPT: primary external API
       async function chatGPT(userInput) {
-        const apiKey = "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";
+        const apiKey = "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";
         const apiUrl = "https://api.openai.com/v1/chat/completions";
         const payload = {
           model: "gpt-4",
@@ -508,42 +512,7 @@
         }
       }
       
-      async function deepSeekChat(userInput) {
-        const apiKey = "sk-5a079b5335564dba87a3f037274dc108";
-        const url = "https://api.deepseek.com/chat/completions";
-        const personality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
-        const payload = {
-          model: "deepseek-chat",
-          messages: [
-            { role: "system", content: personality },
-            { role: "user", content: userInput }
-          ],
-          stream: false
-        };
-        try {
-          document.getElementById('spinner-container').style.display = 'flex';
-          const response = await fetch(url, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": "Bearer " + apiKey
-            },
-            body: JSON.stringify(payload)
-          });
-          document.getElementById('spinner-container').style.display = 'none';
-          const data = await response.json();
-          console.log("DeepSeek API response:", data);
-          if (data && data.choices && data.choices.length > 0) {
-            return data.choices[0].message.content.trim();
-          }
-          return "";
-        } catch (error) {
-          document.getElementById('spinner-container').style.display = 'none';
-          console.error("DeepSeek error:", error);
-          return "";
-        }
-      }
-      
+      // DuckDuckGo search: fallback if ChatGPT doesn't return an acceptable answer.
       async function duckDuckGoSearch(query) {
         const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
         try {
@@ -559,77 +528,6 @@
         }
       }
       
-      async function duckAISearch(query) {
-        try {
-          const url = `https://api.duck.ai/search?q=${encodeURIComponent(query)}`;
-          let response = await fetch(url);
-          let data = await response.json();
-          if (data.result && data.result.length > 0) {
-            return data.result;
-          }
-          return "";
-        } catch (error) {
-          console.error("duck.ai error:", error);
-          return "";
-        }
-      }
-      
-      async function escosiaSearch(query) {
-        try {
-          const url = `https://api.escosia.com/search?q=${encodeURIComponent(query)}`;
-          let response = await fetch(url);
-          let data = await response.json();
-          if (data.answer && data.answer.length > 0) {
-            return data.answer;
-          }
-          return "";
-        } catch (error) {
-          console.error("Escosia error:", error);
-          return "";
-        }
-      }
-      
-      async function torSearch(query) {
-        try {
-          const url = `https://api.torsearch.com/search?q=${encodeURIComponent(query)}`;
-          let response = await fetch(url);
-          let data = await response.json();
-          if (data.result && data.result.length > 0) {
-            return data.result;
-          }
-          return "";
-        } catch (error) {
-          console.error("Tor search error:", error);
-          return "";
-        }
-      }
-      
-      async function googleSearch(query) {
-        // Placeholder for Google Custom Search API integration.
-        return "";
-      }
-      
-      async function conversationDatasetSearch(query) {
-        try {
-          const datasetUrl = "https://raw.githubusercontent.com/PolyAI-LDN/conversational-datasets/master/conversations.json";
-          let response = await fetch(datasetUrl);
-          let data = await response.json();
-          for (let conv of data) {
-            if (
-              conv.question &&
-              conv.answer &&
-              conv.question.toLowerCase().includes(query.toLowerCase())
-            ) {
-              return conv.answer;
-            }
-          }
-          return "";
-        } catch (e) {
-          console.error("Conversation dataset error:", e);
-          return "";
-        }
-      }
-      
       function isAcceptable(answer) {
         if (!answer) return false;
         const clean = answer.trim().toLowerCase();
@@ -639,7 +537,7 @@
         return true;
       }
       
-      // Fuzzy matching: Search teachings for similar questions.
+      // Fuzzy matching: try to find a similar question in teachings.
       function findMatchingTeaching(query) {
         query = query.toLowerCase();
         let queryWords = query.split(/\s+/);
@@ -648,7 +546,7 @@
         for (let key in teachings) {
           let keyWords = key.toLowerCase().split(/\s+/);
           let commonCount = queryWords.filter(word => keyWords.includes(word)).length;
-          if (commonCount > highestScore && commonCount >= 2) { // at least 2 words in common
+          if (commonCount > highestScore && commonCount >= 2) { // threshold: at least 2 words
             highestScore = commonCount;
             bestMatch = teachings[key];
           }
@@ -657,71 +555,23 @@
       }
       
       async function generateResponse(userInput) {
-        // Check fuzzy-match first:
+        // Check for a fuzzy match in stored teachings first.
         let match = findMatchingTeaching(userInput);
         if (match) return match;
         
-        const greetingParts = processGreeting(userInput);
-        if (greetingParts) {
-          if (greetingParts.query.trim() === "") {
-            return "Hello! How can I help you today?";
-          } else {
-            const answerForQuery = await generateResponse(greetingParts.query);
-            return "Hello! " + answerForQuery;
-          }
-        }
-        
-        if (isMathExpression(userInput)) {
-          let result = evaluateMath(userInput);
-          let mathAnswer = "The answer is " + result;
-          teachings[userInput.trim().toLowerCase()] = mathAnswer;
-          localStorage.setItem('teachings', JSON.stringify(teachings));
-          updateTeachList();
-          return mathAnswer;
-        }
-        
-        // Try external sources and store the first acceptable answer.
+        // If not found, try ChatGPT.
         let answer = await getAndStoreAnswer(userInput, chatGPT);
         if (isAcceptable(answer)) return answer;
         
-        answer = await getAndStoreAnswer(userInput, deepSeekChat);
-        if (isAcceptable(answer)) return answer;
-        
-        answer = await getAndStoreAnswer(userInput, duckAISearch);
-        if (isAcceptable(answer)) return answer;
-        
+        // If ChatGPT fails, try DuckDuckGo as fallback.
         answer = await getAndStoreAnswer(userInput, duckDuckGoSearch);
         if (isAcceptable(answer)) return answer;
         
-        answer = await getAndStoreAnswer(userInput, googleSearch);
-        if (isAcceptable(answer)) return answer;
-        
-        answer = await getAndStoreAnswer(userInput, escosiaSearch);
-        if (isAcceptable(answer)) return answer;
-        
-        answer = await getAndStoreAnswer(userInput, torSearch);
-        if (isAcceptable(answer)) return answer;
-        
-        answer = await getAndStoreAnswer(userInput, conversationDatasetSearch);
-        if (isAcceptable(answer)) return answer;
-        
-        // Default fallback message.
-        return "Sorry, I didn't get that. Could you please repeat?";
+        // Default fallback:
+        return "Sorry, I didn't understand that. Could you please rephrase?";
       }
       
-      // Helper to call an external source, store the answer, and return it.
-      async function getAndStoreAnswer(userInput, fetchFunction) {
-        let answer = await fetchFunction(userInput);
-        if (isAcceptable(answer)) {
-          teachings[userInput.trim().toLowerCase()] = answer;
-          localStorage.setItem('teachings', JSON.stringify(teachings));
-          updateTeachList();
-          return answer;
-        }
-        return "";
-      }
-      
-      /***** CHAT INTERACTION *****/
+      /***** CHAT INTERACTION ******/
       document.getElementById('send').addEventListener('click', async () => {
         const userInput = document.getElementById('userInput').value.trim();
         if (userInput === '') return;
@@ -817,7 +667,16 @@
         });
       }
       
-      window.addEventListener("load", function () {
+      // Listen for storage events (sync from admin.html)
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'teachings') {
+          teachings = JSON.parse(e.newValue) || {};
+          updateTeachList();
+        }
+      });
+      
+      // Add-to-Homescreen code (unchanged)
+      window.addEventListener("load", function() {
         if (window.AddToHomeScreen) {
           window.AddToHomeScreenInstance = window.AddToHomeScreen({
             appName: "Copilot Chat",
@@ -837,17 +696,8 @@
         navigator.serviceWorker.register("/service-worker.js")
           .then(() => console.log("Service Worker registered!"))
           .catch(err => console.error("Service Worker registration failed!", err));
-          
+    
       }
-      
-      // Listen for changes in the teachings key to sync updates from admin.html
-      window.addEventListener('storage', function(e) {
-        if (e.key === 'teachings') {
-          teachings = JSON.parse(e.newValue) || {};
-          updateTeachList();
-        }
-      });
-      
     });
   </script>
 </body>
