@@ -7,9 +7,10 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f1f1f1;
+      background: #1e1e1e;
+      color: #f1f1f1;
       padding: 20px;
-      color: #333;
+      margin: 0;
     }
     h1, h2 {
       text-align: center;
@@ -19,28 +20,38 @@
       margin: 0 auto;
     }
     .section {
-      margin-bottom: 30px;
+      margin: 20px auto;
       padding: 15px;
-      background: #fff;
-      border: 1px solid #ccc;
+      background: #2a2a2a;
+      border: 1px solid #444;
       border-radius: 5px;
     }
     input[type="text"],
     input[type="url"],
+    input[type="password"],
     textarea {
-      width: 80%;
+      width: 90%;
       padding: 8px;
-      margin: 5px 0;
-      border: 1px solid #aaa;
+      margin: 8px 0;
+      border: 1px solid #555;
       border-radius: 3px;
+      background: #333;
+      color: #f1f1f1;
     }
     textarea {
       height: 150px;
     }
     button {
       padding: 8px 16px;
-      margin: 5px 0;
+      margin: 8px 0;
       cursor: pointer;
+      background-color: #007bff;
+      border: none;
+      color: #f1f1f1;
+      border-radius: 3px;
+    }
+    button:hover {
+      background-color: #0056b3;
     }
     ul {
       list-style: none;
@@ -48,27 +59,41 @@
     }
     li {
       padding: 5px;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #444;
+    }
+    /* Simple login styling */
+    #loginSection {
+      text-align: center;
+      margin-top: 100px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div id="loginSection">
+    <h1>Admin Login</h1>
+    <p>Please enter the admin password:</p>
+    <input type="password" id="adminPassword" placeholder="Password" />
+    <br />
+    <button id="loginButton">Login</button>
+    <p id="loginError" style="color:#ffaaaa;"></p>
+  </div>
+
+  <div id="adminContent" style="display:none;" class="container">
     <h1>Copilot Chat Admin Panel</h1>
     
-    <!-- Section: Unsolved Questions -->
+    <!-- Unsolved Questions Section -->
     <div class="section" id="unsolvedSection">
       <h2>Unsolved Questions</h2>
       <button id="clearUnsolved">Clear Unsolved Questions</button>
       <ul id="unsolvedList"></ul>
     </div>
     
-    <!-- Section: URL-based Learning Links -->
+    <!-- Learning Links Section (URL-based) -->
     <div class="section">
       <h2>Add Learning Dataset via URL</h2>
       <p>
-        Paste a URL that returns a JSON dataset of Q–A pairs. (Example format:
-        [ {"question": "What is 2+2?", "answer": "4"}, ... ])
+        Paste a URL that returns a JSON dataset of Q–A pairs. Example format:
+        <br /><code>[ { "question": "What is 2+2?", "answer": "4" }, ... ]</code>
       </p>
       <input type="url" id="datasetUrl" placeholder="Dataset URL" />
       <button id="addDataset">Add Learning Link</button>
@@ -77,23 +102,52 @@
       <button id="fetchDatasets">Fetch Datasets and Update Teaching Data</button>
     </div>
 
-    <!-- Section: Raw JSON Learning Data -->
+    <!-- Raw JSON Import Section -->
     <div class="section">
       <h2>Import Raw JSON Dataset</h2>
       <p>
-        Paste raw JSON data directly (an array of objects, each with "question" and "answer" keys).<br>
-        Example:
-        <br><code>
-        [ { "question": "When did Daniel Dennett receive the Erasmus Prize?", "answer": "YYYY" }, { "question": "What is 365chess id of Alexander Alekhine?", "answer": "ID12345" } ]
-        </code>
+        Paste raw JSON data (array of Q–A objects with keys "question" and "answer").<br />
+        Example: <code>[{ "question": "When did Daniel Dennett receive the Erasmus Prize?", "answer": "YYYY" }, { "question": "What is 365chess id of Alexander Alekhine?", "answer": "ID12345" }]</code>
       </p>
-      <textarea id="rawJson" placeholder='Paste JSON data here'></textarea><br>
+      <textarea id="rawJson" placeholder='Paste JSON data here'></textarea>
+      <br />
       <button id="importRawJson">Import Raw JSON Dataset</button>
     </div>
+
+    <!-- Export Teaching Data Section -->
+    <div class="section">
+      <h2>Teaching Data Backup</h2>
+      <button id="exportData">Export Teaching Data</button>
+      <p id="exportMessage"></p>
+    </div>
   </div>
-  
+
   <script>
-    // Unsolved questions management (shared with ai.html)
+    // --- Authentication ---
+    const adminPassword = "1234"; // Hardcoded password
+    const loginSection = document.getElementById("loginSection");
+    const adminContent = document.getElementById("adminContent");
+    const loginButton = document.getElementById("loginButton");
+    const loginError = document.getElementById("loginError");
+
+    // Check if already authenticated
+    if (localStorage.getItem("adminAuthenticated") === "true") {
+      loginSection.style.display = "none";
+      adminContent.style.display = "block";
+    }
+
+    loginButton.addEventListener("click", () => {
+      const inputPass = document.getElementById("adminPassword").value;
+      if (inputPass === adminPassword) {
+        localStorage.setItem("adminAuthenticated", "true");
+        loginSection.style.display = "none";
+        adminContent.style.display = "block";
+      } else {
+        loginError.textContent = "Incorrect password. Please try again.";
+      }
+    });
+
+    // --- Unsolved Questions ---
     function getUnsolvedQuestions() {
       let unsolved = localStorage.getItem("unsolvedQuestions");
       if (!unsolved) return [];
@@ -119,7 +173,7 @@
       updateUnsolvedList();
     });
 
-    // Learning Links management for URL-based datasets.
+    // --- Learning Links (URL-based) ---
     function getLearningLinks() {
       let links = localStorage.getItem("learningLinks");
       if (!links) return [];
@@ -140,6 +194,7 @@
       }
     }
     updateLearningLinks();
+
     document.getElementById("addDataset").addEventListener("click", () => {
       const url = document.getElementById("datasetUrl").value.trim();
       if (!url) { alert("Please enter a valid URL."); return; }
@@ -154,6 +209,7 @@
         alert("This link is already added.");
       }
     });
+
     document.getElementById("fetchDatasets").addEventListener("click", async () => {
       let links = getLearningLinks();
       if (links.length === 0) { alert("No learning links to fetch."); return; }
@@ -183,7 +239,7 @@
       alert("Datasets fetched and teaching data updated.");
     });
 
-    // New: Raw JSON Dataset Import Section.
+    // --- Raw JSON Import Section ---
     document.getElementById("importRawJson").addEventListener("click", () => {
       const rawJsonData = document.getElementById("rawJson").value.trim();
       if (!rawJsonData) {
@@ -211,6 +267,24 @@
       localStorage.setItem("teachings", JSON.stringify(teachings));
       alert("Raw JSON dataset imported and teaching data updated.");
       document.getElementById("rawJson").value = "";
+    });
+
+    // --- Export Teaching Data ---
+    document.getElementById("exportData").addEventListener("click", () => {
+      let teachings = localStorage.getItem("teachings");
+      if (!teachings) {
+        alert("No teaching data to export.");
+        return;
+      }
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(teachings);
+      const downloadAnchorNode = document.createElement("a");
+      downloadAnchorNode.setAttribute("href", dataStr);
+      // Use current timestamp as filename suffix
+      downloadAnchorNode.setAttribute("download", "teaching_data_" + Date.now() + ".json");
+      document.body.appendChild(downloadAnchorNode); // required for Firefox
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+      document.getElementById("exportMessage").textContent = "Teaching data exported.";
     });
   </script>
 </body>
