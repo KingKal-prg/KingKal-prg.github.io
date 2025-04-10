@@ -226,14 +226,14 @@
 </head>
 <body>
   <h1>Copilot Chat</h1>
-  
+
   <!-- TOP TAB BAR -->
   <div id="tabBar">
     <button class="tabButton active" data-tab="chatTab">Chat</button>
     <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
     <button class="tabButton" data-tab="configureTab">Configure Chatbot</button>
   </div>
-  
+
   <!-- CHAT TAB CONTENT -->
   <div id="chatTab" class="tabContent active">
     <div id="chat">
@@ -247,7 +247,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- TEACH CHATBOT TAB CONTENT -->
   <div id="teachTab" class="tabContent">
     <h3>Teach Chatbot</h3>
@@ -266,7 +266,7 @@
       <button id="importButton">Import Teaching Data</button>
     </div>
   </div>
-  
+
   <!-- CONFIGURE CHATBOT TAB CONTENT -->
   <div id="configureTab" class="tabContent">
     <h3>Configure Chatbot Personality</h3>
@@ -276,12 +276,12 @@
       <button type="submit">Save Configuration</button>
     </form>
   </div>
-  
+
   <!-- SPINNER -->
   <div id="spinner-container" class="spinner-container">
     <div class="spinner"></div>
   </div>
-  
+
   <!-- Main JavaScript -->
   <script>
     /***** TEACHING DATA MANAGEMENT *****/
@@ -296,7 +296,7 @@
       }
     }
     updateTeachList();
-    
+
     document.getElementById("teachForm").addEventListener("submit", function (e) {
       e.preventDefault();
       const question = document.getElementById("teachQuestion").value.trim().toLowerCase();
@@ -310,7 +310,7 @@
         document.getElementById("teachAnswer").value = "";
       }
     });
-    
+
     // Teach Chatbot Basics
     document.getElementById("teachBasic").addEventListener("click", function () {
       const basics = {
@@ -328,7 +328,7 @@
       updateTeachList();
       alert("Basic teachings added!");
     });
-    
+
     // Import Teaching Data (Manual)
     document.getElementById("importButton").addEventListener("click", async function () {
       const subject = document.getElementById("importSubject").value.trim().toLowerCase();
@@ -378,7 +378,7 @@
         alert("Error importing teaching data: " + err.message);
       }
     });
-    
+
     /***** DEFAULT TEACHING DATA SYNC *****/
     async function loadDefaultTeachingData() {
       const defaultData = [
@@ -416,13 +416,13 @@
       }
     }
     loadDefaultTeachingData();
-    
+
     /***** CONFIGURE CHATBOT PERSONALITY *****/
     let chatbotPersonality =
       localStorage.getItem("chatbot_personality") ||
       "You are a helpful assistant. If you are unsure, provide your best informed guess.";
     document.getElementById("chatbotPersonality").value = chatbotPersonality;
-    
+
     document.getElementById("configForm").addEventListener("submit", function (e) {
       e.preventDefault();
       const personality = document.getElementById("chatbotPersonality").value.trim();
@@ -431,7 +431,7 @@
         alert("Chatbot personality updated!");
       }
     });
-    
+
     /***** TAB SWITCHING LOGIC *****/
     const tabButtons = document.querySelectorAll(".tabButton");
     const tabContents = document.querySelectorAll(".tabContent");
@@ -443,13 +443,24 @@
         document.getElementById(this.getAttribute("data-tab")).classList.add("active");
       });
     });
-    
+
+    /***** NEW HELPER: Process Greeting *****/
+    // This function checks if input starts with a greeting word and returns the greeting and any subsequent query.
+    function processGreeting(input) {
+      const regex = /^(hello|hi|hey|howdy|hola)\b[\s,]*(.*)$/i;
+      const match = input.match(regex);
+      if (match) {
+        return { greeting: match[1], query: match[2] };
+      }
+      return null;
+    }
+
     /***** HELPER FUNCTIONS *****/
     // Updated isMathExpression to allow letters "x" (for multiplication) and common math symbols.
     function isMathExpression(input) {
       return /^[\d\s+\-*/().x]+$/i.test(input);
     }
-    
+
     // Updated evaluateMath to use Math.js for robust evaluation and fraction formatting.
     function evaluateMath(expression) {
       try {
@@ -465,7 +476,7 @@
         return "error evaluating the math expression";
       }
     }
-    
+
     /***** NEW: Lookup and Save Fallback Function *****/
     async function lookupAnswerAndSave(question) {
       // Use duckDuckGoSearch as a lookup method for the answer.
@@ -480,7 +491,7 @@
         return "I still couldn't find an answer to your question.";
       }
     }
-    
+
     /***** CHATGPT FALLBACK (Using GPT-4) *****/
     async function chatGPT(userInput) {
       const apiKey =
@@ -517,7 +528,7 @@
         return "";
       }
     }
-    
+
     /***** DATA SOURCES *****/
     async function deepSeekChat(userInput) {
       const apiKey = "sk-5a079b5335564dba87a3f037274dc108";
@@ -557,7 +568,7 @@
         return "";
       }
     }
-    
+
     async function duckDuckGoSearch(query) {
       const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
       try {
@@ -572,7 +583,7 @@
         return "";
       }
     }
-    
+
     // Placeholder for duck.ai search function
     async function duckAISearch(query) {
       try {
@@ -588,7 +599,7 @@
         return "";
       }
     }
-    
+
     // Placeholder for Escosia search function
     async function escosiaSearch(query) {
       try {
@@ -604,7 +615,7 @@
         return "";
       }
     }
-    
+
     // Placeholder for Tor search function
     async function torSearch(query) {
       try {
@@ -620,17 +631,18 @@
         return "";
       }
     }
-    
+
     // Placeholder for Google Search function
     async function googleSearch(query) {
       // This is a placeholder; you may implement the Google Custom Search API here.
       return "";
     }
-    
+
     // Placeholder for Conversation Dataset Search
     async function conversationDatasetSearch(query) {
       try {
-        const datasetUrl = "https://raw.githubusercontent.com/PolyAI-LDN/conversational-datasets/master/conversations.json";
+        const datasetUrl =
+          "https://raw.githubusercontent.com/PolyAI-LDN/conversational-datasets/master/conversations.json";
         let response = await fetch(datasetUrl);
         let data = await response.json();
         for (let conv of data) {
@@ -648,7 +660,7 @@
         return "";
       }
     }
-    
+
     function isAcceptable(answer) {
       if (!answer) return false;
       const clean = answer.trim().toLowerCase();
@@ -657,53 +669,119 @@
       }
       return true;
     }
-    
-    // Check if the input is a greeting.
-    function isGreeting(input) {
-      let lower = input.trim().toLowerCase().replace(/[!.,?]/g, "");
-      const greetings = ["hi", "hello", "hey", "howdy", "hola"];
-      return greetings.includes(lower);
-    }
-    
-    // Final Response Chain: Try various data sources.
+
+    // NEW: Enhanced generateResponse using greeting parsing and self-learning.
     async function generateResponse(userInput) {
-      if (isGreeting(userInput)) {
-        return "Hello! How can I help you today?";
+      // First, check if the input starts with a greeting.
+      const greetingParts = processGreeting(userInput);
+      if (greetingParts) {
+        if (greetingParts.query.trim() === "") {
+          // If nothing follows the greeting, simply greet.
+          // Also save this as a teaching data entry.
+          const response = "Hello! How can I help you today?";
+          if (!teachings[userInput.toLowerCase()]) {
+            teachings[userInput.toLowerCase()] = response;
+            localStorage.setItem("teachings", JSON.stringify(teachings));
+            updateTeachList();
+          }
+          return response;
+        } else {
+          // Process the remaining query
+          const answerForQuery = await generateResponse(greetingParts.query);
+          const fullResponse = "Hello! " + answerForQuery;
+          if (!teachings[userInput.toLowerCase()]) {
+            teachings[userInput.toLowerCase()] = fullResponse;
+            localStorage.setItem("teachings", JSON.stringify(teachings));
+            updateTeachList();
+          }
+          return fullResponse;
+        }
       }
       
+      // Check if the question already exists in teaching data.
+      if (teachings[userInput.toLowerCase()]) {
+        return teachings[userInput.toLowerCase()];
+      }
+      
+      // If input is a math expression, evaluate it.
       if (isMathExpression(userInput)) {
         let result = evaluateMath(userInput);
-        return "The answer is " + result;
+        const mathResponse = "The answer is " + result;
+        teachings[userInput.toLowerCase()] = mathResponse;
+        localStorage.setItem("teachings", JSON.stringify(teachings));
+        updateTeachList();
+        return mathResponse;
       }
       
+      // Try various data sources.
       let answer = await chatGPT(userInput);
-      if (isAcceptable(answer)) return answer;
+      if (isAcceptable(answer)) {
+        teachings[userInput.toLowerCase()] = answer;
+        localStorage.setItem("teachings", JSON.stringify(teachings));
+        updateTeachList();
+        return answer;
+      }
       
       answer = await deepSeekChat(userInput);
-      if (isAcceptable(answer)) return answer;
+      if (isAcceptable(answer)) {
+        teachings[userInput.toLowerCase()] = answer;
+        localStorage.setItem("teachings", JSON.stringify(teachings));
+        updateTeachList();
+        return answer;
+      }
       
       answer = await duckAISearch(userInput);
-      if (isAcceptable(answer)) return answer;
+      if (isAcceptable(answer)) {
+        teachings[userInput.toLowerCase()] = answer;
+        localStorage.setItem("teachings", JSON.stringify(teachings));
+        updateTeachList();
+        return answer;
+      }
       
       answer = await duckDuckGoSearch(userInput);
-      if (isAcceptable(answer)) return answer;
+      if (isAcceptable(answer)) {
+        teachings[userInput.toLowerCase()] = answer;
+        localStorage.setItem("teachings", JSON.stringify(teachings));
+        updateTeachList();
+        return answer;
+      }
       
       answer = await googleSearch(userInput);
-      if (isAcceptable(answer)) return answer;
+      if (isAcceptable(answer)) {
+        teachings[userInput.toLowerCase()] = answer;
+        localStorage.setItem("teachings", JSON.stringify(teachings));
+        updateTeachList();
+        return answer;
+      }
       
       answer = await escosiaSearch(userInput);
-      if (isAcceptable(answer)) return answer;
+      if (isAcceptable(answer)) {
+        teachings[userInput.toLowerCase()] = answer;
+        localStorage.setItem("teachings", JSON.stringify(teachings));
+        updateTeachList();
+        return answer;
+      }
       
       answer = await torSearch(userInput);
-      if (isAcceptable(answer)) return answer;
+      if (isAcceptable(answer)) {
+        teachings[userInput.toLowerCase()] = answer;
+        localStorage.setItem("teachings", JSON.stringify(teachings));
+        updateTeachList();
+        return answer;
+      }
       
       answer = await conversationDatasetSearch(userInput);
-      if (isAcceptable(answer)) return answer;
+      if (isAcceptable(answer)) {
+        teachings[userInput.toLowerCase()] = answer;
+        localStorage.setItem("teachings", JSON.stringify(teachings));
+        updateTeachList();
+        return answer;
+      }
       
-      // When no data source returns an acceptable answer, call lookupAnswerAndSave()
+      // If no data source provides an answer, look it up and save the answer.
       return await lookupAnswerAndSave(userInput);
     }
-    
+
     /***** VOICE CHAT *****/
     window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
     if (window.SpeechRecognition) {
@@ -726,7 +804,7 @@
       document.getElementById("voiceChat").disabled = true;
       document.getElementById("voiceChat").textContent = "Voice Chat Not Supported";
     }
-    
+
     /***** CHAT INTERACTION *****/
     document.getElementById("send").addEventListener("click", async () => {
       const userInput = document.getElementById("userInput").value.trim();
@@ -753,7 +831,7 @@
       document.getElementById("userInput").value = "";
       messages.scrollTop = messages.scrollHeight;
     });
-    
+
     /***** IMAGE PRE-PROCESSING & OCR *****/
     function preprocessImage(imageSrc) {
       return new Promise((resolve, reject) => {
@@ -780,12 +858,12 @@
         img.onerror = (err) => reject(err);
       });
     }
-    
+
     // When the plus button is clicked, trigger the hidden file input.
     document.getElementById("uploadBtn").addEventListener("click", () => {
       document.getElementById("imageFile").click();
     });
-    
+
     // When a file is selected, process it using OCR and query DeepSeek.
     document.getElementById("imageFile").addEventListener("change", () => {
       const file = document.getElementById("imageFile").files[0];
@@ -853,7 +931,9 @@
       navigator.serviceWorker
         .register("/service-worker.js")
         .then(() => console.log("Service Worker registered!"))
-        .catch((err) => console.error("Service Worker registration failed!", err));
+        .catch((err) =>
+          console.error("Service Worker registration failed!", err)
+        );
     }
   </script>
 </body>
