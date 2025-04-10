@@ -25,10 +25,17 @@
       border: 1px solid #ccc;
       border-radius: 5px;
     }
-    input[type="text"], input[type="url"] {
+    input[type="text"],
+    input[type="url"],
+    textarea {
       width: 80%;
       padding: 8px;
       margin: 5px 0;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+    }
+    textarea {
+      height: 150px;
     }
     button {
       padding: 8px 16px;
@@ -56,12 +63,12 @@
       <ul id="unsolvedList"></ul>
     </div>
     
-    <!-- Section: Learning Links -->
+    <!-- Section: URL-based Learning Links -->
     <div class="section">
-      <h2>Add Learning Dataset</h2>
+      <h2>Add Learning Dataset via URL</h2>
       <p>
-        Paste a URL that provides a JSON dataset of Q&A pairs. (Example format:
-        [ { "question": "What is 2+2?", "answer": "4" }, ... ] )
+        Paste a URL that returns a JSON dataset of Q–A pairs. (Example format:
+        [ {"question": "What is 2+2?", "answer": "4"}, ... ])
       </p>
       <input type="url" id="datasetUrl" placeholder="Dataset URL" />
       <button id="addDataset">Add Learning Link</button>
@@ -69,18 +76,28 @@
       <ul id="datasetList"></ul>
       <button id="fetchDatasets">Fetch Datasets and Update Teaching Data</button>
     </div>
+
+    <!-- Section: Raw JSON Learning Data -->
+    <div class="section">
+      <h2>Import Raw JSON Dataset</h2>
+      <p>
+        Paste raw JSON data directly (an array of objects, each with "question" and "answer" keys).<br>
+        Example:
+        <br><code>
+        [ { "question": "When did Daniel Dennett receive the Erasmus Prize?", "answer": "YYYY" }, { "question": "What is 365chess id of Alexander Alekhine?", "answer": "ID12345" } ]
+        </code>
+      </p>
+      <textarea id="rawJson" placeholder='Paste JSON data here'></textarea><br>
+      <button id="importRawJson">Import Raw JSON Dataset</button>
+    </div>
   </div>
   
   <script>
-    // Retrieve unsolved questions from localStorage
+    // Unsolved questions management (shared with ai.html)
     function getUnsolvedQuestions() {
       let unsolved = localStorage.getItem("unsolvedQuestions");
       if (!unsolved) return [];
-      try {
-        return JSON.parse(unsolved);
-      } catch (e) {
-        return [];
-      }
+      try { return JSON.parse(unsolved); } catch(e) { return []; }
     }
     function updateUnsolvedList() {
       const unsolvedList = document.getElementById("unsolvedList");
@@ -97,22 +114,16 @@
       }
     }
     updateUnsolvedList();
-
-    // Clear unsolved questions
     document.getElementById("clearUnsolved").addEventListener("click", () => {
       localStorage.removeItem("unsolvedQuestions");
       updateUnsolvedList();
     });
 
-    // Learning Links management
+    // Learning Links management for URL-based datasets.
     function getLearningLinks() {
       let links = localStorage.getItem("learningLinks");
       if (!links) return [];
-      try {
-        return JSON.parse(links);
-      } catch (e) {
-        return [];
-      }
+      try { return JSON.parse(links); } catch(e) { return []; }
     }
     function updateLearningLinks() {
       const datasetList = document.getElementById("datasetList");
@@ -121,7 +132,7 @@
       if (links.length === 0) {
         datasetList.innerHTML = "<li>No learning links added yet.</li>";
       } else {
-        links.forEach((link, index) => {
+        links.forEach(link => {
           const li = document.createElement("li");
           li.textContent = link;
           datasetList.appendChild(li);
@@ -129,13 +140,9 @@
       }
     }
     updateLearningLinks();
-
     document.getElementById("addDataset").addEventListener("click", () => {
       const url = document.getElementById("datasetUrl").value.trim();
-      if (!url) {
-        alert("Please enter a valid URL.");
-        return;
-      }
+      if (!url) { alert("Please enter a valid URL."); return; }
       let links = getLearningLinks();
       if (!links.includes(url)) {
         links.push(url);
@@ -147,14 +154,9 @@
         alert("This link is already added.");
       }
     });
-
-    // Fetch each dataset and update teaching data
     document.getElementById("fetchDatasets").addEventListener("click", async () => {
       let links = getLearningLinks();
-      if (links.length === 0) {
-        alert("No learning links to fetch.");
-        return;
-      }
+      if (links.length === 0) { alert("No learning links to fetch."); return; }
       let teachings = localStorage.getItem("teachings");
       teachings = teachings ? JSON.parse(teachings) : {};
       for (let url of links) {
@@ -179,6 +181,36 @@
       }
       localStorage.setItem("teachings", JSON.stringify(teachings));
       alert("Datasets fetched and teaching data updated.");
+    });
+
+    // New: Raw JSON Dataset Import Section.
+    document.getElementById("importRawJson").addEventListener("click", () => {
+      const rawJsonData = document.getElementById("rawJson").value.trim();
+      if (!rawJsonData) {
+        alert("Please paste valid JSON data.");
+        return;
+      }
+      let parsedData;
+      try {
+        parsedData = JSON.parse(rawJsonData);
+        if (!Array.isArray(parsedData)) {
+          alert("JSON data should be an array of Q–A pairs.");
+          return;
+        }
+      } catch (e) {
+        alert("Invalid JSON. Please check your data.");
+        return;
+      }
+      let teachings = localStorage.getItem("teachings");
+      teachings = teachings ? JSON.parse(teachings) : {};
+      parsedData.forEach(pair => {
+        if (pair.question && pair.answer) {
+          teachings[pair.question.toLowerCase()] = pair.answer;
+        }
+      });
+      localStorage.setItem("teachings", JSON.stringify(teachings));
+      alert("Raw JSON dataset imported and teaching data updated.");
+      document.getElementById("rawJson").value = "";
     });
   </script>
 </body>
