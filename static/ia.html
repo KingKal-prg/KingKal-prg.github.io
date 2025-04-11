@@ -457,13 +457,3 @@
           return "";
         } catch (error) {
           console.error("Escosia error:", error);
-          return "";
-        }
-      }
-
-      async function torSearch(query) {
-        try {
-          const url = `https://api.torsearch.com/search?q=${encodeURIComponent(query)}`;
-          let response = await fetch(url);
-          let data = await response.json();
-          if (data.result && data.result.length > 0)
