@@ -1,550 +1,715 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Copilot Chat</title>
-
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="manifest.json" />
-
-    <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="512x512" href="apple-touch-icon.png" />
-
-    <!-- Math.js for math evaluation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
-
-    <!-- Optional: Add-to-Homescreen CSS -->
-    <link rel="stylesheet" href="./dist/add-to-homescreen.min.css" />
-
-    <!-- Particles.js (ensure particles.js is correctly referenced) -->
-    <script src="particles.js"></script>
-
-    <!-- Additional Libraries (Chatbox embed, Tesseract for OCR) -->
-    <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
-
-    <style>
-      /* Particles.js container */
-      #particles-js {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-      }
-      
-      /* COMMON STYLING */
-      body {
-        font-family: Arial, sans-serif;
-        background: #1e1e1e;
-        margin: 0;
-        padding: 20px;
-        color: #f1f1f1;
-      }
-      h1 {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      
-      /* TAB BAR & BUTTONS */
-      #tabBar {
-        max-width: 600px;
-        margin: 0 auto 20px;
-        text-align: center;
-      }
-      .tabButton {
-        padding: 10px 20px;
-        margin: 0 5px;
-        border: 1px solid #444;
-        background-color: #333;
-        border-radius: 5px;
-        color: #f1f1f1;
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-      }
-      .tabButton:hover {
-        transform: scale(1.05);
-      }
-      .tabButton.active {
-        background-color: #007bff;
-        border-color: #007bff;
-      }
-      
-      /* TAB CONTENT CONTAINERS */
-      .tabContent {
-        display: none;
-        max-width: 600px;
-        margin: 0 auto;
-      }
-      .tabContent.active {
-        display: block;
-      }
-      
-      /* CHAT CONTAINER */
-      #chat {
-        background: #2a2a2a;
-        padding: 20px;
-        border: 1px solid #444;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        animation: fadeInSlide 1s ease-out;
-      }
-      @keyframes fadeInSlide {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      #messages {
-        list-style: none;
-        padding: 0;
-        max-height: 300px;
-        overflow-y: auto;
-        margin-bottom: 20px;
-      }
-      #messages li {
-        padding: 10px;
-        margin-bottom: 10px;
-        border-bottom: 1px solid #444;
-      }
-      
-      /* CHAT INPUT ROW */
-      #input {
-        display: flex;
-        align-items: center;
-      }
-      #input input[type="text"] {
-        flex: 1;
-        padding: 10px;
-        margin-right: 10px;
-        border: 1px solid #555;
-        border-radius: 5px;
-        background: #333;
-        color: #f1f1f1;
-        transition: border-color 0.3s ease;
-      }
-      #send, #voiceChat, #uploadBtn {
-        padding: 10px 20px;
-        border: none;
-        background-color: #007bff;
-        color: #f1f1f1;
-        border-radius: 5px;
-        margin-right: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-      }
-      #send:hover, #voiceChat:hover, #uploadBtn:hover {
-        background-color: #0056b3;
-        transform: scale(1.05);
-      }
-      #send:disabled, #voiceChat:disabled, #uploadBtn:disabled {
-        background-color: #555;
-        cursor: not-allowed;
-      }
-      
-      /* Hide file input element */
-      #imageFile { 
-        display: none;
-      }
-      
-      /* SPINNER */
-      .spinner-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: none;
-        justify-content: center;
-        align-items: center;
-        background-color: rgba(0,0,0,0.4);
-        z-index: 1000;
-      }
-      .spinner {
-        border: 16px solid #333;
-        border-top: 16px solid #007bff;
-        border-radius: 50%;
-        width: 120px;
-        height: 120px;
-        animation: spin 2s linear infinite;
-      }
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      
-      /* FORMS & TEACHING TAB */
-      form {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 10px;
-      }
-      form input, form textarea {
-        padding: 8px;
-        border: 1px solid #444;
-        border-radius: 5px;
-        background: #333;
-        color: #f1f1f1;
-        transition: border-color 0.3s ease;
-      }
-      form button {
-        padding: 8px 16px;
-        border: none;
-        background-color: #007bff;
-        color: #f1f1f1;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-      }
-      form button:hover {
-        background-color: #0056b3;
-        transform: scale(1.05);
-      }
-      #teachList {
-        list-style: none;
-        margin-top: 10px;
-        padding: 0;
-      }
-      #teachList li {
-        padding: 5px;
-        border-bottom: 1px solid #444;
-      }
-      
-      /* CONFIGURE TAB */
-      #configForm textarea {
-        width: 100%;
-        min-height: 100px;
-      }
-      #configForm button {
-        background-color: #ffc107;
-        color: #1e1e1e;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-      }
-      #configForm button:hover {
-        background-color: #e0a800;
-        transform: scale(1.05);
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Particles.js background container -->
-    <div id="particles-js"></div>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Copilot Chat</title>
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  
+  <!-- Apple Touch Icons -->
+  <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="apple-touch-icon.png" />
+  
+  <!-- Math.js (for mathematical evaluation) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+  
+  <!-- Optional: Add-to-Homescreen CSS -->
+  <link rel="stylesheet" href="./dist/add-to-homescreen.min.css" />
+  
+  <!-- Particles.js library (make sure your particles.js file is in the correct location) -->
+  <script src="particles.js"></script>
+  
+  <!-- Additional Libraries (Chatbox embed, Tesseract for OCR) -->
+  <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
+  
+  <style>
+    /* Particles.js background container */
+    #particles-js {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
     
-    <!-- Main Chat Interface -->
-    <div id="chatInterface">
-      <h1>Copilot Chat</h1>
-      <div id="tabBar">
-        <button class="tabButton active" data-tab="chatTab">Chat</button>
-        <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
-        <button class="tabButton" data-tab="configTab">Configure Chatbot</button>
-      </div>
-      <!-- Chat Tab -->
-      <div id="chatTab" class="tabContent active">
-        <div id="chat">
-          <ul id="messages"></ul>
-          <div id="input">
-            <input type="text" id="userInput" placeholder="Type your message here..." />
-            <button id="send">Send</button>
-          </div>
+    /* COMMON STYLING */
+    body {
+      font-family: Arial, sans-serif;
+      background: #1e1e1e;
+      margin: 0;
+      padding: 20px;
+      color: #f1f1f1;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    /* TOP TAB BAR & BUTTONS */
+    #tabBar {
+      max-width: 600px;
+      margin: 0 auto 20px;
+      text-align: center;
+    }
+    .tabButton {
+      padding: 10px 20px;
+      margin: 0 5px;
+      border: 1px solid #444;
+      background-color: #333;
+      border-radius: 5px;
+      color: #f1f1f1;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .tabButton:hover {
+      transform: scale(1.05);
+    }
+    .tabButton.active {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    
+    /* TAB CONTENT CONTAINERS */
+    .tabContent {
+      display: none;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .tabContent.active {
+      display: block;
+    }
+    
+    /* CHAT CONTAINER */
+    #chat {
+      background: #2a2a2a;
+      padding: 20px;
+      border: 1px solid #444;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      animation: fadeInSlide 1s ease-out;
+    }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #messages {
+      list-style: none;
+      padding: 0;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+    #messages li {
+      padding: 10px;
+      border-bottom: 1px solid #444;
+      margin-bottom: 10px;
+    }
+    
+    /* CHAT INPUT ROW */
+    #input {
+      display: flex;
+      align-items: center;
+    }
+    #input input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      margin-right: 10px;
+      border: 1px solid #555;
+      border-radius: 5px;
+      background: #333;
+      color: #f1f1f1;
+      transition: border-color 0.3s ease;
+    }
+    #send, #voiceChat, #uploadBtn {
+      padding: 10px 20px;
+      border: none;
+      background-color: #007bff;
+      color: #f1f1f1;
+      border-radius: 5px;
+      margin-right: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    #send:hover, #voiceChat:hover, #uploadBtn:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+    #send:disabled, #voiceChat:disabled, #uploadBtn:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+    
+    /* Hide file input */
+    #imageFile {
+      display: none;
+    }
+    
+    /* SPINNER */
+    .spinner-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0,0,0,0.4);
+      z-index: 1000;
+    }
+    .spinner {
+      border: 16px solid #333;
+      border-top: 16px solid #007bff;
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin { 
+      0% { transform: rotate(0deg); } 
+      100% { transform: rotate(360deg); } 
+    }
+    
+    /* TEACH & CONFIGURE FORMS */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    form input, form textarea {
+      padding: 8px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background: #333;
+      color: #f1f1f1;
+      transition: border-color 0.3s ease;
+    }
+    form button {
+      padding: 8px 16px;
+      border: none;
+      background-color: #007bff;
+      color: #f1f1f1;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    form button:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+    
+    /* Teach List Styling */
+    #teachList {
+      list-style: none;
+      margin-top: 10px;
+      padding: 0;
+    }
+    #teachList li {
+      padding: 5px;
+      border-bottom: 1px solid #444;
+    }
+    
+    /* CONFIGURE TAB */
+    #configForm textarea {
+      width: 100%;
+      min-height: 100px;
+    }
+    #configForm button {
+      background-color: #ffc107;
+      color: #1e1e1e;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    #configForm button:hover {
+      background-color: #e0a800;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <!-- Particles.js Background -->
+  <div id="particles-js"></div>
+  
+  <!-- Main Chat Interface -->
+  <div id="chatInterface">
+    <h1>Copilot Chat</h1>
+    <div id="tabBar">
+      <button class="tabButton active" data-tab="chatTab">Chat</button>
+      <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
+      <button class="tabButton" data-tab="configTab">Configure Chatbot</button>
+    </div>
+    
+    <!-- Chat Tab -->
+    <div id="chatTab" class="tabContent active">
+      <div id="chat">
+        <ul id="messages"></ul>
+        <div id="input">
+          <input type="text" id="userInput" placeholder="Type your message here..." />
+          <button id="send">Send</button>
+          <button id="voiceChat">Voice Chat</button>
+          <button id="uploadBtn" title="Upload Image">＋</button>
+          <input type="file" id="imageFile" accept="image/*" />
         </div>
       </div>
-      <!-- Teach Chatbot Tab -->
-      <div id="teachTab" class="tabContent">
-        <h3>Teach Chatbot</h3>
-        <p>Enter a question and its answer to update the chatbot’s responses.</p>
-        <form id="teachForm">
-          <input type="text" id="teachQuestion" placeholder="Question (e.g., hi)" required />
-          <input type="text" id="teachAnswer" placeholder="Answer (e.g., Hello, how can I help you?)" required />
-          <button type="submit">Save Teaching</button>
-        </form>
-        <ul id="teachList"></ul>
-      </div>
-      <!-- Configure Chatbot Tab -->
-      <div id="configTab" class="tabContent">
-        <h3>Configure Chatbot Personality</h3>
-        <p>Enter a custom personality prompt for fallback queries.</p>
-        <form id="configForm">
-          <textarea id="chatbotPersonality" placeholder="For example: You are a clever, knowledgeable assistant." required></textarea>
-          <button type="submit">Save Configuration</button>
-        </form>
+    </div>
+    
+    <!-- Teach Chatbot Tab -->
+    <div id="teachTab" class="tabContent">
+      <h3>Teach Chatbot</h3>
+      <p>Enter a question and its answer to update the chatbot’s responses.</p>
+      <form id="teachForm">
+        <input type="text" id="teachQuestion" placeholder="Question (e.g., hi)" required />
+        <input type="text" id="teachAnswer" placeholder="Answer (e.g., Hello, how can I help you?)" required />
+        <button type="submit">Save Teaching</button>
+      </form>
+      <button id="teachBasic">Teach Chatbot Basics</button>
+      <ul id="teachList"></ul>
+      <div id="importSection">
+        <h4>Import Teaching Data</h4>
+        <input type="text" id="importSubject" placeholder="Subject (e.g., math)" required />
+        <input type="url" id="importLink" placeholder="URL to import teaching data" required />
+        <button id="importButton">Import Teaching Data</button>
       </div>
     </div>
     
-    <!-- Spinner -->
-    <div id="spinner-container" class="spinner-container">
-      <div class="spinner"></div>
+    <!-- Configure Chatbot Tab -->
+    <div id="configTab" class="tabContent">
+      <h3>Configure Chatbot Personality</h3>
+      <p>Enter a custom personality prompt for fallback queries.</p>
+      <form id="configForm">
+        <textarea id="chatbotPersonality" placeholder="For example: You are a clever, knowledgeable assistant." required></textarea>
+        <button type="submit">Save Configuration</button>
+      </form>
     </div>
-    
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        /***** PARTICLES.JS INITIALIZATION *****/
-        if (window.particlesJS) {
-          particlesJS("particles-js", {
-            "particles": {
-              "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
-              "color": { "value": "#ffffff" },
-              "shape": { "type": "circle" },
-              "opacity": { "value": 0.5, "random": false },
-              "size": { "value": 3, "random": true },
-              "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.4, "width": 1 },
-              "move": { "enable": true, "speed": 6 }
+  </div>
+  
+  <!-- Spinner -->
+  <div id="spinner-container" class="spinner-container">
+    <div class="spinner"></div>
+  </div>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      
+      /***** PARTICLES.JS INITIALIZATION *****/
+      if (window.particlesJS) {
+        particlesJS("particles-js", {
+          "particles": {
+            "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+            "color": { "value": "#ffffff" },
+            "shape": { "type": "circle" },
+            "opacity": { "value": 0.5, "random": false },
+            "size": { "value": 3, "random": true },
+            "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.4, "width": 1 },
+            "move": { "enable": true, "speed": 6 }
+          },
+          "interactivity": {
+            "events": {
+              "onhover": { "enable": true, "mode": "repulse" },
+              "onclick": { "enable": true, "mode": "push" },
+              "resize": true
             },
-            "interactivity": {
-              "events": {
-                "onhover": { "enable": true, "mode": "repulse" },
-                "onclick": { "enable": true, "mode": "push" },
-                "resize": true
-              },
-              "modes": { "repulse": { "distance": 200 }, "push": { "particles_nb": 4 } }
-            },
-            "retina_detect": true
-          });
+            "modes": { "repulse": { "distance": 200 }, "push": { "particles_nb": 4 } }
+          },
+          "retina_detect": true
+        });
+      }
+      
+      /***** TEACHING DATA MANAGEMENT *****/
+      let teachings = JSON.parse(localStorage.getItem("teachings")) || {};
+      // Preload basic teachings
+      const basicTeachings = {
+        "hi": "Hello, how can I help you?",
+        "hello": "Hello, how can I help you?",
+        "what is 1 plus 1": "2",
+        "what is 2+2": "4"
+      };
+      teachings = { ...basicTeachings, ...teachings };
+      localStorage.setItem("teachings", JSON.stringify(teachings));
+      
+      function updateTeachList() {
+        const teachList = document.getElementById("teachList");
+        teachList.innerHTML = "";
+        for (let key in teachings) {
+          const li = document.createElement("li");
+          li.textContent = key + " -> " + teachings[key];
+          teachList.appendChild(li);
         }
-        
-        /***** TEACHING DATA MANAGEMENT *****/
-        let teachings = JSON.parse(localStorage.getItem("teachings")) || {};
-        // Preload basic teachings
-        const basicTeachings = {
-          "hi": "Hello, how can I help you?",
-          "hello": "Hello, how can I help you?",
-          "what is 1 plus 1": "2",
-          "what is 2+2": "4"
+      }
+      updateTeachList();
+      
+      document.getElementById("teachForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        let q = document.getElementById("teachQuestion").value.trim().toLowerCase();
+        let a = document.getElementById("teachAnswer").value.trim();
+        if (q && a) {
+          teachings[q] = a;
+          localStorage.setItem("teachings", JSON.stringify(teachings));
+          updateTeachList();
+          alert("Teaching saved!");
+          document.getElementById("teachQuestion").value = "";
+          document.getElementById("teachAnswer").value = "";
+        }
+      });
+      
+      document.getElementById("teachBasic").addEventListener("click", function() {
+        const basics = {
+          "what is 2+2": "4",
+          "what is 10 divided by 2": "5",
+          "who discovered america": "Christopher Columbus",
+          "when did world war ii end": "1945",
+          "what is photosynthesis": "Photosynthesis is the process by which green plants use sunlight to synthesize foods from CO₂ and water.",
+          "what is gravity": "Gravity is the force of attraction between two masses.",
+          "what is a thesis statement": "A thesis statement is a concise summary of the main point of an essay or research paper.",
+          "what is an essay": "An essay is a short piece of writing on a particular subject."
         };
-        teachings = { ...basicTeachings, ...teachings };
+        teachings = { ...basics, ...teachings };
         localStorage.setItem("teachings", JSON.stringify(teachings));
-        
-        function updateTeachList() {
-          const teachList = document.getElementById("teachList");
-          teachList.innerHTML = "";
-          for (let key in teachings) {
-            const li = document.createElement("li");
-            li.textContent = key + " -> " + teachings[key];
-            teachList.appendChild(li);
-          }
-        }
         updateTeachList();
-        
-        document.getElementById("teachForm").addEventListener("submit", function(e) {
-          e.preventDefault();
-          let q = document.getElementById("teachQuestion").value.trim().toLowerCase();
-          let a = document.getElementById("teachAnswer").value.trim();
-          if (q && a) {
-            teachings[q] = a;
-            localStorage.setItem("teachings", JSON.stringify(teachings));
-            updateTeachList();
-            alert("Teaching saved!");
-            document.getElementById("teachQuestion").value = "";
-            document.getElementById("teachAnswer").value = "";
-          }
-        });
-        
-        /***** TAB SWITCHING ******/
-        const tabs = document.querySelectorAll(".tabButton");
-        const contents = document.querySelectorAll(".tabContent");
-        tabs.forEach(function(tab) {
-          tab.addEventListener("click", function() {
-            tabs.forEach(t => t.classList.remove("active"));
-            contents.forEach(c => c.classList.remove("active"));
-            tab.classList.add("active");
-            const target = tab.getAttribute("data-tab");
-            document.getElementById(target).classList.add("active");
-          });
-        });
-        
-        /***** HELPER FUNCTIONS ******/
-        // Fuzzy matching: check for an exact or partial match in teachings
-        function matchTeaching(query) {
-          query = query.trim().toLowerCase();
-          if (teachings[query]) return teachings[query];
-          for (let key in teachings) {
-            if (key.includes(query) || query.includes(key)) {
-              return teachings[key];
-            }
-          }
-          return null;
+        alert("Basic teachings added!");
+      });
+      
+      document.getElementById("importButton").addEventListener("click", async function() {
+        const subject = document.getElementById("importSubject").value.trim().toLowerCase();
+        const url = document.getElementById("importLink").value.trim();
+        if (!subject || !url) {
+          alert("Please enter both a subject and a URL.");
+          return;
         }
-        
-        // ChatGPT API function
-        async function chatGPT(userInput) {
-          const apiKey = "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";
-          const apiUrl = "https://api.openai.com/v1/chat/completions";
-          const payload = {
-            model: "gpt-4",
-            messages: [
-              { role: "system", content: localStorage.getItem("chatbot_personality") || "You are a clever, knowledgeable assistant." },
-              { role: "user", content: userInput }
-            ]
-          };
-          try {
-            let response = await fetch(apiUrl, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + apiKey
-              },
-              body: JSON.stringify(payload)
-            });
-            let data = await response.json();
-            if (data.choices && data.choices.length > 0) {
-              return data.choices[0].message.content.trim();
-            }
-            return "";
-          } catch (e) {
-            console.error("ChatGPT error:", e);
-            return "";
+        try {
+          document.getElementById("spinner-container").style.display = "flex";
+          const response = await fetch(url);
+          document.getElementById("spinner-container").style.display = "none";
+          if (!response.ok) {
+            alert("Failed to fetch content from the URL.");
+            return;
           }
-        }
-        
-        // DuckDuckGo fallback search
-        async function duckDuckGoSearch(query) {
-          const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
-          try {
-            let response = await fetch(url);
-            let data = await response.json();
-            if (data.AbstractText && data.AbstractText.trim() !== "") {
-              return data.AbstractText;
+          const contentType = response.headers.get("content-type");
+          let importedContent = "";
+          if (contentType && contentType.includes("text/html")) {
+            const htmlText = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlText, "text/html");
+            importedContent = doc.body.innerText;
+            // Extract equations
+            const equations = extractEquations(importedContent);
+            if (equations.length > 0) {
+              importedContent += "\nExtracted Equations:\n" + equations.join("\n");
             }
-            return "";
-          } catch (error) {
-            console.error("DuckDuckGo error:", error);
-            return "";
+          } else {
+            importedContent = await response.text();
           }
+          if (!importedContent) {
+            alert("No teaching data was found at the provided URL.");
+            return;
+          }
+          if (!importedContent.toLowerCase().includes(subject)) {
+            alert("Warning: The imported content does not appear to relate to the subject.");
+          }
+          if (teachings[subject]) {
+            teachings[subject] += "\n" + importedContent;
+          } else {
+            teachings[subject] = importedContent;
+          }
+          localStorage.setItem("teachings", JSON.stringify(teachings));
+          updateTeachList();
+          alert("Teaching data imported successfully!");
+          document.getElementById("importSubject").value = "";
+          document.getElementById("importLink").value = "";
+        } catch (err) {
+          document.getElementById("spinner-container").style.display = "none";
+          alert("Error importing teaching data: " + err.message);
         }
-        
-        // Conversation dataset fallback (optional)
-        async function conversationDatasetSearch(query) {
-          try {
-            const datasetUrl = "https://raw.githubusercontent.com/PolyAI-LDN/conversational-datasets/master/conversations.json";
-            let response = await fetch(datasetUrl);
-            let data = await response.json();
-            for (let conv of data) {
-              if (
-                conv.question &&
-                conv.answer &&
-                conv.question.toLowerCase().includes(query.toLowerCase())
-              ) {
-                return conv.answer;
+      });
+      
+      async function loadDefaultTeachingData() {
+        const defaultData = [
+          { subject: "math", url: "https://www.education.com/resources/math/" },
+          { subject: "science", url: "https://undsci.berkeley.edu/understanding-science-101/what-is-science/" },
+          { subject: "history", url: "https://www.worldhistory.org/" },
+          { subject: "trappers work tools", url: "https://www.unco.edu/hewit/doing-history/trappers-traders/trappers/trappers-work-tools.aspx" },
+          { subject: "study skills", url: "https://www.britannica.com/topic/education" }
+        ];
+        for (let item of defaultData) {
+          let subject = item.subject.toLowerCase();
+          if (!teachings[subject]) {
+            try {
+              const res = await fetch(item.url);
+              if (res.ok) {
+                let content;
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.includes("text/html")) {
+                  const htmlText = await res.text();
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(htmlText, "text/html");
+                  content = doc.body.innerText;
+                  const equations = extractEquations(content);
+                  if (equations.length > 0) {
+                    content += "\nExtracted Equations:\n" + equations.join("\n");
+                  }
+                } else {
+                  content = await res.text();
+                }
+                teachings[subject] = content;
+                localStorage.setItem("teachings", JSON.stringify(teachings));
+                updateTeachList();
+              } else {
+                console.log("Failed to fetch default data for subject:", subject);
               }
+            } catch (e) {
+              console.error("Error fetching default data for subject:", subject, e);
             }
-            return "";
-          } catch (e) {
-            console.error("Conversation dataset error:", e);
-            return "";
           }
         }
-        
-        // Helper to call an external API and store the answer if acceptable.
-        async function getAndStoreAnswer(userInput, fetchFunction) {
-          let ans = await fetchFunction(userInput);
-          if (isAcceptable(ans)) {
-            teachings[userInput.trim().toLowerCase()] = ans;
-            localStorage.setItem("teachings", JSON.stringify(teachings));
-            updateTeachList();
-            return ans;
+      }
+      loadDefaultTeachingData();
+      
+      /***** CONFIGURE CHATBOT PERSONALITY *****/
+      let chatbotPersonality = localStorage.getItem("chatbot_personality") || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
+      document.getElementById("chatbotPersonality").value = chatbotPersonality;
+      
+      document.getElementById("configForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const personality = document.getElementById("chatbotPersonality").value.trim();
+        if (personality) {
+          localStorage.setItem("chatbot_personality", personality);
+          alert("Chatbot personality updated!");
+        }
+      });
+      
+      /***** TAB SWITCHING LOGIC *****/
+      const tabButtons = document.querySelectorAll(".tabButton");
+      const tabContents = document.querySelectorAll(".tabContent");
+      tabButtons.forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          tabButtons.forEach(b => b.classList.remove("active"));
+          tabContents.forEach(content => content.classList.remove("active"));
+          this.classList.add("active");
+          const target = this.getAttribute("data-tab");
+          document.getElementById(target).classList.add("active");
+        });
+      });
+      
+      /***** Helper: Extract Equations from Text *****/
+      function extractEquations(text) {
+        const regex = /[0-9]+(?:\.[0-9]+)?\s*[\+\-\*\/=]\s*[0-9]+(?:\.[0-9]+)?/g;
+        const matches = text.match(regex);
+        return matches ? matches : [];
+      }
+      
+      /***** CHATBOT FUNCTIONALITY *****/
+      // Fuzzy match: check for exact or partial match in the teachings.
+      function findMatchingTeaching(query) {
+        query = query.trim().toLowerCase();
+        if (teachings[query]) {
+          return teachings[query];
+        }
+        let queryWords = query.split(/\s+/);
+        let bestMatch = null;
+        let highestScore = 0;
+        for (let key in teachings) {
+          let keyWords = key.toLowerCase().split(/\s+/);
+          let commonCount = queryWords.filter(word => keyWords.includes(word)).length;
+          if (commonCount > highestScore && commonCount >= 2) {
+            highestScore = commonCount;
+            bestMatch = teachings[key];
+          }
+        }
+        return bestMatch;
+      }
+      
+      async function chatGPT(userInput) {
+        const apiKey = "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";
+        const apiUrl = "https://api.openai.com/v1/chat/completions";
+        const payload = {
+          model: "gpt-4",
+          messages: [
+            { role: "system", content: localStorage.getItem("chatbot_personality") || "You are a helpful assistant." },
+            { role: "user", content: userInput }
+          ]
+        };
+        try {
+          let response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + apiKey
+            },
+            body: JSON.stringify(payload)
+          });
+          let data = await response.json();
+          if (data.choices && data.choices.length > 0) {
+            return data.choices[0].message.content.trim();
           }
           return "";
+        } catch (e) {
+          console.error("ChatGPT error:", e);
+          return "";
         }
-        
-        // Check if answer is acceptable.
-        function isAcceptable(answer) {
-          if (!answer) return false;
-          const clean = answer.trim().toLowerCase();
-          if (clean === "" || clean.includes("error") || clean === "i'm still yn so idk") return false;
-          return true;
-        }
-        
-        // The main response generator:
-        async function generateResponse(userInput) {
-          let key = userInput.trim().toLowerCase();
-          // 1. Exact local match.
-          if (teachings[key]) {
-            return teachings[key];
+      }
+      
+      async function duckDuckGoSearch(query) {
+        const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
+        try {
+          let response = await fetch(url);
+          let data = await response.json();
+          if (data.AbstractText && data.AbstractText.trim() !== "") {
+            return data.AbstractText;
           }
-          // 2. Fuzzy match.
-          let localMatch = matchTeaching(userInput);
-          if (localMatch) return localMatch;
-          
-          // 3. Conversation dataset fallback.
-          let convAns = await conversationDatasetSearch(userInput);
-          if (isAcceptable(convAns)) {
-            teachings[key] = convAns;
-            localStorage.setItem("teachings", JSON.stringify(teachings));
-            updateTeachList();
-            return convAns;
-          }
-          
-          // 4. Try ChatGPT.
-          let answer = await getAndStoreAnswer(userInput, chatGPT);
-          if (isAcceptable(answer)) return answer;
-          
-          // 5. Fallback to DuckDuckGo.
-          answer = await getAndStoreAnswer(userInput, duckDuckGoSearch);
-          if (isAcceptable(answer)) return answer;
-          
-          return "Sorry, I didn't understand that. Could you please rephrase?";
+          return "";
+        } catch (error) {
+          console.error("DuckDuckGo error:", error);
+          return "";
         }
-        
-        /***** CHAT INTERACTION ******/
-        document.getElementById("send").addEventListener("click", async () => {
-          const userInput = document.getElementById("userInput").value.trim();
-          if (userInput === "") return;
-          const messages = document.getElementById("messages");
-          let userMessage = document.createElement("li");
-          userMessage.textContent = `User: ${userInput}`;
-          messages.appendChild(userMessage);
-          try {
-            let response = await generateResponse(userInput);
-            let botMessage = document.createElement("li");
-            botMessage.textContent = `Chatbot: ${response}`;
-            messages.appendChild(botMessage);
-            if (window.speechSynthesis) {
-              let utterance = new SpeechSynthesisUtterance(response);
-              speechSynthesis.speak(utterance);
+      }
+      
+      async function conversationDatasetSearch(query) {
+        try {
+          const datasetUrl = "https://raw.githubusercontent.com/PolyAI-LDN/conversational-datasets/master/conversations.json";
+          let response = await fetch(datasetUrl);
+          let data = await response.json();
+          for (let conv of data) {
+            if (
+              conv.question &&
+              conv.answer &&
+              conv.question.toLowerCase().includes(query.toLowerCase())
+            ) {
+              return conv.answer;
             }
-          } catch (error) {
-            console.error(error);
-            let errorMessage = document.createElement("li");
-            errorMessage.textContent = "Chatbot: An error occurred. Please try again later.";
-            messages.appendChild(errorMessage);
           }
-          document.getElementById("userInput").value = "";
-          messages.scrollTop = messages.scrollHeight;
-        });
+          return "";
+        } catch (e) {
+          console.error("Conversation dataset error:", e);
+          return "";
+        }
+      }
+      
+      async function getAndStoreAnswer(userInput, fetchFunction) {
+        let ans = await fetchFunction(userInput);
+        if (isAcceptable(ans)) {
+          teachings[userInput.trim().toLowerCase()] = ans;
+          localStorage.setItem("teachings", JSON.stringify(teachings));
+          updateTeachList();
+          return ans;
+        }
+        return "";
+      }
+      
+      function isAcceptable(answer) {
+        if (!answer) return false;
+        const clean = answer.trim().toLowerCase();
+        if (clean === "" || clean.includes("error") || clean === "i'm still yn so idk") return false;
+        return true;
+      }
+      
+      async function generateResponse(userInput) {
+        // 1. Exact or fuzzy match from local teachings.
+        let fuzzyMatch = findMatchingTeaching(userInput);
+        if (fuzzyMatch) return fuzzyMatch;
         
-        /***** STORAGE EVENT (Sync with admin panel updates) ******/
-        window.addEventListener("storage", function(e) {
-          if (e.key === "teachings") {
-            teachings = JSON.parse(e.newValue) || {};
-            updateTeachList();
-          }
-        });
+        // 2. Try conversation dataset.
+        let convAns = await conversationDatasetSearch(userInput);
+        if (isAcceptable(convAns)) {
+          teachings[userInput.trim().toLowerCase()] = convAns;
+          localStorage.setItem("teachings", JSON.stringify(teachings));
+          updateTeachList();
+          return convAns;
+        }
         
-        /***** ADD-TO-HOMESCREEN & SERVICE WORKER *****/
-        window.addEventListener("load", function() {
-          if (window.AddToHomeScreen) {
-            window.AddToHomeScreenInstance = window.AddToHomeScreen({
-              appName: "Copilot Chat",
-              appIconUrl: "apple-touch-icon.png",
-              appNameDisplay: "standalone",
-              assetUrl: "./dist/assets/",
-              maxModalDisplayCount: -1,
-              displayOptions: { showMobile: true, showDesktop: true },
-              allowClose: true,
-              showArrow: false
-            });
-            window.AddToHomeScreenInstance.show();
+        // 3. Try ChatGPT.
+        let answer = await getAndStoreAnswer(userInput, chatGPT);
+        if (isAcceptable(answer)) return answer;
+        
+        // 4. Try DuckDuckGo.
+        answer = await getAndStoreAnswer(userInput, duckDuckGoSearch);
+        if (isAcceptable(answer)) return answer;
+        
+        return "Sorry, I didn't understand that. Could you please rephrase?";
+      }
+      
+      /***** CHAT INTERACTION ******/
+      document.getElementById("send").addEventListener("click", async () => {
+        const userInput = document.getElementById("userInput").value.trim();
+        if (userInput === "") return;
+        const messages = document.getElementById("messages");
+        let userMessage = document.createElement("li");
+        userMessage.textContent = "User: " + userInput;
+        messages.appendChild(userMessage);
+        try {
+          let response = await generateResponse(userInput);
+          let botMessage = document.createElement("li");
+          botMessage.textContent = "Chatbot: " + response;
+          messages.appendChild(botMessage);
+          if (window.speechSynthesis) {
+            let utterance = new SpeechSynthesisUtterance(response);
+            speechSynthesis.speak(utterance);
           }
-        });
-        if ("serviceWorker" in navigator) {
-          navigator.serviceWorker
-            .register("/service-worker.js")
-            .then(() => console.log("Service Worker registered!"))
-            .catch(err => console.error("Service Worker registration failed!", err));
+        } catch (error) {
+          console.error(error);
+          let errorMessage = document.createElement("li");
+          errorMessage.textContent = "Chatbot: An error occurred. Please try again later.";
+          messages.appendChild(errorMessage);
+        }
+        document.getElementById("userInput").value = "";
+        messages.scrollTop = messages.scrollHeight;
       });
-    });
-  </script>
-</body>
-</html>
+      
+      document.getElementById("uploadBtn").addEventListener("click", () => {
+        document.getElementById("imageFile").click();
+      });
+      
+      document.getElementById("imageFile").addEventListener("change", () => {
+        const file = document.getElementById("imageFile").files[0];
+        const messages = document.getElementById("messages");
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = async function(e) {
+            let imageMessage = document.createElement("li");
+            imageMessage.textContent = "User sent an image:";
+            let img = document.createElement("img");
+            img.src = e.target.result;
+            img.style.maxWidth = "100%";
+            imageMessage.appendChild(img);
+            messages.appendChild(imageMessage);
+            try {
+              const processedSrc = await preprocessImage(e.target.result);
+              document.getElementById("spinner-container").style.display = "flex";
+              let { data: { text } } = await Tesseract.recognize(processedSrc, "eng");
+              document.getElementById("spinner-container").style.display = "none";
+              text = text.replace(/[«»‘’“”]/g, "").trim();
+              let extractedTextMsg = document.createElement("li");
+              extractedTextMsg.textContent = "Extracted Text from Image: " + text;
+              messages.appendChild(extractedTextMsg);
+              let deepResponse = await deepSeekChat(text);
+              let deepResponseMsg = document.createElement("li");
+              deepResponseMsg.textContent = "Chatbot: " + deepResponse;
+              messages.appendChild(deepResponseMsg);
+            } catch (err) {
+              document.getElementById("spinner-container").style.display = "none";
+              let errorMsg = document.createElement("li");
+              errorMsg.textContent = "Error in OCR or pre-processing: " + err.message;
+              messages.appendChild(errorMsg);
+            }
+          };
+          reader.readAsDataURL(file);
+        } else {
+          alert("No file selected.");
+        }
+      });
+      
+      function preprocessImage(imageSrc) {
+        return new Promise((resolve, reject) => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          const img = new Image();
+          img.crossOrigin = "Anonymous";
+          img.src = imageSrc;
+          img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx
