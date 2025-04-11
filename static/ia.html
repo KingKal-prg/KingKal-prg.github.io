@@ -454,4 +454,257 @@
           const url = `https://api.torsearch.com/search?q=${encodeURIComponent(query)}`;
           let response = await fetch(url);
           let data = await response.json();
-          if (data.result && data.result.length > 0)
+          if (data.result && data.result.length > 0) {
+            return data.result;
+          }
+          return "";
+        } catch (error) {
+          console.error("Tor search error:", error);
+          return "";
+        }
+      }
+
+      async function googleSearch(query) {
+        // Placeholder for Google Custom Search API integration.
+        return "";
+      }
+
+      async function conversationDatasetSearch(query) {
+        try {
+          const datasetUrl = "https://raw.githubusercontent.com/PolyAI-LDN/conversational-datasets/master/conversations.json";
+          let response = await fetch(datasetUrl);
+          let data = await response.json();
+          for (let conv of data) {
+            if (
+              conv.question &&
+              conv.answer &&
+              conv.question.toLowerCase().includes(query.toLowerCase())
+            ) {
+              return conv.answer;
+            }
+          }
+          return "";
+        } catch (e) {
+          console.error("Conversation dataset error:", e);
+          return "";
+        }
+      }
+
+      function isAcceptable(answer) {
+        if (!answer) return false;
+        const clean = answer.trim().toLowerCase();
+        if (clean === "" || clean.includes("error") || clean === "i'm still yn so idk") {
+          return false;
+        }
+        return true;
+      }
+
+      async function generateResponse(userInput) {
+        // First, try to match the question with stored teachings using fuzzy matching.
+        let bestMatch = findMatchingTeaching(userInput);
+        if (bestMatch) {
+          return bestMatch;
+        }
+
+        const greetingParts = processGreeting(userInput);
+        if (greetingParts) {
+          if (greetingParts.query.trim() === "") {
+            return "Hello! How can I help you today?";
+          } else {
+            const answerForQuery = await generateResponse(greetingParts.query);
+            return "Hello! " + answerForQuery;
+          }
+        }
+
+        if (isMathExpression(userInput)) {
+          let result = evaluateMath(userInput);
+          return "The answer is " + result;
+        }
+
+        let answer = await chatGPT(userInput);
+        if (isAcceptable(answer)) return answer;
+
+        answer = await deepSeekChat(userInput);
+        if (isAcceptable(answer)) return answer;
+
+        answer = await duckAISearch(userInput);
+        if (isAcceptable(answer)) return answer;
+
+        answer = await duckDuckGoSearch(userInput);
+        if (isAcceptable(answer)) return answer;
+
+        answer = await googleSearch(userInput);
+        if (isAcceptable(answer)) return answer;
+
+        answer = await escosiaSearch(userInput);
+        if (isAcceptable(answer)) return answer;
+
+        answer = await torSearch(userInput);
+        if (isAcceptable(answer)) return answer;
+
+        answer = await conversationDatasetSearch(userInput);
+        if (isAcceptable(answer)) return answer;
+
+        return "can you repeat more clearly";
+      }
+
+      // Simple fuzzy match: checks for common words between the query and stored questions in teachings.
+      function findMatchingTeaching(query) {
+        query = query.toLowerCase();
+        let queryWords = query.split(/\s+/);
+        let bestMatch = null;
+        let highestScore = 0;
+        for (let key in teachings) {
+          let keyWords = key.toLowerCase().split(/\s+/);
+          // Count common words between the query and the key.
+          let common = queryWords.filter(word => keyWords.includes(word)).length;
+          if (common > highestScore && common >= 2) { // threshold of 2 common words
+            highestScore = common;
+            bestMatch = teachings[key];
+          }
+        }
+        return bestMatch;
+      }
+
+      /***** HELPER FUNCTIONS *****/
+      function isMathExpression(text) {
+        text = text.toLowerCase();
+        const mathKeywords = ["+", "-", "*", "/", "plus", "minus", "times", "divided", "equals", "what is", "calculate"];
+        return mathKeywords.some(keyword => text.includes(keyword)) ||
+          /\d+(\.\d+)?\s*[\+\-\*\/]\s*\d+(\.\d+)?/.test(text);
+      }
+
+      function evaluateMath(expression) {
+        try {
+          // Use Math.js to evaluate the expression
+          const result = math.evaluate(expression);
+          return result;
+        } catch (error) {
+          console.error("Error evaluating math expression:", error);
+          return "Invalid math expression.";
+        }
+      }
+
+      function processGreeting(text) {
+        const greetings = [
+          "hello", "hi", "hey", "greetings", "good morning", "good afternoon", "good evening",
+          "sup", "howdy", "what's up", "how's it going", "nice to meet you"
+        ];
+        const punctuation = [",", ".", "!", "?"];
+        text = text.toLowerCase();
+        text = text.replace(/[^a-zA-Z0-9\s]/g, '');
+        let foundGreeting = "";
+        for (let greeting of greetings) {
+          if (text.startsWith(greeting)) {
+            foundGreeting = greeting;
+            break;
+          }
+        }
+        if (foundGreeting) {
+          let query = text.slice(foundGreeting.length).trim();
+          punctuation.forEach(p => {
+            if (query.endsWith(p)) {
+              query = query.slice(0, -1).trim();
+            }
+          });
+          return {
+            greeting: foundGreeting,
+            query: query
+          };
+        }
+        return null;
+      }
+
+
+      /***** CHAT INTERACTION *****/
+      const sendButton = document.getElementById('send');
+      const userInputField = document.getElementById('userInput');
+      const messagesContainer = document.getElementById('messages');
+      const imageFileElement = document.getElementById('imageFile');
+      const uploadButton = document.getElementById('uploadBtn');
+
+      sendButton.addEventListener('click', async () => {
+        const userInput = userInputField.value.trim();
+        if (userInput === '') return;
+        const messages = messagesContainer;
+        const userMessage = document.createElement('li');
+        userMessage.textContent = `User: ${userInput}`;
+        messages.appendChild(userMessage);
+        try {
+          const response = await generateResponse(userInput);
+          const botMessage = document.createElement('li');
+          botMessage.textContent = `Chatbot: ${response}`;
+          messages.appendChild(botMessage);
+          if (window.speechSynthesis) {
+            const utterance = new SpeechSynthesisUtterance(response);
+            speechSynthesis.speak(utterance);
+          }
+        } catch (error) {
+          console.error(error);
+          const errorMessage = document.createElement('li');
+          errorMessage.textContent = "Chatbot: An error occurred. Please try again later.";
+          messages.appendChild(errorMessage);
+        }
+        userInputField.value = '';
+        messages.scrollTop = messages.scrollHeight;
+      });
+
+      uploadButton.addEventListener('click', () => {
+        imageFileElement.click();
+      });
+
+      imageFileElement.addEventListener('change', () => {
+        const file = imageFileElement.files[0];
+        const messages = messagesContainer;
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = async function(e) {
+            const imageMessage = document.createElement('li');
+            imageMessage.textContent = "User sent an image:";
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.maxWidth = "100%";
+            imageMessage.appendChild(img);
+            messages.appendChild(imageMessage);
+            try {
+              const processedSrc = await preprocessImage(e.target.result);
+              document.getElementById('spinner-container').style.display = 'flex';
+              let {
+                data: {
+                  text
+                }
+              } = await Tesseract.recognize(processedSrc, "eng");
+              document.getElementById('spinner-container').style.display = 'none';
+              text = text.replace(/[«»‘’“”]/g, "").trim();
+              const extractedTextMsg = document.createElement('li');
+              extractedTextMsg.textContent = "Extracted Text from Image: " + text;
+              messages.appendChild(extractedTextMsg);
+              const deepResponse = await deepSeekChat(text);
+              const deepResponseMsg = document.createElement('li');
+              deepResponseMsg.textContent = "Chatbot: " + deepResponse;
+              messages.appendChild(deepResponseMsg);
+            } catch (err) {
+              document.getElementById('spinner-container').style.display = 'none';
+              const errorMsg = document.createElement('li');
+              errorMsg.textContent = "Error in OCR or pre-processing: " + err.message;
+              messages.appendChild(errorMsg);
+            }
+          };
+          reader.readAsDataURL(file);
+        } else {
+          alert("No file selected.");
+        }
+      });
+
+      function preprocessImage(imageSrc) {
+        return new Promise((resolve, reject) => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          const img = new Image();
+          img.crossOrigin = "Anonymous";
+          img.src = imageSrc;
+          img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.heigh
