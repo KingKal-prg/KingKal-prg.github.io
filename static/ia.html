@@ -1,488 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Chatbot with Image Upload</title>
+  <meta charset="UTF-8">
+  <title>Freaky Chatbot 💖</title>
   <style>
-    /* CSS - Keeping your original CSS for styling */
     body {
-      font-family: Arial, sans-serif;
-      background: #1e1e1e;
+      background: #1c1c2b;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
       margin: 0;
-      padding: 20px;
-      color: #f1f1f1;
-    }
-
-    h1 {
-      text-align: center;
-      color: #f1f1f1;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
 
     #chat {
-      background: #2a2a2a;
-      padding: 20px;
-      border: 1px solid #444;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      /* Ensure chat content stacks vertically */
-      min-height: 500px; /* Give chat area some minimum height */
-    }
-
-    #messages {
-      list-style: none;
-      padding: 0;
-      max-height: 400px;
-      /* Or adjust height as needed */
+      flex: 1;
       overflow-y: auto;
-      margin-bottom: 20px;
-      flex-grow: 1;
-      /* Allow messages area to grow */
+      padding: 20px;
     }
 
-    #messages li {
+    .message {
+      margin: 10px 0;
+      max-width: 70%;
       padding: 10px;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #444;
-      word-wrap: break-word;
-      /* Prevent long words/URLs from overflowing */
+      border-radius: 10px;
+      line-height: 1.5;
     }
-     #messages li img {
-        max-width: 150px; /* Display smaller image in chat */
-        display: block;
-        margin-top: 5px;
-        border-radius: 5px;
-     }
 
+    .user {
+      background: #7b2cbf;
+      align-self: flex-end;
+      text-align: right;
+    }
 
-    #input {
+    .bot {
+      background: #3c096c;
+      align-self: flex-start;
+    }
+
+    #inputArea {
       display: flex;
-      align-items: center;
-      margin-top: auto;
-      /* Push input to the bottom */
-      padding-top: 10px; /* Add some space above input */
+      padding: 10px;
+      background: #2a2a3d;
     }
 
-    #input input[type="text"] {
+    #textInput {
       flex: 1;
       padding: 10px;
-      margin-right: 10px;
-      border: 1px solid #555;
-      border-radius: 5px;
-      background: #333;
-      color: #f1f1f1;
-    }
-
-    /* Style for Send and Upload buttons */
-    .action-button {
-      padding: 10px 20px;
+      font-size: 16px;
       border: none;
-      background-color: #007bff;
-      color: #f1f1f1;
       border-radius: 5px;
+      background: #444;
+      color: white;
+    }
+
+    #sendButton {
+      margin-left: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #9d4edd;
+      border: none;
+      border-radius: 5px;
+      color: white;
       cursor: pointer;
-      margin-left: 5px;
-      /* Spacing between buttons */
     }
 
-    .action-button:hover {
-      background-color: #0056b3;
-    }
-
-    .action-button:disabled {
-      background-color: #555;
-      cursor: not-allowed;
-    }
-
-    /* Hide the actual file input */
     #imageInput {
       display: none;
     }
 
-    /* Image Preview Area */
-    #imagePreviewContainer {
-        margin-top: 10px;
-        margin-bottom: 10px; /* Space between preview and input */
-        text-align: center; /* Center the preview */
-        min-height: 30px; /* Reserve space even when empty */
+    label.upload-label {
+      margin-left: 10px;
+      padding: 10px 15px;
+      background: #6a00ff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
-    #imagePreview {
-        max-width: 100px; /* Limit preview size */
-        max-height: 100px;
-        margin-top: 5px;
-        border: 1px solid #555;
-        border-radius: 5px;
-        display: none; /* Hide initially */
-    }
-     #imageFileName {
-        font-size: 0.9em;
-        color: #aaa;
-        margin-top: 5px;
-        display: block; /* Ensure it takes its own line */
-     }
-
-
-    /* Spinner Styles (unchanged) */
-    .spinner-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      background-color: rgba(0, 0, 0, 0.4);
-      z-index: 1000;
-    }
-
-    .spinner {
-      border: 16px solid #333;
-      border-top: 16px solid #007bff;
-      border-radius: 50%;
-      width: 120px;
-      height: 120px;
-      animation: spin 2s linear infinite;
-    }
-
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
+    img.uploaded {
+      max-width: 200px;
+      max-height: 200px;
+      display: block;
+      margin-top: 10px;
+      border-radius: 8px;
     }
   </style>
 </head>
-
 <body>
-  <div id="chatInterface">
-    <h1>Simple Chatbot</h1>
-    <div id="chat">
-      <ul id="messages"></ul>
-       <div id="imagePreviewContainer">
-           <span id="imageFileName">No image selected</span>
-           <img id="imagePreview" src="#" alt="Image preview"/>
-       </div>
-      <div id="input">
-        <input type="text" id="userInput" placeholder="Type your message here..." />
-        <input type="file" id="imageInput" accept="image/png, image/jpeg, image/gif, image/webp">
-        <button id="uploadButton" class="action-button">Upload Image</button>
-        <button id="send" class="action-button">Send</button>
-      </div>
-    </div>
-  </div>
 
-  <div id="spinner-container" class="spinner-container">
-    <div class="spinner"></div>
+  <div id="chat"></div>
+
+  <div id="inputArea">
+    <input type="text" id="textInput" placeholder="Say something freaky...">
+    <label class="upload-label" for="imageInput">📸</label>
+    <input type="file" id="imageInput" accept="image/*">
+    <button id="sendButton">Send</button>
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const messages = document.getElementById('messages');
-      const userInput = document.getElementById('userInput');
-      const sendButton = document.getElementById('send');
-      const uploadButton = document.getElementById('uploadButton');
-      const imageInput = document.getElementById('imageInput');
-      const imagePreview = document.getElementById('imagePreview');
-      const imageFileName = document.getElementById('imageFileName');
-      const spinnerContainer = document.getElementById('spinner-container');
+    const chat = document.getElementById('chat');
+    const textInput = document.getElementById('textInput');
+    const sendButton = document.getElementById('sendButton');
+    const imageInput = document.getElementById('imageInput');
 
-      // --- API Keys (VERY INSECURE - Use a backend in production!) ---
-      // WARNING: The key below was provided by the user and is EXPOSED.
-      // REVOKE THIS KEY IMMEDIATELY: https://platform.openai.com/account/api-keys
-      const openAIApiKey = "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";
-      // --- End Exposed API Key ---
-      const deepSeekApiKey = "sk-87fa4efb1c6c483f9e96f9942a88fdb6"; // Your DeepSeek Key (currently unused but available)
-      // --- End API Keys ---
+    function appendMessage(text, sender = 'bot') {
+      const message = document.createElement('div');
+      message.classList.add('message', sender);
+      message.innerHTML = text;
+      chat.appendChild(message);
+      chat.scrollTop = chat.scrollHeight;
+    }
 
-      let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
-      let selectedImageBase64 = null; // To store the selected image data
-      let selectedFileName = null; // To store the selected image filename
-
-      // Function to display messages
-      function displayMessage(sender, message, imageUrl = null) {
-        const li = document.createElement('li');
-        // Sanitize text content slightly to prevent accidental HTML injection
-        const textNode = document.createTextNode(`${sender}: ${message}`);
-        li.appendChild(textNode);
-
-        if (imageUrl && sender === "User") { // Only show preview for user's sent image
-            const img = document.createElement('img');
-            img.src = imageUrl;
-            // Styles moved to CSS for better separation
-            li.appendChild(img);
-        }
-        messages.appendChild(li);
-        messages.scrollTop = messages.scrollHeight;
+    function sendTextMessage() {
+      const text = textInput.value.trim();
+      if (text) {
+        appendMessage(text, 'user');
+        textInput.value = '';
+        // Simulate bot response
+        setTimeout(() => {
+          appendMessage("Ooh 😏 I like that... Tell me more...");
+        }, 500);
       }
+    }
 
-      // Function to check local storage for an answer (Text only)
-      function checkLocalStorage(query) {
-        query = query.toLowerCase();
-        if (teachings[query]) {
-          return teachings[query];
-        }
-        return null;
-      }
+    sendButton.addEventListener('click', sendTextMessage);
 
-      // --- OpenAI API Call Functions ---
+    textInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') sendTextMessage();
+    });
 
-      // Function to call standard ChatGPT (Text only)
-      async function callChatGPTText(query) {
-        if (!openAIApiKey) { // Basic check if key exists
-             displayMessage("Chatbot", "Error: OpenAI API key is missing in the code.");
-             return; // Stop execution if key is missing
-        }
-        const apiUrl = "https://api.openai.com/v1/chat/completions";
-        spinnerContainer.style.display = 'flex'; // Show spinner
-
-        const payload = {
-          model: "gpt-3.5-turbo", // Standard text model
-          messages: [{ role: "user", content: query }]
+    imageInput.addEventListener('change', () => {
+      const file = imageInput.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const imageHTML = `<img src="${reader.result}" class="uploaded">`;
+          appendMessage(imageHTML, 'user');
+          // Simulate bot reply to image
+          setTimeout(() => {
+            appendMessage("Damn, you really showing off now 👀");
+          }, 600);
         };
-
-        try {
-          const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": "Bearer " + openAIApiKey
-            },
-            body: JSON.stringify(payload)
-          });
-
-          const data = await response.json();
-          spinnerContainer.style.display = 'none'; // Hide spinner
-
-          if (response.ok && data.choices && data.choices.length > 0) {
-            return data.choices[0].message.content.trim();
-          } else {
-             console.error("ChatGPT Text API Error:", data);
-             // Display specific error from API if available
-             displayMessage("Chatbot", `API Error: ${data.error?.message || 'Unknown API error'}`);
-             return null; // Indicate failure
-          }
-        } catch (error) {
-          spinnerContainer.style.display = 'none'; // Hide spinner
-          console.error("ChatGPT Text API Call Error:", error);
-          displayMessage("Chatbot", "Sorry, I encountered an error connecting to the API.");
-          return null; // Indicate failure
-        }
+        reader.readAsDataURL(file);
       }
-
-      // Function to call ChatGPT Vision API (Text + Image)
-      async function callChatGPTVision(textQuery, imageBase64) {
-          if (!openAIApiKey) {
-             displayMessage("Chatbot", "Error: OpenAI API key is missing in the code.");
-             return null; // Stop execution if key is missing
-          }
-          const model = "gpt-4-turbo";
-          const apiUrl = "https://api.openai.com/v1/chat/completions";
-          spinnerContainer.style.display = 'flex';
-
-          const payload = {
-              model: model,
-              messages: [
-                  {
-                      role: "user",
-                      content: [
-                          { type: "text", text: textQuery || "Describe this image." }, // Include text query or a default
-                          {
-                              type: "image_url",
-                              image_url: {
-                                  "url": imageBase64, // Pass the base64 data URI directly
-                                  // "detail": "low" // Optional: use "low" for faster, cheaper processing if high detail isn't needed
-                              }
-                          }
-                      ]
-                  }
-              ],
-              max_tokens: 400 // Increased token limit slightly for potentially detailed vision responses
-          };
-
-          try {
-              const response = await fetch(apiUrl, {
-                  method: "POST",
-                  headers: {
-                      "Content-Type": "application/json",
-                      "Authorization": "Bearer " + openAIApiKey
-                  },
-                  body: JSON.stringify(payload)
-              });
-
-              const data = await response.json();
-              spinnerContainer.style.display = 'none';
-
-             if (response.ok && data.choices && data.choices.length > 0) {
-                  return data.choices[0].message.content.trim();
-              } else {
-                  console.error("ChatGPT Vision API Error:", data);
-                  // Display specific error from API if available
-                  displayMessage("Chatbot", `Vision API Error: ${data.error?.message || 'Unknown API error'}`);
-                  return null; // Indicate failure
-              }
-          } catch (error) {
-              spinnerContainer.style.display = 'none';
-              console.error("ChatGPT Vision API Call Error:", error);
-              displayMessage("Chatbot", "Sorry, I encountered an error connecting to the vision API.");
-              return null; // Indicate failure
-          }
-      }
-
-
-      // --- Event Listeners ---
-
-      // Trigger hidden file input when upload button is clicked
-      uploadButton.addEventListener('click', () => {
-        imageInput.click();
-      });
-
-      // Handle file selection
-      imageInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-          // Limit file size (e.g., 5MB) - OpenAI Vision has limits (around 20MB)
-          const maxSize = 5 * 1024 * 1024; // 5 MB
-          if (file.size > maxSize) {
-             alert(`Image is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Please select an image smaller than 5 MB.`);
-             resetImageSelection();
-             return;
-          }
-
-          const reader = new FileReader();
-          reader.onloadstart = () => {
-             spinnerContainer.style.display = 'flex'; // Show spinner while reading file
-          };
-          reader.onloadend = function() {
-            selectedImageBase64 = reader.result; // Store base64 string
-            selectedFileName = file.name;
-            imagePreview.src = selectedImageBase64;
-            imagePreview.style.display = 'block'; // Show preview
-            imageFileName.textContent = `Selected: ${file.name}`; // Show filename
-            spinnerContainer.style.display = 'none'; // Hide spinner after reading
-          }
-          reader.onerror = () => {
-             spinnerContainer.style.display = 'none';
-             alert("Error reading the image file.");
-             resetImageSelection();
-          };
-          reader.readAsDataURL(file); // Read file as Data URL (base64)
-
-        } else if (file) {
-           // Reset if the selected file is not an image
-           alert("Please select a valid image file (png, jpg, jpeg, gif, webp).");
-           resetImageSelection();
-        } else {
-            // If no file selected (e.g., user cancelled)
-            resetImageSelection();
-        }
-      });
-
-      // Reset image selection state
-      function resetImageSelection() {
-          selectedImageBase64 = null;
-          selectedFileName = null;
-          imagePreview.style.display = 'none';
-          imagePreview.src = '#';
-          imageFileName.textContent = 'No image selected';
-          imageInput.value = ''; // Important to allow re-selecting the same file later
-      }
-
-      // Main function to handle sending messages (handles both text and image)
-      async function sendMessage() {
-        const textQuery = userInput.value.trim();
-        const imageToSend = selectedImageBase64; // Get the currently selected image
-        const imageFileNameToSend = selectedFileName;
-
-        // Only proceed if there's text OR an image
-        if (!textQuery && !imageToSend) {
-            return; // Do nothing if both are empty
-        }
-
-         // Check for API key presence before proceeding
-        if (!openAIApiKey) {
-             // Message already displayed by API call functions, but double-check
-             displayMessage("System", "Error: OpenAI API key is missing. Cannot send message.");
-             return;
-        }
-
-
-        // Display user message first
-        displayMessage("User", textQuery || "(Image Sent)", imageToSend); // Show text or placeholder, and image preview
-
-        // Clear inputs *after* grabbing data but *before* API call
-        const currentText = textQuery; // Keep text for API call
-        userInput.value = "";
-        resetImageSelection(); // Clear image selection state visually
-
-
-        // --- Logic to decide which API to call ---
-        let botResponse = null;
-        if (imageToSend) {
-            // If there's an image, always use the Vision API
-            botResponse = await callChatGPTVision(currentText, imageToSend);
-            // NOTE: We are NOT storing image-based Q&A in local storage for this example.
-        } else {
-            // If only text, use the original text logic (check local storage first)
-            const queryLower = currentText.toLowerCase();
-            let answer = checkLocalStorage(queryLower);
-
-            if (answer) {
-                botResponse = answer; // Use stored answer
-            } else {
-                // Call Text API if not in local storage
-                const gptResponse = await callChatGPTText(currentText);
-                if (gptResponse) { // Check if response is valid (not null)
-                    botResponse = gptResponse;
-                     // Store the new text-only question-answer pair if response seems valid
-                    if (!gptResponse.startsWith("Sorry,") && !gptResponse.startsWith("API Error:")) { // Avoid storing error messages
-                        teachings[queryLower] = gptResponse;
-                        try {
-                           localStorage.setItem('teachings', JSON.stringify(teachings));
-                        } catch (e) {
-                           console.error("Error saving to localStorage:", e);
-                           // Maybe clear some old teachings if storage is full
-                        }
-                    }
-                }
-                // If gptResponse was null (error occurred), botResponse remains null
-            }
-        }
-
-        // Display bot response only if one was successfully generated
-        if (botResponse) {
-             displayMessage("Chatbot", botResponse);
-        }
-        // If botResponse is null (due to API error or missing key), an error message
-        // should have already been displayed by the API call functions.
-      }
-
-      // Send button click
-      sendButton.addEventListener('click', sendMessage);
-
-      // Enter key in text input
-      userInput.addEventListener('keydown', (event) => {
-        // Check if Enter is pressed without Shift key (for multiline input if needed later)
-        if (event.key === "Enter" && !event.shiftKey) {
-          event.preventDefault(); // Prevent default newline insertion in input
-          sendMessage();
-        }
-      });
-
-      // Initial check for API Key on load
-      if (!openAIApiKey) {
-          displayMessage("System", "Error: OpenAI API Key is missing. Please add it to the script section.");
-      }
-
     });
   </script>
-</body>
 
+</body>
 </html>
