@@ -195,10 +195,10 @@
       const spinnerContainer = document.getElementById('spinner-container');
 
       // --- API Keys (VERY INSECURE - Use a backend in production!) ---
-      // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-      // PASTE YOUR **VALID** OPENAI API SECRET KEY HERE:
-      const openAIApiKey = "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";
-      // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+      // WARNING: The key below was provided by the user and is EXPOSED.
+      // REVOKE THIS KEY IMMEDIATELY: https://platform.openai.com/account/api-keys
+      const openAIApiKey = "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";
+      // --- End Exposed API Key ---
       const deepSeekApiKey = "sk-87fa4efb1c6c483f9e96f9942a88fdb6"; // Your DeepSeek Key (currently unused but available)
       // --- End API Keys ---
 
@@ -236,8 +236,8 @@
 
       // Function to call standard ChatGPT (Text only)
       async function callChatGPTText(query) {
-        if (!openAIApiKey || openAIApiKey === "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") {
-             displayMessage("Chatbot", "Error: OpenAI API key is missing or not set in the code.");
+        if (!openAIApiKey) { // Basic check if key exists
+             displayMessage("Chatbot", "Error: OpenAI API key is missing in the code.");
              return; // Stop execution if key is missing
         }
         const apiUrl = "https://api.openai.com/v1/chat/completions";
@@ -265,20 +265,23 @@
             return data.choices[0].message.content.trim();
           } else {
              console.error("ChatGPT Text API Error:", data);
-             return `Sorry, I couldn't get a response. Error: ${data.error?.message || 'Unknown API error'}`;
+             // Display specific error from API if available
+             displayMessage("Chatbot", `API Error: ${data.error?.message || 'Unknown API error'}`);
+             return null; // Indicate failure
           }
         } catch (error) {
           spinnerContainer.style.display = 'none'; // Hide spinner
           console.error("ChatGPT Text API Call Error:", error);
-          return "Sorry, I encountered an error connecting to the API.";
+          displayMessage("Chatbot", "Sorry, I encountered an error connecting to the API.");
+          return null; // Indicate failure
         }
       }
 
       // Function to call ChatGPT Vision API (Text + Image)
       async function callChatGPTVision(textQuery, imageBase64) {
-          if (!openAIApiKey || openAIApiKey === "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") {
-             displayMessage("Chatbot", "Error: OpenAI API key is missing or not set in the code.");
-             return; // Stop execution if key is missing
+          if (!openAIApiKey) {
+             displayMessage("Chatbot", "Error: OpenAI API key is missing in the code.");
+             return null; // Stop execution if key is missing
           }
           const model = "gpt-4-turbo";
           const apiUrl = "https://api.openai.com/v1/chat/completions";
@@ -321,12 +324,15 @@
                   return data.choices[0].message.content.trim();
               } else {
                   console.error("ChatGPT Vision API Error:", data);
-                  return `Sorry, I couldn't get a response from the vision model. Error: ${data.error?.message || 'Unknown API error'}`;
+                  // Display specific error from API if available
+                  displayMessage("Chatbot", `Vision API Error: ${data.error?.message || 'Unknown API error'}`);
+                  return null; // Indicate failure
               }
           } catch (error) {
               spinnerContainer.style.display = 'none';
               console.error("ChatGPT Vision API Call Error:", error);
-              return "Sorry, I encountered an error connecting to the vision API.";
+              displayMessage("Chatbot", "Sorry, I encountered an error connecting to the vision API.");
+              return null; // Indicate failure
           }
       }
 
@@ -401,8 +407,9 @@
         }
 
          // Check for API key presence before proceeding
-        if (!openAIApiKey || openAIApiKey === "YOUR_VALID_OPENAI_API_KEY_HERE") {
-             displayMessage("Chatbot", "Error: OpenAI API key is missing or not set in the code. Cannot send message.");
+        if (!openAIApiKey) {
+             // Message already displayed by API call functions, but double-check
+             displayMessage("System", "Error: OpenAI API key is missing. Cannot send message.");
              return;
         }
 
@@ -432,10 +439,10 @@
             } else {
                 // Call Text API if not in local storage
                 const gptResponse = await callChatGPTText(currentText);
-                if (gptResponse) { // Check if response is valid
+                if (gptResponse) { // Check if response is valid (not null)
                     botResponse = gptResponse;
                      // Store the new text-only question-answer pair if response seems valid
-                    if (!gptResponse.startsWith("Sorry,") && !gptResponse.startsWith("Error:")) { // Avoid storing error messages
+                    if (!gptResponse.startsWith("Sorry,") && !gptResponse.startsWith("API Error:")) { // Avoid storing error messages
                         teachings[queryLower] = gptResponse;
                         try {
                            localStorage.setItem('teachings', JSON.stringify(teachings));
@@ -444,18 +451,17 @@
                            // Maybe clear some old teachings if storage is full
                         }
                     }
-                } else {
-                   // Handle case where callChatGPTText might return undefined/null (though unlikely with current returns)
-                   botResponse = "Sorry, something went wrong fetching the text response.";
                 }
+                // If gptResponse was null (error occurred), botResponse remains null
             }
         }
 
-        // Display bot response if one was generated
+        // Display bot response only if one was successfully generated
         if (botResponse) {
              displayMessage("Chatbot", botResponse);
         }
-        // If botResponse is null/undefined (e.g., API key missing message already shown), do nothing more
+        // If botResponse is null (due to API error or missing key), an error message
+        // should have already been displayed by the API call functions.
       }
 
       // Send button click
@@ -471,8 +477,8 @@
       });
 
       // Initial check for API Key on load
-      if (!openAIApiKey || openAIApiKey === "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") {
-          displayMessage("System", "Warning: OpenAI API Key is missing. Please add it to the script section.");
+      if (!openAIApiKey) {
+          displayMessage("System", "Error: OpenAI API Key is missing. Please add it to the script section.");
       }
 
     });
