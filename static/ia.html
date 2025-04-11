@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,6 +27,7 @@
       padding: 20px;
       color: #f1f1f1;
     }
+
     h1 {
       text-align: center;
       color: #f1f1f1;
@@ -37,6 +39,7 @@
       margin: 0 auto 20px auto;
       text-align: center;
     }
+
     .tabButton {
       padding: 10px 20px;
       margin: 0 5px;
@@ -46,6 +49,7 @@
       border-radius: 5px;
       color: #f1f1f1;
     }
+
     .tabButton.active {
       background-color: #007bff;
       border-color: #007bff;
@@ -57,6 +61,7 @@
       max-width: 600px;
       margin: 0 auto;
     }
+
     .tabContent.active {
       display: block;
     }
@@ -69,33 +74,45 @@
       border-radius: 10px;
       margin-bottom: 20px;
     }
+
     #messages {
       list-style: none;
       padding: 0;
       max-height: 400px;
       overflow-y: auto;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
+
     #messages li {
       padding: 10px;
       margin-bottom: 10px;
       border-bottom: 1px solid #444;
     }
 
-    /* Chat Input Row */
+    /* Chat Input Area */
+    #inputArea {
+      background: #333;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
     #input {
       display: flex;
       align-items: center;
-      gap: 10px; /* Spacing between input and buttons */
+      gap: 10px;
+      /* Spacing between input and buttons */
     }
+
     #userInput {
       flex: 1;
       padding: 10px;
       border: 1px solid #555;
       border-radius: 5px;
-      background: #333;
+      background: #444;
       color: #f1f1f1;
     }
+
     #send,
     #uploadBtn {
       padding: 10px 20px;
@@ -105,17 +122,21 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
     #send:hover,
     #uploadBtn:hover {
       background-color: #0056b3;
     }
+
     #send:disabled,
     #uploadBtn:disabled {
       background-color: #555;
       cursor: not-allowed;
     }
+
     #imageFile {
-      display: none; /* Hidden file input */
+      display: none;
+      /* Hidden file input */
     }
 
     .spinner-container {
@@ -130,6 +151,7 @@
       background-color: rgba(0, 0, 0, 0.4);
       z-index: 1000;
     }
+
     .spinner {
       border: 16px solid #333;
       border-top: 16px solid #007bff;
@@ -138,10 +160,12 @@
       height: 120px;
       animation: spin 2s linear infinite;
     }
+
     @keyframes spin {
       0% {
         transform: rotate(0deg);
       }
+
       100% {
         transform: rotate(360deg);
       }
@@ -153,6 +177,7 @@
       border-radius: 5px;
       align-self: flex-end;
     }
+
     .chatbot-message {
       background-color: #007bff;
       border-radius: 5px;
@@ -167,31 +192,71 @@
       border-radius: 5px;
       margin-top: 5px;
     }
+
+    /* Input Display Area (like Gemini) */
+    #inputDisplay {
+      padding: 10px;
+      border-bottom: 1px solid #444;
+      margin-bottom: 10px;
+      color: #f1f1f1;
+      overflow-wrap: break-word;
+    }
+
+    #imagePreview {
+      max-width: 100%;
+      max-height: 200px;
+      margin-top: 5px;
+      border-radius: 5px;
+    }
   </style>
 </head>
+
 <body>
   <div id="chatInterface">
     <h1>Copilot Chat</h1>
     <div id="tabBar">
       <button class="tabButton active" data-tab="chatTab">Chat</button>
+      <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
       <button class="tabButton" data-tab="configureTab">Configure Chatbot</button>
     </div>
     <div id="chatTab" class="tabContent active">
       <div id="chat">
         <ul id="messages"></ul>
-        <div id="input">
-          <input type="text" id="userInput" placeholder="Type your message here..." />
-          <button id="uploadBtn" title="Upload Image">＋</button>
-          <input type="file" id="imageFile" accept="image/*" />
-          <button id="send">Send</button>
+        <div id="inputArea">
+          <div id="inputDisplay"></div>
+          <img id="imagePreview" src="" style="display: none;">
+          <div id="input">
+            <input type="text" id="userInput" placeholder="Type your message here..." />
+            <button id="send">Send</button>
+            <button id="uploadBtn" title="Upload Image">＋</button>
+            <input type="file" id="imageFile" accept="image/*" />
+          </div>
         </div>
+      </div>
+    </div>
+    <div id="teachTab" class="tabContent">
+      <h3>Teach Chatbot</h3>
+      <p>Enter a question and its corresponding answer to update the chatbot’s responses.</p>
+      <form id="teachForm">
+        <input type="text" id="teachQuestion" placeholder="Question (e.g., what's 100x100?)" required />
+        <input type="text" id="teachAnswer" placeholder="Answer (e.g., 10000)" required />
+        <button type="submit">Save Correction</button>
+      </form>
+      <button id="teachBasic">Teach Chatbot Basics</button>
+      <ul id="teachList"></ul>
+      <div id="importSection">
+        <h4>Import Teaching Data</h4>
+        <input type="text" id="importSubject" placeholder="Subject (e.g., math)" required />
+        <input type="url" id="importLink" placeholder="URL to import teaching data" required />
+        <button id="importButton">Import Teaching Data</button>
       </div>
     </div>
     <div id="configureTab" class="tabContent">
       <h3>Configure Chatbot Personality</h3>
       <p>Enter a custom personality or configuration prompt for your chatbot.</p>
       <form id="configForm">
-        <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty assistant who loves helping with school work." required></textarea>
+        <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty assistant who loves helping with school work."
+          required></textarea>
         <button type="submit">Save Configuration</button>
       </form>
     </div>
@@ -202,175 +267,163 @@
   </div>
 
   <script>
+    // Wrap all event registration and initialization in DOMContentLoaded to ensure elements are loaded.
     document.addEventListener("DOMContentLoaded", function() {
-      const messages = document.getElementById('messages');
-      const userInput = document.getElementById('userInput');
-      const sendButton = document.getElementById('send');
-      const uploadButton = document.getElementById('uploadBtn');
-      const imageFile = document.getElementById('imageFile');
-      const spinnerContainer = document.getElementById('spinner-container');
-      const tabBar = document.getElementById('tabBar');
-      const tabButtons = tabBar.querySelectorAll('.tabButton');
-      const tabContents = document.querySelectorAll('.tabContent');
-      const configForm = document.getElementById('configForm');
-      const chatbotPersonalityInput = document.getElementById('chatbotPersonality');
 
-      // Load chatbot personality from local storage
-      let chatbotPersonality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant.";
-      chatbotPersonalityInput.value = chatbotPersonality;
-
-      // Load teachings from local storage
+      /***** TEACHING DATA MANAGEMENT *****/
       let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
 
-      let currentImageBase64 = null; // To store the base64 of the selected image
+      function updateTeachList() {
+        const teachList = document.getElementById('teachList');
+        teachList.innerHTML = '';
+        for (let key in teachings) {
+          const li = document.createElement('li');
+          li.textContent = `${key} --> ${teachings[key]}`;
 
-      // Function to display messages
-      function displayMessage(sender, message, isImage = false, imageUrl = null) {
-        const li = document.createElement('li');
-        li.classList.add(sender === "User" ? "user-message" : "chatbot-message");
-
-        if (isImage && imageUrl) {
-          const img = document.createElement('img');
-          img.src = imageUrl;
-          img.classList.add("message-image");
-          li.textContent = `${sender}: `;
-          li.appendChild(img);
-        } else {
-          li.textContent = `${sender}: ${message}`;
-        }
-
-        messages.appendChild(li);
-        messages.scrollTop = messages.scrollHeight;
-      }
-
-      // Function to check local storage for an answer
-      function checkLocalStorage(query) {
-        query = query.toLowerCase();
-        if (teachings[query]) {
-          return teachings[query];
-        }
-        return null;
-      }
-
-      // Function to call ChatGPT API
-      async function callChatGPT(query, imageBase64 = null) {
-        const apiKey = ""; // Replace with your actual API key
-        const apiUrl = "https://api.openai.com/v1/chat/completions";
-        const headers = {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        };
-        const messagesPayload = [{ role: "user", content: query }];
-        if (imageBase64) {
-          messagesPayload[0].content = [
-            { type: "text", text: query },
-            { type: "image_url", image_url: { "url": imageBase64 } }
-          ];
-        }
-
-        const payload = {
-          model: "gpt-4-vision-preview", // Or your preferred vision model
-          messages: messagesPayload,
-          max_tokens: 300 // Adjust as needed
-        };
-
-        spinnerContainer.style.display = 'flex';
-        try {
-          const response = await fetch(apiUrl, { method: "POST", headers: headers, body: JSON.stringify(payload) });
-          const data = await response.json();
-          spinnerContainer.style.display = 'none';
-          if (data.choices && data.choices.length > 0) {
-            return data.choices[0].message.content.trim();
-          } else {
-            return "Sorry, I couldn't get a response from the AI.";
-          }
-        } catch (error) {
-          spinnerContainer.style.display = 'none';
-          console.error("ChatGPT API Error:", error);
-          return "Sorry, I encountered an error while trying to get an answer.";
+          teachList.appendChild(li);
         }
       }
+      updateTeachList();
 
-      // Main function to handle sending messages
-      async function sendMessage() {
-        const query = userInput.value.trim();
-        if (query || currentImageBase64) {
-          displayMessage("User", query, currentImageBase64 !== null, currentImageBase64);
-          userInput.value = "";
-
-          let combinedQuery = query;
-          if (currentImageBase64) {
-            combinedQuery = `Analyze this image and ${query ? query : 'tell me what\'s in it'}`;
-          }
-
-          let answer = checkLocalStorage(combinedQuery);
-
-          if (answer) {
-            displayMessage("Chatbot", answer, false, null);
-          } else {
-            const gptResponse = await callChatGPT(combinedQuery, currentImageBase64);
-            displayMessage("Chatbot", gptResponse, false, null);
-
-            // Store the new question-answer pair
-            teachings[combinedQuery] = gptResponse;
-            localStorage.setItem('teachings', JSON.stringify(teachings));
-          }
-          currentImageBase64 = null; // Reset after sending
-        }
-      }
-
-      // Function to handle image uploads
-      function handleImageUpload(event) {
-        const file = event.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            currentImageBase64 = e.target.result;
-            displayMessage("User", "Image selected. Add text and click Send.", true, currentImageBase64);
-          };
-          reader.readAsDataURL(file);
-        }
-      }
-
-      // Event listeners for tabs
-      tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          tabButtons.forEach(btn => btn.classList.remove('active'));
-          tabContents.forEach(content => content.classList.remove('active'));
-          this.classList.add('active');
-          document.getElementById(this.getAttribute('data-tab')).classList.add('active');
-        });
-      });
-
-      // Event listener for send button
-      sendButton.addEventListener('click', sendMessage);
-
-      // Event listener for image upload button
-      uploadButton.addEventListener('click', () => {
-        imageFile.click(); // Trigger the file input
-      });
-
-      // Event listener for image file change
-      imageFile.addEventListener('change', handleImageUpload);
-
-      // Event listener for configure chatbot form
-      configForm.addEventListener('submit', function(e) {
+      document.getElementById('teachForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        const personality = chatbotPersonalityInput.value.trim();
-        if (personality) {
-          localStorage.setItem('chatbot_personality', personality);
-          chatbotPersonality = personality;
-          alert("Chatbot personality updated!");
-        }
-      });
+        const question = document.getElementById('teachQuestion').value.trim().toLowerCase();
+        const answer = document.getElementById('teachAnswer').value.trim();
+        if (question && answer) {
+          teachings[question] = answer;
 
-      // Handle Enter key press in input field
-      userInput.addEventListener('keydown', (event) => {
-        if (event.key === "Enter") {
-          sendMessage();
+          localStorage.setItem('teachings', JSON.stringify(teachings));
+          updateTeachList();
+          alert('Teaching saved!');
+          document.getElementById('teachQuestion').value = '';
+          document.getElementById('teachAnswer').value = '';
         }
       });
-    });
-  </script>
-</body>
-</html>
+      document.getElementById('teachBasic').addEventListener('click', function() {
+        const basics = {
+          "what is 2+2": "4",
+          "what is 10 divided by 2": "5",
+          "who discovered america": "Christopher Columbus",
+          "when did world war ii end": "1945",
+          "what is photosynthesis": "Photosynthesis is the process by which green plants use sunlight to synthesize foods from CO₂ and water.",
+          "what is gravity": "Gravity is the force of attraction between two masses.",
+          "what is a thesis statement": "A thesis statement is a concise summary of the main point of an essay or research paper.",
+          "what is an essay": "An essay is a short piece of writing on a particular subject."
+        };
+        teachings = {
+          ...basics,
+          ...teachings
+        };
+
+        localStorage.setItem('teachings', JSON.stringify(teachings));
+        updateTeachList();
+        alert('Basic teachings added!');
+      });
+      document.getElementById('importButton').addEventListener('click', async function() {
+        const subject = document.getElementById('importSubject').value.trim().toLowerCase();
+        const url = document.getElementById('importLink').value.trim();
+        if (!subject || !url) {
+          alert("Please enter both a subject and a URL.");
+          return;
+        }
+        try {
+          document.getElementById('spinner-container').style.display = 'flex';
+
+          const response = await fetch(url);
+          document.getElementById('spinner-container').style.display = 'none';
+          if (!response.ok) {
+            alert("Failed to fetch content from the URL.");
+            return;
+          }
+          const contentType = response.headers.get("content-type");
+          let importedContent = "";
+
+          if (contentType && contentType.includes("text/html")) {
+            const htmlText = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlText, "text/html");
+            importedContent = doc.body.innerText;
+            // Extract equations from the content
+            const equations = extractEquations(importedContent);
+            if (equations.length > 0) {
+              importedContent += "\nExtracted Equations:\n" + equations.join("\n");
+            }
+          } else {
+            importedContent = await response.text();
+          }
+          if (!importedContent) {
+            alert("No teaching data was found at the provided URL.");
+            return;
+          }
+          if (!importedContent.toLowerCase().includes(subject)) {
+            alert("Warning: The imported content does not appear to relate to the subject.");
+          }
+          if (teachings[subject]) {
+            teachings[subject] += "\n" + importedContent;
+          } else {
+            teachings[subject] = importedContent;
+          }
+          localStorage.setItem('teachings', JSON.stringify(teachings));
+          updateTeachList();
+          alert("Teaching data imported successfully!");
+          document.getElementById('importSubject').value = "";
+          document.getElementById('importLink').value = "";
+        } catch (err) {
+          document.getElementById('spinner-container').style.display = 'none';
+          alert("Error importing teaching data: " + err.message);
+        }
+      });
+      async function loadDefaultTeachingData() {
+        const defaultData = [{
+            subject: "math",
+            url: "https://www.education.com/resources/math/"
+          },
+          {
+            subject: "science",
+            url: "https://undsci.berkeley.edu/understanding-science-101/what-is-science/"
+          },
+          {
+            subject: "history",
+            url: "https://www.worldhistory.org/"
+          },
+          {
+            subject: "study skills",
+            url: "https://www.britannica.com/topic/education"
+          }
+        ];
+        for (let item of defaultData) {
+          let subject = item.subject.toLowerCase();
+          if (!teachings[subject]) {
+            try {
+              const res = await fetch(item.url);
+              if (res.ok) {
+                let content;
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.includes("text/html")) {
+                  const htmlText = await res.text();
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(htmlText, "text/html");
+                  content = doc.body.innerText;
+                  const equations = extractEquations(content);
+                  if (equations.length > 0) {
+                    content += "\nExtracted Equations:\n" + equations.join("\n");
+                  }
+                } else {
+                  content = await res.text();
+                }
+                teachings[subject] = content;
+                localStorage.setItem('teachings', JSON.stringify(teachings));
+                updateTeachList();
+              } else {
+                console.log("Failed to fetch default data for subject:", subject);
+              }
+            } catch (e) {
+              console.error("Error fetching default data for subject:", subject, e);
+            }
+          }
+        }
+      }
+      loadDefaultTeachingData();
+      /***** CONFIGURE CHATBOT PERSONALITY *****/
+      let chatbotPersonality = localStorage.getItem('chatbot_personality') ||
+        "You are a helpful assistant. If you are unsure, provide your best informed guess.";
