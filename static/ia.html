@@ -7,7 +7,7 @@
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
-
+  
   <!-- Apple Touch Icons -->
   <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png" />
   <link rel="apple-touch-icon" sizes="512x512" href="apple-touch-icon.png" />
@@ -18,7 +18,7 @@
   <!-- Optional: Add-to-Homescreen CSS -->
   <link rel="stylesheet" href="./dist/add-to-homescreen.min.css" />
   
-  <!-- Particles.js (ensure your file is in the correct path) -->
+  <!-- Particles.js (ensure your particles.js is in the same directory or update the path) -->
   <script src="particles.js"></script>
   
   <!-- Additional libraries -->
@@ -26,7 +26,7 @@
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
   
   <style>
-    /* Particles.js background container */
+    /* PARTICLES BACKGROUND */
     #particles-js {
       position: fixed;
       top: 0;
@@ -48,7 +48,8 @@
       text-align: center;
       color: #f1f1f1;
     }
-    /* TOP TAB BAR */
+    
+    /* TOP TAB BAR & BUTTONS */
     #tabBar {
       max-width: 600px;
       margin: 0 auto 20px;
@@ -59,9 +60,9 @@
       margin: 0 5px;
       border: 1px solid #444;
       background-color: #333;
+      cursor: pointer;
       border-radius: 5px;
       color: #f1f1f1;
-      cursor: pointer;
       transition: background-color 0.3s ease, transform 0.2s ease;
     }
     .tabButton:hover {
@@ -71,7 +72,8 @@
       background-color: #007bff;
       border-color: #007bff;
     }
-    /* TAB CONTENT CONTAINERS */
+    
+    /* TAB CONTENT */
     .tabContent {
       display: none;
       max-width: 600px;
@@ -80,6 +82,7 @@
     .tabContent.active {
       display: block;
     }
+    
     /* CHAT CONTAINER */
     #chat {
       background: #2a2a2a;
@@ -106,6 +109,7 @@
       margin-bottom: 10px;
       border-bottom: 1px solid #444;
     }
+    
     /* CHAT INPUT ROW */
     #input {
       display: flex;
@@ -139,8 +143,10 @@
       background-color: #555;
       cursor: not-allowed;
     }
+    
     /* Hide file input element */
     #imageFile { display: none; }
+    
     /* SPINNER */
     .spinner-container {
       position: fixed;
@@ -162,11 +168,9 @@
       height: 120px;
       animation: spin 2s linear infinite;
     }
-    @keyframes spin { 
-      0% { transform: rotate(0deg); } 
-      100% { transform: rotate(360deg); } 
-    }
-    /* TEACH & CONFIGURE STYLING */
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    /* TEACH & CONFIGURE TABS STYLING */
     #teachForm, #configForm {
       display: flex;
       flex-direction: column;
@@ -195,7 +199,7 @@
       background-color: #0056b3;
       transform: scale(1.05);
     }
-    /* Button to load basic teachings */
+    /* Button to Load Basic Teachings */
     #teachBasic {
       margin-top: 10px;
       padding: 8px 16px;
@@ -238,7 +242,7 @@
       background-color: #138496;
       transform: scale(1.05);
     }
-    /* Teach List */
+    /* Teach List Styling */
     #teachList {
       margin-top: 20px;
       list-style: none;
@@ -248,7 +252,7 @@
       padding: 5px;
       border-bottom: 1px solid #444;
     }
-    /* Configure Chatbot Tab */
+    /* Configure Chatbot Tab Styling */
     #configForm textarea {
       width: 100%;
       min-height: 100px;
@@ -322,7 +326,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       
-      /***** PARTICLES.JS INITIALIZATION *****/
+      // Initialize particles.js background if available.
       if (window.particlesJS) {
         particlesJS("particles-js", {
           "particles": {
@@ -340,10 +344,7 @@
               "onclick": { "enable": true, "mode": "push" },
               "resize": true
             },
-            "modes": {
-              "repulse": { "distance": 200 },
-              "push": { "particles_nb": 4 }
-            }
+            "modes": { "repulse": { "distance": 200 }, "push": { "particles_nb": 4 } }
           },
           "retina_detect": true
         });
@@ -351,7 +352,8 @@
       
       /***** TEACHING DATA MANAGEMENT ******/
       let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
-      // Preload basic teachings if none exist.
+      
+      // Preload basic teachings
       const basicTeachings = {
         "who was the first president of the usa": "George Washington",
         "what is 1 plus 1": "2",
@@ -429,7 +431,7 @@
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlText, "text/html");
             importedContent = doc.body.innerText;
-            // Optionally, extract math equations from the content
+            // Extract equations from content
             const equations = extractEquations(importedContent);
             if (equations.length > 0) {
               importedContent += "\nExtracted Equations:\n" + equations.join("\n");
@@ -535,8 +537,7 @@
       }
       
       /***** CHATBOT FUNCTIONALITY ******/
-      
-      // Fuzzy matching: Search stored teachings for similar question.
+      // Fuzzy matching: try to find a similar question
       function findMatchingTeaching(query) {
         query = query.toLowerCase();
         let queryWords = query.split(/\s+/);
@@ -545,7 +546,7 @@
         for (let key in teachings) {
           let keyWords = key.toLowerCase().split(/\s+/);
           let commonCount = queryWords.filter(word => keyWords.includes(word)).length;
-          if (commonCount > highestScore && commonCount >= 2) {  // threshold: at least 2 common words
+          if (commonCount > highestScore && commonCount >= 2) {
             highestScore = commonCount;
             bestMatch = teachings[key];
           }
@@ -553,7 +554,7 @@
         return bestMatch;
       }
       
-      // Helper: Try an external source then store the answer if acceptable.
+      // Helper: Call an external API and store answer if acceptable.
       async function getAndStoreAnswer(userInput, fetchFunction) {
         let ans = await fetchFunction(userInput);
         if (isAcceptable(ans)) {
@@ -565,7 +566,7 @@
         return "";
       }
       
-      // ChatGPT function (primary source)
+      // ChatGPT (primary external API)
       async function chatGPT(userInput) {
         const apiKey = "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";
         const apiUrl = "https://api.openai.com/v1/chat/completions";
@@ -596,7 +597,7 @@
         }
       }
       
-      // Fallback source: DuckDuckGo search
+      // Fallback: DuckDuckGo search
       async function duckDuckGoSearch(query) {
         const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
         try {
@@ -612,7 +613,7 @@
         }
       }
       
-      // Conversation dataset search (optional fallback)
+      // Fallback: Conversation dataset search
       async function conversationDatasetSearch(query) {
         try {
           const datasetUrl = "https://raw.githubusercontent.com/PolyAI-LDN/conversational-datasets/master/conversations.json";
@@ -634,7 +635,7 @@
         }
       }
       
-      // Check if an answer is acceptable (non-empty and doesn't indicate error)
+      // Check if an answer is acceptable
       function isAcceptable(answer) {
         if (!answer) return false;
         const clean = answer.trim().toLowerCase();
@@ -645,11 +646,11 @@
       }
       
       async function generateResponse(userInput) {
-        // 1. Try fuzzy matching from local teachings.
+        // 1. Fuzzy matching from teachings:
         let fuzzyMatch = findMatchingTeaching(userInput);
         if (fuzzyMatch) return fuzzyMatch;
         
-        // 2. Try searching a conversation dataset.
+        // 2. Try conversation dataset.
         let convAnswer = await conversationDatasetSearch(userInput);
         if (isAcceptable(convAnswer)) {
           teachings[userInput.trim().toLowerCase()] = convAnswer;
@@ -716,85 +717,4 @@
             try {
               const processedSrc = await preprocessImage(e.target.result);
               document.getElementById('spinner-container').style.display = 'flex';
-              let { data: { text } } = await Tesseract.recognize(processedSrc, "eng");
-              document.getElementById('spinner-container').style.display = 'none';
-              text = text.replace(/[«»‘’“”]/g, "").trim();
-              const extractedTextMsg = document.createElement('li');
-              extractedTextMsg.textContent = "Extracted Text from Image: " + text;
-              messages.appendChild(extractedTextMsg);
-              const deepResponse = await deepSeekChat(text);
-              const deepResponseMsg = document.createElement('li');
-              deepResponseMsg.textContent = "Chatbot: " + deepResponse;
-              messages.appendChild(deepResponseMsg);
-            } catch (err) {
-              document.getElementById('spinner-container').style.display = 'none';
-              const errorMsg = document.createElement('li');
-              errorMsg.textContent = "Error in OCR or pre-processing: " + err.message;
-              messages.appendChild(errorMsg);
-            }
-          };
-          reader.readAsDataURL(file);
-        } else {
-          alert("No file selected.");
-        }
-      });
-      
-      function preprocessImage(imageSrc) {
-        return new Promise((resolve, reject) => {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          const img = new Image();
-          img.crossOrigin = "Anonymous";
-          img.src = imageSrc;
-          img.onload = () => {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            for (let i = 0; i < data.length; i += 4) {
-              let avg = (data[i] + data[i+1] + data[i+2]) / 3;
-              data[i] = avg;
-              data[i+1] = avg;
-              data[i+2] = avg;
-            }
-            ctx.putImageData(imageData, 0, 0);
-            resolve(canvas.toDataURL());
-          };
-          img.onerror = (err) => reject(err);
-        });
-      }
-      
-      // Listen for changes in localStorage "teachings" (sync with admin panel)
-      window.addEventListener('storage', function(e) {
-        if (e.key === 'teachings') {
-          teachings = JSON.parse(e.newValue) || {};
-          updateTeachList();
-        }
-      });
-      
-      // Add-to-Homescreen (if available)
-      window.addEventListener("load", function() {
-        if (window.AddToHomeScreen) {
-          window.AddToHomeScreenInstance = window.AddToHomeScreen({
-            appName: "Copilot Chat",
-            appIconUrl: "apple-touch-icon.png",
-            appNameDisplay: "standalone",
-            assetUrl: "./dist/assets/",
-            maxModalDisplayCount: -1,
-            displayOptions: { showMobile: true, showDesktop: true },
-            allowClose: true,
-            showArrow: false
-          });
-          window.AddToHomeScreenInstance.show();
-        }
-      });
-      
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/service-worker.js")
-          .then(() => console.log("Service Worker registered!"))
-          .catch(err => console.error("Service Worker registration failed!", err));
-    });
-  </script>
-</body>
-</html>
+              let { data
