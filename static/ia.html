@@ -106,7 +106,6 @@
     }
 
     #send,
-    #voiceChat,
     #uploadBtn {
       padding: 10px 20px;
       border: none;
@@ -118,13 +117,11 @@
     }
 
     #send:hover,
-    #voiceChat:hover,
     #uploadBtn:hover {
       background-color: #0056b3;
     }
 
     #send:disabled,
-    #voiceChat:disabled,
     #uploadBtn:disabled {
       background-color: #555;
       cursor: not-allowed;
@@ -263,7 +260,6 @@
     <h1>Copilot Chat</h1>
     <div id="tabBar">
       <button class="tabButton active" data-tab="chatTab">Chat</button>
-      <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
       <button class="tabButton" data-tab="configureTab">Configure Chatbot</button>
     </div>
     <div id="chatTab" class="tabContent active">
@@ -272,27 +268,9 @@
         <div id="input">
           <input type="text" id="userInput" placeholder="Type your message here..." />
           <button id="send">Send</button>
-          <button id="voiceChat">Voice Chat</button>
           <button id="uploadBtn" title="Upload Image">＋</button>
           <input type="file" id="imageFile" accept="image/*" />
         </div>
-      </div>
-    </div>
-    <div id="teachTab" class="tabContent">
-      <h3>Teach Chatbot</h3>
-      <p>Enter a question and its corresponding answer to update the chatbot’s responses.</p>
-      <form id="teachForm">
-        <input type="text" id="teachQuestion" placeholder="Question (e.g., what's 100x100?)" required />
-        <input type="text" id="teachAnswer" placeholder="Answer (e.g., 10000)" required />
-        <button type="submit">Save Correction</button>
-      </form>
-      <button id="teachBasic">Teach Chatbot Basics</button>
-      <ul id="teachList"></ul>
-      <div id="importSection">
-        <h4>Import Teaching Data</h4>
-        <input type="text" id="importSubject" placeholder="Subject (e.g., math)" required />
-        <input type="url" id="importLink" placeholder="URL to import teaching data" required />
-        <button id="importButton">Import Teaching Data</button>
       </div>
     </div>
     <div id="configureTab" class="tabContent">
@@ -329,136 +307,163 @@
       }
       updateTeachList();
 
-      document.getElementById('teachForm').addEventListener('submit', function(e) {
+      /***** CONFIGURE CHATBOT PERSONALITY *****/
+      let chatbotPersonality = localStorage.getItem('chatbot_personality') ||
+        "You are a helpful assistant. If you are unsure, provide your best informed guess.";
+      document.getElementById('chatbotPersonality').value = chatbotPersonality;
+      document.getElementById('configForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        const question = document.getElementById('teachQuestion').value.trim().toLowerCase();
-        const answer = document.getElementById('teachAnswer').value.trim();
-        if (question && answer) {
-          teachings[question] = answer;
-
-          localStorage.setItem('teachings', JSON.stringify(teachings));
-          updateTeachList();
-          alert('Teaching saved!');
-          document.getElementById('teachQuestion').value = '';
-          document.getElementById('teachAnswer').value = '';
+        const personality = document.getElementById('chatbotPersonality').value.trim();
+        if (personality) {
+          localStorage.setItem('chatbot_personality', personality);
+          alert("Chatbot personality updated!");
         }
       });
-      document.getElementById('teachBasic').addEventListener('click', function() {
-        const basics = {
-          "what is 2+2": "4",
-          "what is 10 divided by 2": "5",
-          "who discovered america": "Christopher Columbus",
-          "when did world war ii end": "1945",
-          "what is photosynthesis": "Photosynthesis is the process by which green plants use sunlight to synthesize foods from CO₂ and water.",
-          "what is gravity": "Gravity is the force of attraction between two masses.",
-          "what is a thesis statement": "A thesis statement is a concise summary of the main point of an essay or research paper.",
-          "what is an essay": "An essay is a short piece of writing on a particular subject."
-        };
-        teachings = {
-          ...basics,
-          ...teachings
-        };
 
-        localStorage.setItem('teachings', JSON.stringify(teachings));
-        updateTeachList();
-        alert('Basic teachings added!');
+      /***** TAB SWITCHING LOGIC *****/
+      const tabButtons = document.querySelectorAll('.tabButton');
+      const tabContents = document.querySelectorAll('.tabContent');
+      tabButtons.forEach((button) => {
+        button.addEventListener('click', function() {
+          tabButtons.forEach((btn) => btn.classList.remove('active'));
+          tabContents.forEach((content) => content.classList.remove('active'));
+          this.classList.add('active');
+          document.getElementById(this.getAttribute('data-tab')).classList.add('active');
+        });
       });
-      document.getElementById('importButton').addEventListener('click', async function() {
-        const subject = document.getElementById('importSubject').value.trim().toLowerCase();
-        const url = document.getElementById('importLink').value.trim();
-        if (!subject || !url) {
-          alert("Please enter both a subject and a URL.");
-          return;
+
+      /***** Helper: Extract Equations from Text *****/
+      function extractEquations(text) {
+        // This regex extracts basic math equations (e.g., "2+2", "3 * 4", etc.)
+        const regex = /[0-9]+(?:\.[0-9]+)?\s*[\+\-\*\/=]\s*[0-9]+(?:\.[0-9]+)?/g;
+        const matches = text.match(regex);
+        return matches ? matches : [];
+      }
+
+      /***** CHATBOT FUNCTIONALITY *****/
+      async function chatGPT(userInput) {
+        const apiKey = "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";
+        const apiUrl = "https://api.openai.com/v1/chat/completions";
+        const payload = {
+          model: "gpt-4",
+          messages: [{
+            role: "system",
+            content: localStorage.getItem('chatbot_personality') ||
+              "You are a helpful assistant."
+          }, {
+            role: "user",
+            content: userInput
+          }]
+        };
+        try {
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + apiKey
+            },
+            body: JSON.stringify(payload)
+          });
+          const data = await response.json();
+          if (data.choices && data.choices.length > 0) {
+            return data.choices[0].message.content.trim();
+          }
+          return "";
+        } catch (e) {
+          console.error("ChatGPT error:", e);
+          return "";
         }
+      }
+
+      async function deepSeekChat(userInput) {
+        const apiKey = "sk-69d23890c43e4b9d9eecbb4371c04f8d";
+        const url = "https://api.deepseek.com/chat/completions";
+        const personality = localStorage.getItem('chatbot_personality') || "You are a helpful assistant. If you are unsure, provide your best informed guess.";
+        const payload = {
+          model: "deepseek-chat",
+          messages: [{
+            role: "system",
+            content: personality
+          }, {
+            role: "user",
+            content: userInput
+          }],
+          stream: false
+        };
         try {
           document.getElementById('spinner-container').style.display = 'flex';
-
-          const response = await fetch(url);
+          const response = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + apiKey
+            },
+            body: JSON.stringify(payload)
+          });
           document.getElementById('spinner-container').style.display = 'none';
-          if (!response.ok) {
-            alert("Failed to fetch content from the URL.");
-            return;
+          const data = await response.json();
+          console.log("DeepSeek API response:", data);
+          if (data && data.choices && data.choices.length > 0) {
+            const answer = data.choices[0].message.content ||
+              data.choices[0].text || "";
+            return answer.trim();
           }
-          const contentType = response.headers.get("content-type");
-          let importedContent = "";
-
-          if (contentType && contentType.includes("text/html")) {
-            const htmlText = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(htmlText, "text/html");
-            importedContent = doc.body.innerText;
-            // Extract equations from the content
-            const equations = extractEquations(importedContent);
-            if (equations.length > 0) {
-              importedContent += "\nExtracted Equations:\n" + equations.join("\n");
-            }
-          } else {
-            importedContent = await response.text();
-          }
-          if (!importedContent) {
-            alert("No teaching data was found at the provided URL.");
-            return;
-          }
-          if (!importedContent.toLowerCase().includes(subject)) {
-            alert("Warning: The imported content does not appear to relate to the subject.");
-          }
-          if (teachings[subject]) {
-            teachings[subject] += "\n" + importedContent;
-          } else {
-            teachings[subject] = importedContent;
-          }
-          localStorage.setItem('teachings', JSON.stringify(teachings));
-          updateTeachList();
-          alert("Teaching data imported successfully!");
-          document.getElementById('importSubject').value = "";
-          document.getElementById('importLink').value = "";
-        } catch (err) {
+          return "";
+        } catch (error) {
           document.getElementById('spinner-container').style.display = 'none';
-          alert("Error importing teaching data: " + err.message);
+          console.error("DeepSeek error:", error);
+          return "";
         }
-      });
-      async function loadDefaultTeachingData() {
-        const defaultData = [
-          {
-            subject: "math",
-            url: "https://www.education.com/resources/math/"
-          },
-          {
-            subject: "science",
-            url: "https://undsci.berkeley.edu/understanding-science-101/what-is-science/"
-          },
-          {
-            subject: "history",
-            url: "https://www.worldhistory.org/"
-          },
-          {
-            subject: "study skills",
-            url: "https://www.britannica.com/topic/education"
+      }
+
+      async function duckDuckGoSearch(query) {
+        const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
+        try {
+          let response = await fetch(url);
+          let data = await response.json();
+          if (data.AbstractText && data.AbstractText.length > 0) {
+            return data.AbstractText;
           }
-        ];
-        for (let item of defaultData) {
-          let subject = item.subject.toLowerCase();
-          if (!teachings[subject]) {
-            try {
-              const res = await fetch(item.url);
-              if (res.ok) {
-                let content;
-                const contentType = res.headers.get("content-type");
-                if (contentType && contentType.includes("text/html")) {
-                  const htmlText = await res.text();
-                  const parser = new DOMParser();
-                  const doc = parser.parseFromString(htmlText, "text/html");
-                  content = doc.body.innerText;
-                  const equations = extractEquations(content);
-                  if (equations.length > 0) {
-                    content += "\nExtracted Equations:\n" + equations.join("\n");
-                  }
-                } else {
-                  content = await res.text();
-                }
-                teachings[subject] = content;
-                localStorage.setItem('teachings', JSON.stringify(teachings));
-                updateTeachList();
-              } else {
-                console.log("Failed to fetch default data for subject:", subject);
-              }
+          return "";
+        } catch (error) {
+          console.error("DuckDuckGo error:", error);
+          return "";
+        }
+      }
+
+      async function duckAISearch(query) {
+        try {
+          const url = `https://api.duck.ai/search?q=${encodeURIComponent(query)}`;
+          let response = await fetch(url);
+          let data = await response.json();
+          if (data.result && data.result.length > 0) {
+            return data.result;
+          }
+          return "";
+        } catch (error) {
+          console.error("duck.ai error:", error);
+          return "";
+        }
+      }
+
+      async function escosiaSearch(query) {
+        try {
+          const url = `https://api.escosia.com/search?q=${encodeURIComponent(query)}`;
+          let response = await fetch(url);
+          let data = await response.json();
+          if (data.answer && data.answer.length > 0) {
+            return data.answer;
+          }
+          return "";
+        } catch (error) {
+          console.error("Escosia error:", error);
+          return "";
+        }
+      }
+
+      async function torSearch(query) {
+        try {
+          const url = `https://api.torsearch.com/search?q=${encodeURIComponent(query)}`;
+          let response = await fetch(url);
+          let data = await response.json();
+          if (data.result && data.result.length > 0)
