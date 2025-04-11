@@ -29,6 +29,7 @@
       display: flex;
       flex-direction: column;
       /* Ensure chat content stacks vertically */
+      min-height: 500px; /* Give chat area some minimum height */
     }
 
     #messages {
@@ -49,12 +50,20 @@
       word-wrap: break-word;
       /* Prevent long words/URLs from overflowing */
     }
+     #messages li img {
+        max-width: 150px; /* Display smaller image in chat */
+        display: block;
+        margin-top: 5px;
+        border-radius: 5px;
+     }
+
 
     #input {
       display: flex;
       align-items: center;
       margin-top: auto;
       /* Push input to the bottom */
+      padding-top: 10px; /* Add some space above input */
     }
 
     #input input[type="text"] {
@@ -96,7 +105,9 @@
     /* Image Preview Area */
     #imagePreviewContainer {
         margin-top: 10px;
+        margin-bottom: 10px; /* Space between preview and input */
         text-align: center; /* Center the preview */
+        min-height: 30px; /* Reserve space even when empty */
     }
 
     #imagePreview {
@@ -184,8 +195,11 @@
       const spinnerContainer = document.getElementById('spinner-container');
 
       // --- API Keys (VERY INSECURE - Use a backend in production!) ---
-      const openAIApiKey = "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"; // Replace YOUR_API_KEY if needed, but revoke this one ASAP.
-      const deepSeekApiKey = "sk-87fa4efb1c6c483f9e96f9942a88fdb6"; // Your DeepSeek Key (currently unused in this example but available)
+      // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+      // PASTE YOUR **VALID** OPENAI API SECRET KEY HERE:
+      const openAIApiKey = "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";
+      // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+      const deepSeekApiKey = "sk-87fa4efb1c6c483f9e96f9942a88fdb6"; // Your DeepSeek Key (currently unused but available)
       // --- End API Keys ---
 
       let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
@@ -195,13 +209,14 @@
       // Function to display messages
       function displayMessage(sender, message, imageUrl = null) {
         const li = document.createElement('li');
-        li.textContent = `${sender}: ${message}`;
-        if (imageUrl) {
+        // Sanitize text content slightly to prevent accidental HTML injection
+        const textNode = document.createTextNode(`${sender}: ${message}`);
+        li.appendChild(textNode);
+
+        if (imageUrl && sender === "User") { // Only show preview for user's sent image
             const img = document.createElement('img');
             img.src = imageUrl;
-            img.style.maxWidth = '150px'; // Display smaller image in chat
-            img.style.display = 'block';
-            img.style.marginTop = '5px';
+            // Styles moved to CSS for better separation
             li.appendChild(img);
         }
         messages.appendChild(li);
@@ -221,6 +236,10 @@
 
       // Function to call standard ChatGPT (Text only)
       async function callChatGPTText(query) {
+        if (!openAIApiKey || openAIApiKey === "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") {
+             displayMessage("Chatbot", "Error: OpenAI API key is missing or not set in the code.");
+             return; // Stop execution if key is missing
+        }
         const apiUrl = "https://api.openai.com/v1/chat/completions";
         spinnerContainer.style.display = 'flex'; // Show spinner
 
@@ -246,24 +265,21 @@
             return data.choices[0].message.content.trim();
           } else {
              console.error("ChatGPT Text API Error:", data);
-             // Basic Fallback attempt (Optional - could add Deepseek here)
-             // if (!response.ok && deepSeekApiKey) {
-             //    console.log("Trying DeepSeek as fallback...");
-             //    // return await callDeepSeekAPI(query); // Need to implement callDeepSeekAPI
-             // }
-             return `Sorry, I couldn't get a response. Error: ${data.error?.message || 'Unknown error'}`;
+             return `Sorry, I couldn't get a response. Error: ${data.error?.message || 'Unknown API error'}`;
           }
         } catch (error) {
           spinnerContainer.style.display = 'none'; // Hide spinner
           console.error("ChatGPT Text API Call Error:", error);
-          return "Sorry, I encountered an error while trying to get an answer.";
+          return "Sorry, I encountered an error connecting to the API.";
         }
       }
 
       // Function to call ChatGPT Vision API (Text + Image)
       async function callChatGPTVision(textQuery, imageBase64) {
-          // Use gpt-4-turbo as it includes vision capabilities and is generally recommended
-          // gpt-4-vision-preview is an older alias you might see in examples.
+          if (!openAIApiKey || openAIApiKey === "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") {
+             displayMessage("Chatbot", "Error: OpenAI API key is missing or not set in the code.");
+             return; // Stop execution if key is missing
+          }
           const model = "gpt-4-turbo";
           const apiUrl = "https://api.openai.com/v1/chat/completions";
           spinnerContainer.style.display = 'flex';
@@ -278,14 +294,14 @@
                           {
                               type: "image_url",
                               image_url: {
-                                  "url": imageBase64 // Pass the base64 data URI directly
-                                  // Optional: "detail": "low" or "high" can be added here
+                                  "url": imageBase64, // Pass the base64 data URI directly
+                                  // "detail": "low" // Optional: use "low" for faster, cheaper processing if high detail isn't needed
                               }
                           }
                       ]
                   }
               ],
-              max_tokens: 300 // Adjust token limit as needed for vision responses
+              max_tokens: 400 // Increased token limit slightly for potentially detailed vision responses
           };
 
           try {
@@ -305,13 +321,12 @@
                   return data.choices[0].message.content.trim();
               } else {
                   console.error("ChatGPT Vision API Error:", data);
-                   // Optional: Add DeepSeek Vision API call here if available and needed
-                  return `Sorry, I couldn't get a response from the vision model. Error: ${data.error?.message || 'Unknown error'}`;
+                  return `Sorry, I couldn't get a response from the vision model. Error: ${data.error?.message || 'Unknown API error'}`;
               }
           } catch (error) {
               spinnerContainer.style.display = 'none';
               console.error("ChatGPT Vision API Call Error:", error);
-              return "Sorry, I encountered an error processing the image.";
+              return "Sorry, I encountered an error connecting to the vision API.";
           }
       }
 
@@ -327,21 +342,37 @@
       imageInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file && file.type.startsWith('image/')) {
-          const reader = new FileReader();
+          // Limit file size (e.g., 5MB) - OpenAI Vision has limits (around 20MB)
+          const maxSize = 5 * 1024 * 1024; // 5 MB
+          if (file.size > maxSize) {
+             alert(`Image is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Please select an image smaller than 5 MB.`);
+             resetImageSelection();
+             return;
+          }
 
+          const reader = new FileReader();
+          reader.onloadstart = () => {
+             spinnerContainer.style.display = 'flex'; // Show spinner while reading file
+          };
           reader.onloadend = function() {
             selectedImageBase64 = reader.result; // Store base64 string
             selectedFileName = file.name;
             imagePreview.src = selectedImageBase64;
             imagePreview.style.display = 'block'; // Show preview
             imageFileName.textContent = `Selected: ${file.name}`; // Show filename
+            spinnerContainer.style.display = 'none'; // Hide spinner after reading
           }
+          reader.onerror = () => {
+             spinnerContainer.style.display = 'none';
+             alert("Error reading the image file.");
+             resetImageSelection();
+          };
           reader.readAsDataURL(file); // Read file as Data URL (base64)
+
         } else if (file) {
            // Reset if the selected file is not an image
-           alert("Please select a valid image file (png, jpg, gif, webp).");
+           alert("Please select a valid image file (png, jpg, jpeg, gif, webp).");
            resetImageSelection();
-           imageInput.value = ''; // Clear the file input
         } else {
             // If no file selected (e.g., user cancelled)
             resetImageSelection();
@@ -355,7 +386,7 @@
           imagePreview.style.display = 'none';
           imagePreview.src = '#';
           imageFileName.textContent = 'No image selected';
-          imageInput.value = ''; // Important to allow re-selecting the same file
+          imageInput.value = ''; // Important to allow re-selecting the same file later
       }
 
       // Main function to handle sending messages (handles both text and image)
@@ -365,41 +396,66 @@
         const imageFileNameToSend = selectedFileName;
 
         // Only proceed if there's text OR an image
-        if (textQuery || imageToSend) {
-            let userMessage = textQuery;
-            if (imageToSend) {
-                userMessage += ` (Image: ${imageFileNameToSend || 'Uploaded Image'})`;
-            }
+        if (!textQuery && !imageToSend) {
+            return; // Do nothing if both are empty
+        }
 
-            displayMessage("User", textQuery, imageToSend); // Display text and preview of sent image
-            userInput.value = ""; // Clear text input
-            resetImageSelection(); // Clear image selection after sending
+         // Check for API key presence before proceeding
+        if (!openAIApiKey || openAIApiKey === "YOUR_VALID_OPENAI_API_KEY_HERE") {
+             displayMessage("Chatbot", "Error: OpenAI API key is missing or not set in the code. Cannot send message.");
+             return;
+        }
 
-            // --- Logic to decide which API to call ---
-            if (imageToSend) {
-                // If there's an image, always use the Vision API
-                const visionResponse = await callChatGPTVision(textQuery, imageToSend);
-                displayMessage("Chatbot", visionResponse);
-                // NOTE: We are NOT storing image-based Q&A in local storage for this example.
+
+        // Display user message first
+        displayMessage("User", textQuery || "(Image Sent)", imageToSend); // Show text or placeholder, and image preview
+
+        // Clear inputs *after* grabbing data but *before* API call
+        const currentText = textQuery; // Keep text for API call
+        userInput.value = "";
+        resetImageSelection(); // Clear image selection state visually
+
+
+        // --- Logic to decide which API to call ---
+        let botResponse = null;
+        if (imageToSend) {
+            // If there's an image, always use the Vision API
+            botResponse = await callChatGPTVision(currentText, imageToSend);
+            // NOTE: We are NOT storing image-based Q&A in local storage for this example.
+        } else {
+            // If only text, use the original text logic (check local storage first)
+            const queryLower = currentText.toLowerCase();
+            let answer = checkLocalStorage(queryLower);
+
+            if (answer) {
+                botResponse = answer; // Use stored answer
             } else {
-                // If only text, use the original text logic (check local storage first)
-                const queryLower = textQuery.toLowerCase();
-                let answer = checkLocalStorage(queryLower);
-
-                if (answer) {
-                    displayMessage("Chatbot", answer);
-                } else {
-                    const gptResponse = await callChatGPTText(textQuery);
-                    displayMessage("Chatbot", gptResponse);
-
-                    // Store the new text-only question-answer pair if response is valid
-                    if (!gptResponse.startsWith("Sorry,")) { // Avoid storing error messages
+                // Call Text API if not in local storage
+                const gptResponse = await callChatGPTText(currentText);
+                if (gptResponse) { // Check if response is valid
+                    botResponse = gptResponse;
+                     // Store the new text-only question-answer pair if response seems valid
+                    if (!gptResponse.startsWith("Sorry,") && !gptResponse.startsWith("Error:")) { // Avoid storing error messages
                         teachings[queryLower] = gptResponse;
-                        localStorage.setItem('teachings', JSON.stringify(teachings));
+                        try {
+                           localStorage.setItem('teachings', JSON.stringify(teachings));
+                        } catch (e) {
+                           console.error("Error saving to localStorage:", e);
+                           // Maybe clear some old teachings if storage is full
+                        }
                     }
+                } else {
+                   // Handle case where callChatGPTText might return undefined/null (though unlikely with current returns)
+                   botResponse = "Sorry, something went wrong fetching the text response.";
                 }
             }
         }
+
+        // Display bot response if one was generated
+        if (botResponse) {
+             displayMessage("Chatbot", botResponse);
+        }
+        // If botResponse is null/undefined (e.g., API key missing message already shown), do nothing more
       }
 
       // Send button click
@@ -407,10 +463,18 @@
 
       // Enter key in text input
       userInput.addEventListener('keydown', (event) => {
-        if (event.key === "Enter") {
+        // Check if Enter is pressed without Shift key (for multiline input if needed later)
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault(); // Prevent default newline insertion in input
           sendMessage();
         }
       });
+
+      // Initial check for API Key on load
+      if (!openAIApiKey || openAIApiKey === "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") {
+          displayMessage("System", "Warning: OpenAI API Key is missing. Please add it to the script section.");
+      }
+
     });
   </script>
 </body>
