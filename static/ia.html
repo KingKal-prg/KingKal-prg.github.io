@@ -4,9 +4,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Chatbot</title>
+  <title>Copilot Chat</title>
+
+  <link rel="manifest" href="manifest.json" />
+
+  <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="apple-touch-icon.png" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+
+  <link rel="stylesheet" href="./dist/add-to-homescreen.min.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
+
   <style>
-    /* CSS - Keeping your original CSS for styling */
+    /* Common styling taken from your file */
     body {
       font-family: Arial, sans-serif;
       background: #1e1e1e;
@@ -20,6 +33,40 @@
       color: #f1f1f1;
     }
 
+    /* TOP TAB BAR */
+    #tabBar {
+      max-width: 600px;
+      margin: 0 auto 20px auto;
+      text-align: center;
+    }
+
+    .tabButton {
+      padding: 10px 20px;
+      margin: 0 5px;
+      border: 1px solid #444;
+      background-color: #333;
+      cursor: pointer;
+      border-radius: 5px;
+      color: #f1f1f1;
+    }
+
+    .tabButton.active {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+
+    /* TAB CONTENT CONTAINERS */
+    .tabContent {
+      display: none;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .tabContent.active {
+      display: block;
+    }
+
+    /* CHAT CONTAINER */
     #chat {
       background: #2a2a2a;
       padding: 20px;
@@ -42,6 +89,7 @@
       border-bottom: 1px solid #444;
     }
 
+    /* Chat Input Row */
     #input {
       display: flex;
       align-items: center;
@@ -57,24 +105,37 @@
       color: #f1f1f1;
     }
 
-    #send {
+    #send,
+    #voiceChat,
+    #uploadBtn {
       padding: 10px 20px;
       border: none;
       background-color: #007bff;
       color: #f1f1f1;
       border-radius: 5px;
+      margin-right: 5px;
       cursor: pointer;
     }
 
-    #send:hover {
+    #send:hover,
+    #voiceChat:hover,
+    #uploadBtn:hover {
       background-color: #0056b3;
     }
 
-    #send:disabled {
+    #send:disabled,
+    #voiceChat:disabled,
+    #uploadBtn:disabled {
       background-color: #555;
       cursor: not-allowed;
     }
 
+    /* Hide the file input element */
+    #imageFile {
+      display: none;
+    }
+
+    /* SPINNER */
     .spinner-container {
       position: fixed;
       top: 0;
@@ -106,18 +167,145 @@
         transform: rotate(360deg);
       }
     }
+
+    /* TEACH & CONFIGURE TABS STYLING */
+    #teachForm,
+    #configForm {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #teachForm input,
+    #teachForm textarea,
+    #configForm textarea {
+      padding: 8px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background: #333;
+      color: #f1f1f1;
+    }
+
+    #teachForm button,
+    #configForm button {
+      align-self: flex-start;
+      padding: 8px 16px;
+      border: none;
+      background-color: #007bff;
+      color: #f1f1f1;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Button to Load Basic Teachings */
+    #teachBasic {
+      margin-top: 10px;
+      padding: 8px 16px;
+      border: none;
+      background-color: #28a745;
+      color: #f1f1f1;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Import Teaching Data Section */
+    #importSection {
+      margin-top: 20px;
+      border-top: 1px solid #444;
+      padding-top: 10px;
+    }
+
+    #importSection input {
+      padding: 8px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background: #333;
+      color: #f1f1f1;
+      margin-right: 10px;
+    }
+
+    #importButton {
+      padding: 8px 16px;
+      border: none;
+      background-color: #17a2b8;
+      color: #f1f1f1;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Teach List Styling */
+    #teachList {
+      margin-top: 20px;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #teachList li {
+      padding: 5px;
+      border-bottom: 1px solid #444;
+    }
+
+    /* Configure Chatbot Tab Styling */
+    #configForm textarea {
+      width: 100%;
+      min-height: 100px;
+    }
+
+    #configForm button {
+      background-color: #ffc107;
+      color: #1e1e1e;
+    }
   </style>
 </head>
 
 <body>
   <div id="chatInterface">
-    <h1>Simple Chatbot</h1>
-    <div id="chat">
-      <ul id="messages"></ul>
-      <div id="input">
-        <input type="text" id="userInput" placeholder="Type your message here..." />
-        <button id="send">Send</button>
+    <h1>Copilot Chat</h1>
+    <div id="tabBar">
+      <button class="tabButton active" data-tab="chatTab">Chat</button>
+      <button class="tabButton" data-tab="teachTab">Teach Chatbot</button>
+      <button class="tabButton" data-tab="configureTab">Configure Chatbot</button>
+    </div>
+    <div id="chatTab" class="tabContent active">
+      <div id="chat">
+        <ul id="messages"></ul>
+        <div id="input">
+          <input type="text" id="userInput" placeholder="Type your message here..." />
+          <button id="send">Send</button>
+          <button id="voiceChat">Voice Chat</button>
+          <button id="uploadBtn" title="Upload Image">＋</button>
+          <input type="file" id="imageFile" accept="image/*" />
+          <input type="file" id="textFile" accept=".txt">
+        </div>
       </div>
+    </div>
+    <div id="teachTab" class="tabContent">
+      <h3>Teach Chatbot</h3>
+      <p>Enter a question and its corresponding answer to update the chatbot’s responses.</p>
+      <form id="teachForm">
+        <input type="text" id="teachQuestion" placeholder="Question (e.g., what's 100x100?)" required />
+        <input type="text" id="teachAnswer" placeholder="Answer (e.g., 10000)" required />
+        <button type="submit">Save Correction</button>
+      </form>
+      <button id="teachBasic">Teach Chatbot Basics</button>
+      <ul id="teachList"></ul>
+      <div id="importSection">
+        <h4>Import Teaching Data</h4>
+        <input type="text" id="importSubject" placeholder="Subject (e.g., math)" required />
+        <input type="url" id="importLink" placeholder="URL to import teaching data" required />
+        <button id="importButton">Import Teaching Data</button>
+      </div>
+    </div>
+    <div id="configureTab" class="tabContent">
+      <h3>Configure Chatbot Personality</h3>
+      <p>Enter a custom personality or configuration prompt for your chatbot.</p>
+      <form id="configForm">
+        <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty assistant who loves helping with school work."
+          required></textarea>
+        <label for="chatbotName">Chatbot Name:</label>
+        <input type="text" id="chatbotName" placeholder="e.g., 'Jarvis'" />
+        <button type="submit">Save Configuration</button>
+      </form>
     </div>
   </div>
 
@@ -126,103 +314,135 @@
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const messages = document.getElementById('messages');
-      const userInput = document.getElementById('userInput');
-      const sendButton = document.getElementById('send');
-      const spinnerContainer = document.getElementById('spinner-container');
+    // Wrap all event registration and initialization in DOMContentLoaded to ensure elements are loaded.
+    document.addEventListener("DOMContentLoaded", function () {
 
-      //  Load teachings from local storage
+      /***** TEACHING DATA MANAGEMENT *****/
       let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
+      function updateTeachList() {
+        const teachList = document.getElementById('teachList');
+        teachList.innerHTML = '';
+        for (let key in teachings) {
+          const li = document.createElement('li');
+          li.textContent = `${key} --> ${teachings[key]}`;
 
-      //  Function to display messages
-      function displayMessage(sender, message) {
-        const li = document.createElement('li');
-        li.textContent = `${sender}: ${message}`;
-        messages.appendChild(li);
-        messages.scrollTop = messages.scrollHeight;
-      }
-
-      //  Function to check local storage for an answer
-      function checkLocalStorage(query) {
-        query = query.toLowerCase();
-        if (teachings[query]) {
-          return teachings[query];
-        }
-        return null;
-      }
-
-      //  Function to call ChatGPT API
-      async function callChatGPT(query) {
-        const apiKey = "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"; //  Replace with your actual API key
-        const apiUrl = "https://api.openai.com/v1/chat/completions";
-
-        spinnerContainer.style.display = 'flex'; //  Show spinner
-
-        const payload = {
-          model: "gpt-4", //  Or your preferred model
-          messages: [{
-            role: "user",
-            content: query
-          }]
-        };
-
-        try {
-          const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": "Bearer " + apiKey
-            },
-            body: JSON.stringify(payload)
-          });
-
-          const data = await response.json();
-          spinnerContainer.style.display = 'none'; //  Hide spinner
-
-          if (data.choices && data.choices.length > 0) {
-            return data.choices[0].message.content.trim();
-          } else {
-            return "Sorry, I couldn't get a response from the AI.";
-          }
-        } catch (error) {
-          spinnerContainer.style.display = 'none'; //  Hide spinner
-          console.error("ChatGPT API Error:", error);
-          return "Sorry, I encountered an error while trying to get an answer.";
+          teachList.appendChild(li);
         }
       }
+      updateTeachList();
 
-      //  Main function to handle sending messages
-      async function sendMessage() {
-        const query = userInput.value.trim().toLowerCase();
-        if (query) {
-          displayMessage("User", userInput.value);
-          userInput.value = ""; //  Clear input
+      document.getElementById('teachForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const question = document.getElementById('teachQuestion').value.trim().toLowerCase();
+        const answer = document.getElementById('teachAnswer').value.trim();
+        if (question && answer) {
+          teachings[question] = answer;
 
-          let answer = checkLocalStorage(query);
-
-          if (answer) {
-            displayMessage("Chatbot", answer);
-          } else {
-            const gptResponse = await callChatGPT(query);
-            displayMessage("Chatbot", gptResponse);
-
-            //  Store the new question-answer pair
-            teachings[query] = gptResponse;
-            localStorage.setItem('teachings', JSON.stringify(teachings));
-          }
-        }
-      }
-
-      //  Event listeners
-      sendButton.addEventListener('click', sendMessage);
-      userInput.addEventListener('keydown', (event) => {
-        if (event.key === "Enter") {
-          sendMessage();
+          localStorage.setItem('teachings', JSON.stringify(teachings));
+          updateTeachList();
+          alert('Teaching saved!');
+          document.getElementById('teachQuestion').value = '';
+          document.getElementById('teachAnswer').value = '';
         }
       });
-    });
-  </script>
-</body>
+      document.getElementById('teachBasic').addEventListener('click', function () {
+        const basics = {
+          "what is 2+2": "4",
+          "what is 10 divided by 2": "5",
+          "who discovered america": "Christopher Columbus",
+          "when did world war ii end": "1945",
+          "what is photosynthesis": "Photosynthesis is the process by which green plants use sunlight to synthesize foods from CO₂ and water.",
+          "what is gravity": "Gravity is the force of attraction between two masses.",
+          "what is a thesis statement": "A thesis statement is a concise summary of the main point of an essay or research paper.",
+          "what is an essay": "An essay is a short piece of writing on a particular subject."
+        };
+        teachings = { ...basics, ...teachings };
 
-</html>
+        localStorage.setItem('teachings', JSON.stringify(teachings));
+        updateTeachList();
+        alert('Basic teachings added!');
+      });
+      document.getElementById('importButton').addEventListener('click', async function () {
+        const subject = document.getElementById('importSubject').value.trim().toLowerCase();
+        const url = document.getElementById('importLink').value.trim();
+        if (!subject || !url) {
+          alert("Please enter both a subject and a URL.");
+          return;
+        }
+        try {
+          document.getElementById('spinner-container').style.display = 'flex';
+
+          const response = await fetch(url);
+          document.getElementById('spinner-container').style.display = 'none';
+          if (!response.ok) {
+            alert("Failed to fetch content from the URL.");
+            return;
+          }
+          const contentType = response.headers.get("content-type");
+          let importedContent = "";
+
+          if (contentType && contentType.includes("text/html")) {
+            const htmlText = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlText, "text/html");
+            importedContent = doc.body.innerText;
+            // Extract equations from the content
+            const equations = extractEquations(importedContent);
+            if (equations.length > 0) {
+              importedContent += "\nExtracted Equations:\n" + equations.join("\n");
+            }
+          } else {
+            importedContent = await response.text();
+          }
+          if (!importedContent) {
+            alert("No teaching data was found at the provided URL.");
+            return;
+          }
+          if (!importedContent.toLowerCase().includes(subject)) {
+            alert("Warning: The imported content does not appear to relate to the subject.");
+          }
+          if (teachings[subject]) {
+            teachings[subject] += "\n" + importedContent;
+          } else {
+            teachings[subject] = importedContent;
+          }
+          localStorage.setItem('teachings', JSON.stringify(teachings));
+          updateTeachList();
+          alert("Teaching data imported successfully!");
+          document.getElementById('importSubject').value = "";
+          document.getElementById('importLink').value = "";
+        } catch (err) {
+          document.getElementById('spinner-container').style.display = 'none';
+          alert("Error importing teaching data: " + err.message);
+        }
+      });
+      async function loadDefaultTeachingData() {
+        const defaultData = [
+          { subject: "math", url: "https://www.education.com/resources/math/" },
+          { subject: "science", url: "https://undsci.berkeley.edu/understanding-science-101/what-is-science/" },
+          { subject: "history", url: "https://www.worldhistory.org/" },
+          { subject: "study skills", url: "https://www.britannica.com/topic/education" }
+        ];
+        for (let item of defaultData) {
+          let subject = item.subject.toLowerCase();
+          if (!teachings[subject]) {
+            try {
+              const res = await fetch(item.url);
+              if (res.ok) {
+                let content;
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.includes("text/html")) {
+                  const htmlText = await res.text();
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(htmlText, "text/html");
+                  content = doc.body.innerText;
+                  const equations = extractEquations(content);
+                  if (equations.length > 0) {
+                    content += "\nExtracted Equations:\n" + equations.join("\n");
+                  }
+                } else {
+                  content = await res.text();
+                }
+                teachings[subject] = content;
+                localStorage.setItem('teachings', JSON.stringify(teachings));
+                updateTeachList();
