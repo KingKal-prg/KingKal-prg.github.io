@@ -275,7 +275,6 @@
           <button id="voiceChat">Voice Chat</button>
           <button id="uploadBtn" title="Upload Image">＋</button>
           <input type="file" id="imageFile" accept="image/*" />
-          <input type="file" id="textFile" accept=".txt">
         </div>
       </div>
     </div>
@@ -302,8 +301,6 @@
       <form id="configForm">
         <textarea id="chatbotPersonality" placeholder="For example: You are a friendly, witty assistant who loves helping with school work."
           required></textarea>
-        <label for="chatbotName">Chatbot Name:</label>
-        <input type="text" id="chatbotName" placeholder="e.g., 'Jarvis'" />
         <button type="submit">Save Configuration</button>
       </form>
     </div>
@@ -315,10 +312,11 @@
 
   <script>
     // Wrap all event registration and initialization in DOMContentLoaded to ensure elements are loaded.
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
 
       /***** TEACHING DATA MANAGEMENT *****/
       let teachings = JSON.parse(localStorage.getItem('teachings')) || {};
+
       function updateTeachList() {
         const teachList = document.getElementById('teachList');
         teachList.innerHTML = '';
@@ -331,7 +329,7 @@
       }
       updateTeachList();
 
-      document.getElementById('teachForm').addEventListener('submit', function (e) {
+      document.getElementById('teachForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const question = document.getElementById('teachQuestion').value.trim().toLowerCase();
         const answer = document.getElementById('teachAnswer').value.trim();
@@ -345,7 +343,7 @@
           document.getElementById('teachAnswer').value = '';
         }
       });
-      document.getElementById('teachBasic').addEventListener('click', function () {
+      document.getElementById('teachBasic').addEventListener('click', function() {
         const basics = {
           "what is 2+2": "4",
           "what is 10 divided by 2": "5",
@@ -356,13 +354,16 @@
           "what is a thesis statement": "A thesis statement is a concise summary of the main point of an essay or research paper.",
           "what is an essay": "An essay is a short piece of writing on a particular subject."
         };
-        teachings = { ...basics, ...teachings };
+        teachings = {
+          ...basics,
+          ...teachings
+        };
 
         localStorage.setItem('teachings', JSON.stringify(teachings));
         updateTeachList();
         alert('Basic teachings added!');
       });
-      document.getElementById('importButton').addEventListener('click', async function () {
+      document.getElementById('importButton').addEventListener('click', async function() {
         const subject = document.getElementById('importSubject').value.trim().toLowerCase();
         const url = document.getElementById('importLink').value.trim();
         if (!subject || !url) {
@@ -418,10 +419,22 @@
       });
       async function loadDefaultTeachingData() {
         const defaultData = [
-          { subject: "math", url: "https://www.education.com/resources/math/" },
-          { subject: "science", url: "https://undsci.berkeley.edu/understanding-science-101/what-is-science/" },
-          { subject: "history", url: "https://www.worldhistory.org/" },
-          { subject: "study skills", url: "https://www.britannica.com/topic/education" }
+          {
+            subject: "math",
+            url: "https://www.education.com/resources/math/"
+          },
+          {
+            subject: "science",
+            url: "https://undsci.berkeley.edu/understanding-science-101/what-is-science/"
+          },
+          {
+            subject: "history",
+            url: "https://www.worldhistory.org/"
+          },
+          {
+            subject: "study skills",
+            url: "https://www.britannica.com/topic/education"
+          }
         ];
         for (let item of defaultData) {
           let subject = item.subject.toLowerCase();
@@ -446,3 +459,6 @@
                 teachings[subject] = content;
                 localStorage.setItem('teachings', JSON.stringify(teachings));
                 updateTeachList();
+              } else {
+                console.log("Failed to fetch default data for subject:", subject);
+              }
