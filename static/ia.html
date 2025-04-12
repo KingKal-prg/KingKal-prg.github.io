@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Chatbot with DeepSeek Integration</title>
+  <title>Kelvin Get A Life</title>
   <style>
     body {
       background: #1c1c2b;
@@ -94,8 +94,8 @@
   <div id="chat"></div>
 
   <div id="inputArea">
-    <input type="text" id="textInput" placeholder="Ask me anything...">
-    <label class="upload-label" for="imageInput">📸 Upload Image</label>
+    <input type="text" id="textInput" placeholder="Ask me something...">
+    <label class="upload-label" for="imageInput">📸</label>
     <input type="file" id="imageInput" accept="image/*">
     <button id="sendButton">Send</button>
   </div>
@@ -105,11 +105,11 @@
     const textInput = document.getElementById('textInput');
     const sendButton = document.getElementById('sendButton');
     const imageInput = document.getElementById('imageInput');
-    
-    const DEEPSEEK_API_KEY = "sk-4f39048c0f0442fcafae02e3cad352a5";  // Replace with your DeepSeek API key
-    const OCR_API_KEY = "K81305024088957";  // OCR API key if you're using OCR.space or another OCR provider
 
-    // Append messages to chat
+    const OCR_API_KEY = 'K81305024088957'; // Your OCR API key
+    const DEEPSEEK_API_KEY = 'sk-4f39048c0f0442fcafae02e3cad352a5'; // Your DeepSeek API key
+
+    // Append messages to the chat
     function appendMessage(text, sender = 'bot') {
       const message = document.createElement('div');
       message.classList.add('message', sender);
@@ -118,39 +118,7 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
-    // Send the question to DeepSeek and get the answer
-    async function sendQueryToDeepSeek(query) {
-      const response = await fetch('https://api.deepseek.com/ask', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: query
-        }),
-      });
-      
-      const data = await response.json();
-      if (data.answer) {
-        appendMessage(data.answer, 'bot');
-      } else {
-        appendMessage("Oops, something went wrong. Try again later.", 'bot');
-      }
-    }
-
-    // Handle text-based queries
-    function sendTextMessage() {
-      const text = textInput.value.trim();
-      if (text) {
-        appendMessage(text, 'user');
-        textInput.value = '';
-        // Send to DeepSeek for answering
-        sendQueryToDeepSeek(text);
-      }
-    }
-
-    // Handle image-based queries (OCR)
+    // Send the image to OCR for text extraction
     async function handleImageUpload(file) {
       const formData = new FormData();
       formData.append('image', file);
@@ -162,13 +130,13 @@
         },
         body: formData,
       });
-      
+
       const result = await response.json();
       if (result.OCRExitCode === 1) {
         const extractedText = result.ParsedResults[0].ParsedText.trim();
         if (extractedText) {
           appendMessage(`Extracted text: ${extractedText}`, 'bot');
-          sendQueryToDeepSeek(extractedText);
+          sendQueryToDeepSeek(extractedText); // Send to DeepSeek for processing
         } else {
           appendMessage("No readable text found in the image.", 'bot');
         }
@@ -177,9 +145,37 @@
       }
     }
 
-    // Event listeners
-    sendButton.addEventListener('click', sendTextMessage);
+    // Send the user's query (or extracted text) to DeepSeek API for an answer
+    async function sendQueryToDeepSeek(query) {
+      const response = await fetch('https://api.deepseek.ai/v1/query', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      });
 
+      const data = await response.json();
+      if (data && data.answer) {
+        appendMessage(`Answer: ${data.answer}`, 'bot');
+      } else {
+        appendMessage("Sorry, I couldn't find an answer. Please try again.", 'bot');
+      }
+    }
+
+    // Handle sending text queries
+    function sendTextMessage() {
+      const text = textInput.value.trim();
+      if (text) {
+        appendMessage(text, 'user');
+        textInput.value = '';
+        sendQueryToDeepSeek(text); // Send the text input directly to DeepSeek
+      }
+    }
+
+    // Event Listeners
+    sendButton.addEventListener('click', sendTextMessage);
     textInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') sendTextMessage();
     });
@@ -191,7 +187,7 @@
         reader.onload = () => {
           const imageHTML = `<img src="${reader.result}" class="uploaded">`;
           appendMessage(imageHTML, 'user');
-          handleImageUpload(file);  // Send image to OCR for text extraction
+          handleImageUpload(file); // Start OCR image analysis
         };
         reader.readAsDataURL(file);
       }
