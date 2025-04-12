@@ -106,6 +106,7 @@
     const sendButton = document.getElementById('sendButton');
     const imageInput = document.getElementById('imageInput');
 
+    // Your API keys
     const OCR_API_KEY = 'K81305024088957'; // Your OCR API key
     const DEEPSEEK_API_KEY = 'sk-4f39048c0f0442fcafae02e3cad352a5'; // Your DeepSeek API key
 
@@ -118,94 +119,106 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
-    // Handle image upload by extracting text with OCR
-    async function handleImageUpload(file) {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const response = await fetch('https://api.ocr.space/parse/image', {
-        method: 'POST',
-        headers: {
-          'apikey': OCR_API_KEY,
-        },
-        body: formData,
-      });
-
-      const result = await response.json();
-      if (result.OCRExitCode === 1) {
-        const extractedText = result.ParsedResults[0].ParsedText.trim();
-        if (extractedText) {
-          appendMessage(`Extracted text: ${extractedText}`, 'bot');
-
-          // If the extracted text contains a simple math expression, compute it locally.
-          const computedAnswer = detectMathExpression(extractedText);
-          if (computedAnswer !== null) {
-            appendMessage(`Computed Answer: ${computedAnswer}`, 'bot');
-          } else {
-            // Otherwise, send the text to DeepSeek for a response.
-            sendQueryToDeepSeek(extractedText);
-          }
-        } else {
-          appendMessage("No readable text found in the image.", 'bot');
-        }
-      } else {
-        appendMessage("Error extracting text from image. Please try again.", 'bot');
-      }
-    }
-
-    // Query DeepSeek API using the provided query
-    async function sendQueryToDeepSeek(query) {
-      const response = await fetch('https://api.deepseek.ai/v1/query', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query }),
-      });
-
-      const data = await response.json();
-      if (data && data.answer) {
-        appendMessage(`Answer: ${data.answer}`, 'bot');
-      } else {
-        appendMessage("Sorry, I couldn't find an answer. Please try again.", 'bot');
-      }
-    }
-
-    // Check if the text contains a simple math expression and compute it.
-    // This function replaces words like 'plus' with mathematical operators and then extracts an expression.
+    // Check for simple math expressions and compute the result locally.
     function detectMathExpression(text) {
       text = text.toLowerCase();
-      // Replace commonly written words with symbols
       text = text.replace(/plus/g, '+')
                  .replace(/minus/g, '-')
-                 .replace(/times/g, '*')
-                 .replace(/multiplied by/g, '*')
+                 .replace(/times|multiplied by/g, '*')
                  .replace(/divided by/g, '/');
 
-      // Regex that matches a simple math expression with two numbers
+      // Matches simple expressions: number [operator] number (e.g., "1+1" or "12.5-3")
       const regex = /(-?\d+(\.\d+)?\s*[\+\-\*\/]\s*-?\d+(\.\d+)?)/;
       const match = text.match(regex);
+
       if (match) {
         try {
           let expression = match[1].replace(/\s+/g, '');
-          // Use eval to calculate the result (note: eval is used here on a controlled input after sanitization)
-          let result = eval(expression);
-          return result;
+          return eval(expression);  // Using eval on controlled input
         } catch (err) {
+          console.error("Error computing the math expression:", err);
           return null;
         }
       }
       return null;
     }
 
-    // Handle sending text queries through DeepSeek API.
+    // Send the query text to the DeepSeek API.
+    async function sendQueryToDeepSeek(query) {
+      try {
+        console.log("Sending query to DeepSeek:", query);
+        const response = await fetch('https://api.deepseek.ai/v1/query', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query }),
+        });
+        const data = await response.json();
+        console.log("DeepSeek response:", data);
+        if (data && data.answer) {
+          appendMessage(`Answer: ${data.answer}`, 'bot');
+        } else {
+          appendMessage("Sorry, I couldn't get an answer. Please try again.", 'bot');
+        }
+      } catch (error) {
+        console.error("Error fetching from DeepSeek:", error);
+        appendMessage("An error occurred while connecting to DeepSeek.", 'bot');
+      }
+    }
+
+    // Handle image uploads: extract text using OCR, then process the result.
+    async function handleImageUpload(file) {
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        console.log("Sending image to OCR:", file.name);
+        const response = await fetch('https://api.ocr.space/parse/image', {
+          method: 'POST',
+          headers: {
+            'apikey': OCR_API_KEY,
+          },
+          body: formData,
+        });
+
+        const result = await response.json();
+        console.log("OCR response:", result);
+        if (result.OCRExitCode === 1) {
+          const extractedText = result.ParsedResults[0].ParsedText.trim();
+          if (extractedText) {
+            appendMessage(`Extracted text: ${extractedText}`, 'bot');
+            const computedAnswer = detectMathExpression(extractedText);
+            if (computedAnswer !== null) {
+              appendMessage(`Computed Answer: ${computedAnswer}`, 'bot');
+            } else {
+              sendQueryToDeepSeek(extractedText);
+            }
+          } else {
+            appendMessage("No readable text found in the image.", 'bot');
+          }
+        } else {
+          appendMessage("Error extracting text from the image.", 'bot');
+        }
+      } catch (error) {
+        console.error("Error in OCR call:", error);
+        appendMessage("An error occurred while processing the image.", 'bot');
+      }
+    }
+
+    // Handle text messages from the input field.
     function sendTextMessage() {
       const text = textInput.value.trim();
       if (text) {
         appendMessage(text, 'user');
         textInput.value = '';
-        sendQueryToDeepSeek(text);
+        const computedAnswer = detectMathExpression(text);
+        if (computedAnswer !== null) {
+          appendMessage(`Computed Answer: ${computedAnswer}`, 'bot');
+        } else {
+          sendQueryToDeepSeek(text);
+        }
       }
     }
 
