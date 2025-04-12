@@ -107,21 +107,22 @@
     const imageInput = document.getElementById('imageInput');
 
     // Your API keys
-    const OCR_API_KEY = 'K81305024088957'; // Your OCR API key
-    const DEEPSEEK_API_KEY = 'sk-4f39048c0f0442fcafae02e3cad352a5'; // Your DeepSeek API key
+    const OCR_API_KEY = 'K81305024088957'; // Your OCR API key remains unchanged
+    const DEEPSEEK_API_KEY = 'sk-a74c7d056a5b4665a1ed56ed72911c14'; // Updated DeepSeek API key
 
-    // Append messages to the chat UI
+    // Append a message to the chat display.
     function appendMessage(text, sender = 'bot') {
       const message = document.createElement('div');
       message.classList.add('message', sender);
       message.innerHTML = text;
       chat.appendChild(message);
-      chat.scrollTop = chat.scrollHeight;
+      chat.scrollTop = chat.scrollHeight; // Scroll to bottom
     }
 
     // Check for simple math expressions and compute the result locally.
     function detectMathExpression(text) {
       text = text.toLowerCase();
+      // Replace common words with math operators.
       text = text.replace(/plus/g, '+')
                  .replace(/minus/g, '-')
                  .replace(/times|multiplied by/g, '*')
@@ -134,9 +135,10 @@
       if (match) {
         try {
           let expression = match[1].replace(/\s+/g, '');
-          return eval(expression);  // Using eval on controlled input
+          // WARNING: Using eval() on controlled input.
+          return eval(expression);
         } catch (err) {
-          console.error("Error computing the math expression:", err);
+          console.error("Error computing math expression:", err);
           return null;
         }
       }
@@ -155,6 +157,14 @@
           },
           body: JSON.stringify({ query }),
         });
+        
+        if (!response.ok) {
+          const errorDetails = await response.text();
+          console.error("DeepSeek API error response:", errorDetails);
+          appendMessage("Error: " + errorDetails, 'bot');
+          return;
+        }
+        
         const data = await response.json();
         console.log("DeepSeek response:", data);
         if (data && data.answer) {
@@ -168,7 +178,7 @@
       }
     }
 
-    // Handle image uploads: extract text using OCR, then process the result.
+    // Process image uploads: extract text using OCR, then process the result.
     async function handleImageUpload(file) {
       try {
         const formData = new FormData();
@@ -222,7 +232,7 @@
       }
     }
 
-    // Event Listeners
+    // Event Listeners for sending text and handling image uploads.
     sendButton.addEventListener('click', sendTextMessage);
     textInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') sendTextMessage();
