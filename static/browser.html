@@ -34,15 +34,7 @@
     .sidebar:hover {
       width: 70px;
     }
-    .sidebar .logo {
-      width: 40px;
-      height: auto;
-      margin-bottom: 10px;
-      transition: transform 0.3s ease;
-    }
-    .sidebar .logo:hover {
-      transform: scale(1.2);
-    }
+    /* Removed the home image for a cleaner sidebar */
     .sidebar .divider {
       width: 80%;
       border-bottom: 1px solid #d580ff;
@@ -69,7 +61,7 @@
 
     /* ---------------- Main Content Area ---------------- */
     .main-content {
-      margin-left: 70px; /* Ensure space for the sidebar */
+      margin-left: 70px; /* leave space for the sidebar */
       height: 100vh;
       display: flex;
       flex-direction: column;
@@ -127,22 +119,21 @@
 <body>
   <!-- Sidebar (Nebula X style) -->
   <div class="sidebar">
-    <!-- For your logo, change "logo.png" as needed -->
-    <img src="logo.png" alt="Logo" class="logo" />
+    <!-- The home image is removed for a clean sidebar -->
     <div class="divider"></div>
     <div class="nav-item selected" id="nav-chatbot">ChatBot</div>
   </div>
 
   <!-- Main Content Area -->
   <div class="main-content">
-    <!-- Search header with input and search button -->
+    <!-- Search Header with input and search button -->
     <div class="search-header">
       <div class="search-box">
         <input type="text" id="search-input" placeholder="Search Google or enter a URL..." />
         <button id="search-button">🔍</button>
       </div>
     </div>
-    <!-- Iframe for displaying content -->
+    <!-- Iframe for displaying content full screen -->
     <iframe
       id="browser-frame"
       class="browser-frame"
@@ -152,11 +143,8 @@
 
   <script>
     // ---------------- Configuration URLs ----------------
-    // ChatBot URL (with embed parameter for improved integration)
     const chatBotURL = "https://julius.ai/ai-chatbot?embed=true";
-    // Google search URL - using a parameter that may help with embedding
     const googleSearchBase = "https://www.google.com/search?igu=1&q=";
-
     const iframe = document.getElementById("browser-frame");
     const searchInput = document.getElementById("search-input");
 
@@ -164,25 +152,25 @@
     function requestFullScreen(element) {
       if (element.requestFullscreen) {
         element.requestFullscreen();
-      } else if (element.mozRequestFullScreen) {
+      } else if (element.mozRequestFullScreen) { // Firefox
         element.mozRequestFullScreen();
-      } else if (element.webkitRequestFullscreen) {
+      } else if (element.webkitRequestFullscreen) { // Chrome, Safari, Opera
         element.webkitRequestFullscreen();
-      } else if (element.msRequestFullscreen) {
+      } else if (element.msRequestFullscreen) { // IE/Edge
         element.msRequestFullscreen();
       }
     }
 
     // ---------------- Iframe Loader with Smooth Fade ----------------
-    function loadIframe(url, fullScreen = false) {
+    // The "fullScreen" flag ensures we call the Fullscreen API after loading.
+    function loadIframe(url, fullScreen = true) {
       // Start fade-out transition
       iframe.style.opacity = 0;
       setTimeout(() => {
         iframe.src = url;
-        // When the iframe loads new content, fade it back in
       }, 300);
-
-      // If fullScreen is true, request fullscreen on the iframe
+      
+      // Request fullscreen if indicated
       if (fullScreen) {
         setTimeout(() => {
           requestFullScreen(iframe);
@@ -190,46 +178,44 @@
       }
     }
 
-    // Fade the iframe back in once content has loaded.
+    // Fade the iframe back in once the new content has loaded.
     iframe.addEventListener("load", function () {
       iframe.style.opacity = 1;
     });
 
     // ---------------- Search Functionality ----------------
-    // When the user presses Enter in the search input:
+    // Pressing Enter inside the search input
     searchInput.addEventListener("keyup", function (e) {
       if (e.key === "Enter" && this.value.trim() !== "") {
-        const query = this.value.trim();
-        if (query.startsWith("http://") || query.startsWith("https://")) {
-          // If the input is a URL, load it directly in fullscreen.
-          loadIframe(query, true);
-        } else {
-          // Otherwise, treat it as a search query for Google.
-          const encodedQuery = encodeURIComponent(query);
-          const url = googleSearchBase + encodedQuery;
-          loadIframe(url);
-        }
+        processInput(this.value.trim());
         this.value = "";
       }
     });
 
-    // When the search button is clicked:
+    // Clicking the search button
     document.getElementById("search-button").addEventListener("click", function () {
       if (searchInput.value.trim() !== "") {
-        const query = searchInput.value.trim();
-        if (query.startsWith("http://") || query.startsWith("https://")) {
-          loadIframe(query, true);
-        } else {
-          const encodedQuery = encodeURIComponent(query);
-          const url = googleSearchBase + encodedQuery;
-          loadIframe(url);
-        }
+        processInput(searchInput.value.trim());
         searchInput.value = "";
       }
     });
 
+    // Process the search input: if it starts with "http://" or "https://", load it directly.
+    // Otherwise, treat it as a Google search query.
+    function processInput(query) {
+      let url = "";
+      if (query.startsWith("http://") || query.startsWith("https://")) {
+        url = query;
+      } else {
+        // Treat input as a search query for Google.
+        const encodedQuery = encodeURIComponent(query);
+        url = googleSearchBase + encodedQuery;
+      }
+      loadIframe(url, true); // Always open in fullscreen
+    }
+
     // ---------------- ChatBot Navigation ----------------
-    // When clicking the ChatBot nav item in the sidebar:
+    // When clicking the ChatBot nav item, load the chat URL in fullscreen.
     document.getElementById("nav-chatbot").addEventListener("click", function () {
       loadIframe(chatBotURL, true);
     });
