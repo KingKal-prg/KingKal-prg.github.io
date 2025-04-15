@@ -1,163 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Zapari-Kelvin Browser</title>
-    <style>
-      :root {
-        --primary-color: #9c27b0; /* Soft purple */
-        --secondary-color: #673ab7; /* Deep purple */
-        --accent-color: #e040fb; /* Neon purple/pink accent */
-        --button-hover-color: #bd00e8;
-        --text-color: #ffffff;
-        --header-bg: rgba(0, 0, 0, 0.6);
-        --input-bg: rgba(255, 255, 255, 0.9);
-      }
-      /* Reset */
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      /* Purple space animated background */
-      body {
-        font-family: sans-serif;
-        overflow: hidden;
-        background: linear-gradient(135deg, #2c003e, #72147a, #240b36);
-        background-size: 400% 400%;
-        animation: gradientBG 15s ease infinite;
-        color: var(--text-color);
-        transition: background 0.5s ease;
-      }
-      @keyframes gradientBG {
-        0% {
-          background-position: 0% 50%;
-        }
-        50% {
-          background-position: 100% 50%;
-        }
-        100% {
-          background-position: 0% 50%;
-        }
-      }
-      /* Header styling */
-      .header {
-        background-color: var(--header-bg);
-        backdrop-filter: blur(10px);
-        padding: 10px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        transition: background-color 0.3s ease;
-      }
-      .search-container {
-        flex: 1;
-      }
-      #search-input {
-        width: 100%;
-        padding: 8px 12px;
-        font-size: 16px;
-        border: none;
-        border-radius: 4px;
-        background-color: var(--input-bg);
-        color: #000;
-        transition: background-color 0.3s ease, box-shadow 0.3s ease;
-      }
-      #search-input:focus {
-        outline: none;
-        box-shadow: 0 0 10px var(--primary-color);
-      }
-      #chat-button {
-        background-color: var(--accent-color);
-        color: var(--text-color);
-        border: none;
-        padding: 8px 16px;
-        font-size: 16px;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-left: 20px;
-        transition: background-color 0.3s ease, transform 0.3s ease;
-      }
-      #chat-button:hover {
-        background-color: var(--button-hover-color);
-        transform: scale(1.05);
-      }
-      /* Iframe / Browser area with fade transition */
-      .browser-frame {
-        width: 100%;
-        height: calc(100vh - 50px); /* Adjust for header height */
-        border: none;
-        opacity: 1;
-        transition: opacity 0.5s ease;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Header with search bar and ChatBot button -->
-    <div class="header">
-      <div class="search-container">
-        <input
-          type="text"
-          id="search-input"
-          placeholder="Search Google..."
-        />
-      </div>
-      <button id="chat-button">ChatBot</button>
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <title>Zapari-Kelvin Browser</title>
+  <style>
+    /* --- Nebula X Inspired Global Styles & Sidebar --- */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at bottom, #7c2ae8, #000);
+      color: white;
+      overflow: hidden;
+    }
 
-    <!-- Iframe used as the browser view -->
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 50px;
+      height: 100%;
+      background-color: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      transition: width 0.3s ease-in-out;
+      padding-top: 15px;
+      z-index: 10;
+      border-bottom: 2px solid #d580ff;
+    }
+
+    .sidebar:hover {
+      width: 70px;
+    }
+
+    .sidebar .logo {
+      width: 40px;
+      height: auto;
+      margin-bottom: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar .logo:hover {
+      transform: scale(1.2);
+    }
+
+    .sidebar .divider {
+      width: 80%;
+      border-bottom: 1px solid #d580ff;
+      margin-bottom: 15px;
+    }
+
+    .sidebar .nav-item {
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      color: #d580ff;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
+    }
+
+    .sidebar .nav-item.selected {
+      background-color: #b34cd9;
+      border-radius: 10px;
+      color: white;
+    }
+
+    .sidebar .nav-item:hover {
+      transform: scale(1.2);
+      color: white;
+    }
+
+    /* --- Main Content Area Styles --- */
+    .main-content {
+      margin-left: 70px; /* ensure space for the sidebar, even on hover */
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Search Header (placed at the top of main content) */
+    .search-header {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .search-box {
+      position: relative;
+      display: inline-block;
+    }
+
+    .search-box input {
+      width: 400px;
+      padding: 12px 20px;
+      border-radius: 30px;
+      border: 2px solid #d580ff;
+      outline: none;
+      background-color: #111;
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .search-box input:focus {
+      box-shadow: 0 0 15px #d580ff;
+    }
+
+    .search-box button {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #d580ff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: color 0.3s ease-in-out;
+    }
+
+    .search-box button:hover {
+      color: white;
+    }
+
+    /* --- Iframe (Browser) Styles with Smooth Fade --- */
+    .browser-frame {
+      width: 100%;
+      flex: 1;
+      border: none;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar using Nebula X styling -->
+  <div class="sidebar">
+    <!-- Replace logo.png with your logo image if available -->
+    <img src="logo.png" alt="Logo" class="logo" />
+    <div class="divider"></div>
+    <div class="nav-item selected" id="nav-chatbot">ChatBot</div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Search Header with search input and button -->
+    <div class="search-header">
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search Google..." />
+        <button id="search-button">🔍</button>
+      </div>
+    </div>
+    <!-- Iframe that displays either search results or the Julius ChatBot -->
     <iframe
       id="browser-frame"
       class="browser-frame"
       src="https://julius.ai/ai-chatbot?embed=true"
     ></iframe>
+  </div>
 
-    <script>
-      // URLs for the two views.
-      // Updated chatBotURL includes an embed parameter to help the chatbot initialize
-      const chatBotURL = "https://julius.ai/ai-chatbot?embed=true";
-      // The igu=1 parameter may help Google display in an iframe.
-      const googleSearchBase = "https://www.google.com/search?igu=1&q=";
-      const iframe = document.getElementById("browser-frame");
+  <script>
+    // URLs
+    const chatBotURL = "https://julius.ai/ai-chatbot?embed=true";
+    // The igu=1 parameter is sometimes used to help Google render inside an iframe.
+    const googleSearchBase = "https://www.google.com/search?igu=1&q=";
+    const iframe = document.getElementById("browser-frame");
 
-      // Function for smooth iframe transitions
-      function loadIframe(url) {
-        iframe.style.opacity = 0;
-        setTimeout(() => {
-          iframe.src = url;
-        }, 300);
+    // Function to smoothly load a URL in the iframe.
+    function loadIframe(url) {
+      iframe.style.opacity = 0;
+      setTimeout(() => {
+        iframe.src = url;
+      }, 300);
+    }
+
+    // Fade the iframe back in once content has loaded.
+    iframe.addEventListener("load", function () {
+      iframe.style.opacity = 1;
+    });
+
+    // Search functionality: when enter is pressed or search button is clicked.
+    const searchInput = document.getElementById("search-input");
+    searchInput.addEventListener("keyup", function (e) {
+      if (e.key === "Enter" && this.value.trim() !== "") {
+        const query = encodeURIComponent(this.value.trim());
+        const url = googleSearchBase + query;
+        loadIframe(url);
+        this.value = "";
       }
+    });
 
-      // Fade the iframe back in once it has loaded
-      iframe.addEventListener("load", function () {
-        iframe.style.opacity = 1;
-      });
+    document.getElementById("search-button").addEventListener("click", function () {
+      if (searchInput.value.trim() !== "") {
+        const query = encodeURIComponent(searchInput.value.trim());
+        const url = googleSearchBase + query;
+        loadIframe(url);
+        searchInput.value = "";
+      }
+    });
 
-      // Search input: on Enter, load Google search results in the iframe.
-      document
-        .getElementById("search-input")
-        .addEventListener("keyup", function (e) {
-          if (e.key === "Enter" && this.value.trim() !== "") {
-            const query = encodeURIComponent(this.value.trim());
-            const url = googleSearchBase + query;
-            loadIframe(url);
-            this.value = "";
-          }
-        });
-
-      // ChatBot button: load the chat URL with the embed parameter in the same iframe.
-      document
-        .getElementById("chat-button")
-        .addEventListener("click", function () {
-          loadIframe(chatBotURL);
-        });
-    </script>
-
-    <!--
-      Optional: If Julius provides an embed script (e.g., embed.min.js), include it here.
-      <script src="https://julius.ai/embed.min.js"></script>
-      Then, follow Julius’ documentation to initialize the chatbot widget.
-    -->
-  </body>
+    // ChatBot navigation: clicking the "ChatBot" nav item loads the ChatBot URL.
+    document.getElementById("nav-chatbot").addEventListener("click", function () {
+      loadIframe(chatBotURL);
+    });
+  </script>
+</body>
 </html>
