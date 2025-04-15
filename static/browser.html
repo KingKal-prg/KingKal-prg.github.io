@@ -60,7 +60,7 @@
       transition: opacity 0.5s ease;
     }
     /* ---------------- Fullscreen Mode Styles ---------------- */
-    /* When in fullscreen mode, hide the header and make the iframe cover the viewport */
+    /* When in fullscreen mode, hide the header and expand the iframe to cover the viewport */
     .fullscreen-view .search-header {
       display: none;
     }
@@ -73,9 +73,9 @@
       z-index: 9999;
     }
   </style>
-  <!-- Import the Rammerhead proxy scripts:
-       (Note: Loading from raw.githubusercontent.com may produce CORS/MIME issues. 
-       If possible, consider hosting these files on your own server.) -->
+  
+  <!-- Include Rammerhead proxy scripts from GitHub -->
+  <!-- (In production, host these files on your server to avoid CORS issues) -->
   <script src="https://raw.githubusercontent.com/binary-person/rammerhead/refs/heads/master/src/classes/RammerheadProxy.js"></script>
   <script src="https://raw.githubusercontent.com/binary-person/rammerhead/refs/heads/master/src/client/rammerhead.js"></script>
 </head>
@@ -87,19 +87,21 @@
       <button id="search-button">🔍</button>
     </div>
   </div>
-  <!-- Iframe for displaying content -->
+  
+  <!-- Iframe to display the loaded page full screen -->
   <iframe id="browser-frame" src="about:blank"></iframe>
   
   <script>
-    // Use Google as the base search engine.
+    /***** Configuration *****/
+    // Base URL for Google searches
     const searchEngineBase = "https://www.google.com/search?q=";
+    // Reference to the iframe and search input
     const iframe = document.getElementById("browser-frame");
     const searchInput = document.getElementById("search-input");
-
-    // Debug: Log whether RammerheadProxy is loaded
-    console.log("RammerheadProxy:", typeof RammerheadProxy);
-
-    // Request fullscreen for the given element
+    
+    /***** Helper Functions *****/
+    
+    // Requests full screen for a given element
     function requestFullScreen(element) {
       if (element.requestFullscreen) {
         element.requestFullscreen();
@@ -111,15 +113,19 @@
         element.msRequestFullscreen();
       }
     }
-
-    // Load the URL into the iframe with a fade transition and switch to fullscreen view.
+    
+    // Loads the URL into the iframe with a fade transition and enters full screen.
     function loadIframe(url, fullScreen = true) {
+      // Log for debugging
       console.log("Loading URL:", url);
+      
+      // Fade out the iframe
       iframe.style.opacity = 0;
       setTimeout(() => {
         iframe.src = url;
       }, 300);
       
+      // If fullScreen is requested, add the class that expands the iframe and request fullscreen.
       if (fullScreen) {
         document.body.classList.add("fullscreen-view");
         setTimeout(() => {
@@ -127,45 +133,50 @@
         }, 500);
       }
     }
-
-    // Fade the iframe back in when new content is loaded.
+    
+    // Listen for the iframe load event to fade it back in.
     iframe.addEventListener("load", function () {
       iframe.style.opacity = 1;
     });
-
-    // Process the input from the user.
-    // If the query is a URL (begins with http:// or https://), then use it directly.
-    // Otherwise, treat the input as a search query for Google.
+    
+    /***** Process User Input *****/
     function processInput(query) {
       let url = "";
-      if (query.startsWith("http://") || query.startsWith("https://")) {
-        url = query;
-      } else {
-        url = searchEngineBase + encodeURIComponent(query);
-      }
-      console.log("Original URL before proxy:", url);
       
-      // Route the URL through Rammerhead proxy if available.
+      // Check if the query starts with "http://" or "https://"
+      if (query.startsWith("http://") || query.startsWith("https://")) {
+        // Treat it as a URL
+        url = query;
+        console.log("Input is detected as the URL:", url);
+      } else {
+        // Otherwise, it's treated as a search query for Google.
+        url = searchEngineBase + encodeURIComponent(query);
+        console.log("Input is treated as search query, generated URL:", url);
+      }
+      
+      // If the proxy is available, pass the URL through the proxy.
       if (typeof RammerheadProxy !== "undefined" &&
           typeof RammerheadProxy.route === "function") {
         url = RammerheadProxy.route(url);
-        console.log("Proxied URL:", url);
+        console.log("After proxy routing, URL:", url);
       } else {
-        console.warn("RammerheadProxy not available or 'route' function missing.");
+        console.warn("RammerheadProxy is not available or missing 'route' function.");
       }
-      
+    
+      // Finally, load the resulting URL in the iframe.
       loadIframe(url, true);
     }
-
-    // Trigger search when the user presses Enter.
+    
+    /***** Event Listeners *****/
+    // Trigger processing when the user presses Enter in the search input.
     searchInput.addEventListener("keyup", function (e) {
       if (e.key === "Enter" && this.value.trim() !== "") {
         processInput(this.value.trim());
         this.value = "";
       }
     });
-
-    // Trigger search when the search button is clicked.
+    
+    // Trigger processing when the search button is clicked.
     document.getElementById("search-button").addEventListener("click", function () {
       if (searchInput.value.trim() !== "") {
         processInput(searchInput.value.trim());
