@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Direct Link / Search</title>
+  <title>Flip-Boi</title>
   <style>
-    /* Global Nebula X–Inspired Styles */
+    /* ---------------- Global Nebula X–Inspired Styles ---------------- */
     body {
       margin: 0;
       padding: 0;
@@ -50,14 +50,16 @@
     .search-box button:hover {
       color: white;
     }
+    /* ---------------- Iframe Styles ---------------- */
+    /* The iframe now includes a sandbox attribute that allows scripts and same-origin but not popups */
     #browser-frame {
       width: 100%;
-      height: calc(100vh - 80px); /* Leaves room for the header */
+      height: calc(100vh - 80px); /* Leaves room for the search header */
       border: none;
       opacity: 1;
       transition: opacity 0.5s ease;
     }
-    /* Fullscreen mode: hide the header and have the iframe cover the viewport */
+    /* ---------------- Fullscreen Mode Styles ---------------- */
     .fullscreen-view .search-header {
       display: none;
     }
@@ -70,80 +72,88 @@
       z-index: 9999;
     }
   </style>
+  
+  <!-- Include Rammerhead proxy scripts (host these files on your server in production to avoid CORS issues) -->
+  <script src="https://raw.githubusercontent.com/binary-person/rammerhead/refs/heads/master/src/classes/RammerheadProxy.js"></script>
+  <script src="https://raw.githubusercontent.com/binary-person/rammerhead/refs/heads/master/src/client/rammerhead.js"></script>
 </head>
 <body>
-  <!-- Search Header (only the search box is shown) -->
+  <!-- Search Header -->
   <div class="search-header">
     <div class="search-box">
-      <input type="text" id="search-input" placeholder="Enter URL or search term..." />
+      <input type="text" id="search-input" placeholder="Search Google or enter URL..." />
       <button id="search-button">🔍</button>
     </div>
   </div>
   
-  <!-- Iframe where content is loaded in fullscreen -->
-  <iframe id="browser-frame" src="about:blank"></iframe>
+  <!-- Iframe with sandbox attribute to block popups -->
+  <iframe id="browser-frame" sandbox="allow-scripts allow-same-origin" src="about:blank"></iframe>
   
   <script>
     /***** Configuration *****/
     // Base URL for Google searches.
     const googleSearchBase = "https://www.google.com/search?q=";
+    // Proxy base URL for search queries (if needed).
+    // For direct URL entries we want the site to load directly.
+    const proxyBase = "https://teachers.azimei.cn/?url=";
     
-    // Reference to the iframe and search input.
     const iframe = document.getElementById("browser-frame");
     const searchInput = document.getElementById("search-input");
     
     /***** Utility Functions *****/
-
+    
     // Fullscreen helper using the Fullscreen API.
     function requestFullScreen(element) {
       if (element.requestFullscreen) {
         element.requestFullscreen();
-      } else if (element.mozRequestFullScreen) { // Firefox
+      } else if (element.mozRequestFullScreen) {
         element.mozRequestFullScreen();
-      } else if (element.webkitRequestFullscreen) { // Chrome, Safari, Opera
+      } else if (element.webkitRequestFullscreen) {
         element.webkitRequestFullscreen();
-      } else if (element.msRequestFullscreen) { // IE/Edge
+      } else if (element.msRequestFullscreen) {
         element.msRequestFullscreen();
       }
     }
     
-    // Loads the URL into the iframe with a fade transition and enters fullscreen.
+    // Loads the given URL into the iframe with fade transitions and fullscreen if needed.
     function loadIframe(url, fullScreen = true) {
       console.log("Loading URL:", url);
       iframe.style.opacity = 0;
-      setTimeout(() => {
+      setTimeout(function() {
         iframe.src = url;
       }, 300);
       
       if (fullScreen) {
         document.body.classList.add("fullscreen-view");
-        setTimeout(() => {
+        setTimeout(function() {
           requestFullScreen(document.documentElement);
         }, 500);
       }
     }
     
-    // When the iframe completes loading, fade it in.
+    // Fade in the iframe content when loaded.
     iframe.addEventListener("load", function() {
       iframe.style.opacity = 1;
     });
     
     /***** Direct Link Mapping *****/
-    // For demonstration, if the URL contains "now.gg", return the provided direct link.
+    // Map specific sites (like now.gg) to a given direct link.
     function getDirectLink(url) {
       if (url.toLowerCase().includes("now.gg")) {
+        // Direct link provided for now.gg.
         return "https://teachers.azimei.cn/4c2b8912901f4db787042727594ac6fd/_rhsDAMmB://MH2.mI/";
       }
-      return url;  // Otherwise, return the URL unchanged.
+      return url;
     }
-    
-    /***** Process Input *****/
+
+    /***** Process User Input *****/
     function processInput(query) {
       let targetUrl = "";
-      // If the query starts with "http://" or "https://", or if it contains a dot, assume it’s a URL.
+      
+      // If the query starts with "http://" or "https://", or contains a dot, treat it as a URL.
       if (query.startsWith("http://") || query.startsWith("https://")) {
         targetUrl = query;
-        console.log("Detected a full URL:", targetUrl);
+        console.log("Detected full URL:", targetUrl);
       } else if (query.indexOf('.') !== -1) {
         targetUrl = "https://" + query;
         console.log("Assumed domain input; converted to URL:", targetUrl);
@@ -151,12 +161,15 @@
         // Otherwise, treat it as a search query for Google.
         targetUrl = googleSearchBase + encodeURIComponent(query);
         console.log("Treated as search query; generated URL:", targetUrl);
+        // For search queries, route through the proxy.
+        targetUrl = proxyBase + encodeURIComponent(targetUrl);
+        console.log("After proxy routing, URL:", targetUrl);
       }
       
-      // If we detected a URL (by presence of a dot), then get the direct link.
+      // For direct URL inputs, get the direct link mapping.
       if (query.indexOf('.') !== -1) {
         targetUrl = getDirectLink(targetUrl);
-        // Copy the direct link to the clipboard.
+        // Optionally copy the direct link to the clipboard.
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(targetUrl)
             .then(() => console.log("Direct link copied to clipboard:", targetUrl))
@@ -166,6 +179,13 @@
       
       loadIframe(targetUrl, true);
     }
+    
+    /***** Popup Prevention *****/
+    // Override window.open in the parent (this may help block attempts from the iframe).
+    window.open = function() {
+      console.warn("Popup blocked.");
+      return null;
+    };
     
     /***** Event Listeners *****/
     searchInput.addEventListener("keyup", function(e) {
