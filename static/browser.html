@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Zapari-Kelvin Direct URL Resolver</title>
+  <title>Rammerhead Proxy Browser</title>
   <style>
-    /* ---------- Global Nebula X–Inspired Styles ---------- */
+    /* Global Nebula X–Inspired Styles */
     body {
       margin: 0;
       padding: 0;
@@ -13,7 +13,7 @@
       color: white;
       overflow: hidden;
     }
-    /* ---------- Search Header ---------- */
+    /* Search Header */
     .search-header {
       padding: 20px;
       text-align: center;
@@ -51,7 +51,7 @@
     .search-box button:hover {
       color: white;
     }
-    /* ---------- Iframe (Browser) Styles ---------- */
+    /* Iframe (Browser) Styles */
     #browser-frame {
       width: 100%;
       height: calc(100vh - 80px); /* Leaves room for the header */
@@ -59,7 +59,7 @@
       opacity: 1;
       transition: opacity 0.5s ease;
     }
-    /* ---------- Fullscreen Mode Styles ---------- */
+    /* Fullscreen mode: hide the header and let the iframe fill the viewport */
     .fullscreen-view .search-header {
       display: none;
     }
@@ -72,6 +72,7 @@
       z-index: 9999;
     }
   </style>
+  <!-- (Note: In production, host the proxy endpoint and any related scripts on your own server.) -->
 </head>
 <body>
   <!-- Search Header -->
@@ -81,16 +82,15 @@
       <button id="search-button">🔍</button>
     </div>
   </div>
-  
-  <!-- Iframe to display the result. The iframe is not given extra permissions (e.g. popups) -->
+  <!-- Iframe: The sandbox attribute (without allow-popups) blocks popups -->
   <iframe id="browser-frame" sandbox="allow-scripts allow-same-origin" src="about:blank"></iframe>
   
   <script>
     /***** Configuration *****/
-    // Base URL for Google searches.
+    // Base URL for Google search queries.
     const googleSearchBase = "https://www.google.com/search?q=";
-    // RAMMERHEAD PROXY ENDPOINT:
-    // This endpoint is expected to take a query parameter "url" and return (plain text) the resolved direct URL.
+    // Rammerhead Proxy Endpoint.
+    // This example expects that simply adding the encoded target URL after this base does the trick.
     const proxyEndpoint = "https://teachers.azimei.cn/?url=";
     
     const iframe = document.getElementById("browser-frame");
@@ -98,7 +98,7 @@
     
     /***** Utility Functions *****/
     
-    // Requests full screen for the given element using the Fullscreen API.
+    // Request full screen for an element (using the Fullscreen API).
     function requestFullScreen(element) {
       if (element.requestFullscreen) {
         element.requestFullscreen();
@@ -111,14 +111,13 @@
       }
     }
     
-    // Loads the URL into the iframe with a fade transition and enters fullscreen mode.
+    // Use a fade transition to load the given URL into the iframe and enter fullscreen.
     function loadIframe(url, fullScreen = true) {
       console.log("Loading URL:", url);
       iframe.style.opacity = 0;
       setTimeout(() => {
         iframe.src = url;
       }, 300);
-      
       if (fullScreen) {
         document.body.classList.add("fullscreen-view");
         setTimeout(() => {
@@ -127,78 +126,51 @@
       }
     }
     
-    // Fade in the iframe when the new content finishes loading.
+    // Fade the iframe back in when new content finishes loading.
     iframe.addEventListener("load", function() {
       iframe.style.opacity = 1;
     });
     
-    /***** Proxy Resolution *****/
-    // Sends the given URL to the proxy endpoint and returns a promise that resolves to the direct URL.
-    async function getDirectLink(url) {
-      const fullProxyUrl = proxyEndpoint + encodeURIComponent(url);
-      console.log("Fetching direct link from proxy:", fullProxyUrl);
-      try {
-        const response = await fetch(fullProxyUrl);
-        if (!response.ok) {
-          throw new Error(`Proxy request failed: ${response.statusText}`);
-        }
-        // Assume the proxy returns plain text containing the direct URL.
-        const directLink = (await response.text()).trim();
-        console.log("Received direct link from proxy:", directLink);
-        return directLink;
-      } catch (err) {
-        console.error("Error fetching direct link:", err);
-        // In case of error, fall back to the original URL.
-        return url;
-      }
-    }
-    
     /***** Process User Input *****/
-    async function processInput(query) {
+    function processInput(query) {
       let targetUrl = "";
       
-      // If the query starts with "http://" or "https://" treat it as a URL.
-      // Or if it contains a dot, assume it's a domain.
+      // If the input starts with "http://" or "https://", or if it contains a dot, assume it’s a URL.
       if (query.startsWith("http://") || query.startsWith("https://")) {
         targetUrl = query;
-        console.log("Detected full URL:", targetUrl);
+        console.log("Detected full URL input:", targetUrl);
       } else if (query.indexOf('.') !== -1) {
+        // If the input doesn't have the protocol, prepend "https://".
         targetUrl = "https://" + query;
         console.log("Assumed domain input; converted to URL:", targetUrl);
       } else {
-        // Otherwise, treat the input as a search query.
+        // Otherwise, treat it as a search query.
         targetUrl = googleSearchBase + encodeURIComponent(query);
         console.log("Treated as search query; generated URL:", targetUrl);
-        // For search queries, you might want to send them through the proxy as well.
-        // Uncomment the following line if desired:
-        // targetUrl = proxyEndpoint + encodeURIComponent(targetUrl);
       }
       
-      // If the input appears to be a URL (i.e. contains a dot), resolve it through the proxy.
-      if (query.indexOf('.') !== -1) {
-        const directUrl = await getDirectLink(targetUrl);
-        // Optionally, copy the direct URL to the clipboard.
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(directUrl)
-            .then(() => console.log("Direct URL copied to clipboard:", directUrl))
-            .catch(err => console.error("Clipboard copy error:", err));
-        }
-        loadIframe(directUrl, true);
-      } else {
-        // For search queries, simply load the URL.
-        loadIframe(targetUrl, true);
+      // Now, to route through the proxy: simply encode the target URL and prepend the proxy endpoint.
+      const proxiedUrl = proxyEndpoint + encodeURIComponent(targetUrl);
+      console.log("Final proxied URL:", proxiedUrl);
+      
+      // Optionally, copy the final URL to the clipboard to prevent exposing the proxy UI.
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(proxiedUrl)
+          .then(() => console.log("Proxied URL copied to clipboard."))
+          .catch(err => console.error("Failed to copy proxied URL:", err));
       }
+      
+      loadIframe(proxiedUrl, true);
     }
     
     /***** Event Listeners *****/
-    // Trigger on Enter key
-    searchInput.addEventListener("keyup", function(e) {
+    searchInput.addEventListener("keyup", function (e) {
       if (e.key === "Enter" && this.value.trim() !== "") {
         processInput(this.value.trim());
         this.value = "";
       }
     });
-    // Trigger on search button click.
+    
     document.getElementById("search-button").addEventListener("click", function() {
       if (searchInput.value.trim() !== "") {
         processInput(searchInput.value.trim());
@@ -207,7 +179,7 @@
     });
     
     /***** Popup Prevention *****/
-    // Prevent any call to window.open (in case a loaded page tries to open a popup)
+    // Override window.open to block popups.
     window.open = function() {
       console.warn("Popup blocked.");
       return null;
