@@ -13,7 +13,7 @@
       color: white;
       overflow: hidden;
     }
-
+    
     /* ---------------- Sidebar Styles ---------------- */
     .sidebar {
       position: fixed;
@@ -34,7 +34,7 @@
     .sidebar:hover {
       width: 70px;
     }
-    /* Removed the home image for a cleaner sidebar */
+    /* Removed home image for a clean sidebar */
     .sidebar .divider {
       width: 80%;
       border-bottom: 1px solid #d580ff;
@@ -58,7 +58,7 @@
       transform: scale(1.2);
       color: white;
     }
-
+    
     /* ---------------- Main Content Area ---------------- */
     .main-content {
       margin-left: 70px; /* leave space for the sidebar */
@@ -66,8 +66,8 @@
       display: flex;
       flex-direction: column;
     }
-
-    /* Search Header Styles */
+    
+    /* ---------------- Search Header Styles ---------------- */
     .search-header {
       padding: 20px;
       text-align: center;
@@ -105,117 +105,123 @@
     .search-box button:hover {
       color: white;
     }
-
+    
     /* ---------------- Iframe (Browser) Styles ---------------- */
-    .browser-frame {
+    #browser-frame {
       width: 100%;
       flex: 1;
       border: none;
       opacity: 1;
       transition: opacity 0.5s ease;
     }
+    
+    /* ---------------- Fullscreen Mode Styles ---------------- */
+    /* When the body has the fullscreen-view class, hide header/sidebar,
+       and make the iframe fill the viewport */
+    .fullscreen-view .sidebar,
+    .fullscreen-view .search-header {
+      display: none;
+    }
+    .fullscreen-view #browser-frame {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+    }
   </style>
 </head>
 <body>
   <!-- Sidebar (Nebula X style) -->
   <div class="sidebar">
-    <!-- The home image is removed for a clean sidebar -->
     <div class="divider"></div>
     <div class="nav-item selected" id="nav-chatbot">ChatBot</div>
   </div>
-
+  
   <!-- Main Content Area -->
   <div class="main-content">
     <!-- Search Header with input and search button -->
     <div class="search-header">
       <div class="search-box">
-        <input type="text" id="search-input" placeholder="Search Google or enter a URL..." />
+        <input type="text" id="search-input" placeholder="Search Google or enter URL..." />
         <button id="search-button">🔍</button>
       </div>
     </div>
-    <!-- Iframe for displaying content full screen -->
-    <iframe
-      id="browser-frame"
-      class="browser-frame"
-      src="https://julius.ai/ai-chatbot?embed=true"
-    ></iframe>
+    <!-- Iframe to display content -->
+    <iframe id="browser-frame" src="https://julius.ai/ai-chatbot?embed=true"></iframe>
   </div>
-
+  
   <script>
     // ---------------- Configuration URLs ----------------
     const chatBotURL = "https://julius.ai/ai-chatbot?embed=true";
     const googleSearchBase = "https://www.google.com/search?igu=1&q=";
     const iframe = document.getElementById("browser-frame");
     const searchInput = document.getElementById("search-input");
-
+    
     // ---------------- Fullscreen Request Function ----------------
     function requestFullScreen(element) {
       if (element.requestFullscreen) {
         element.requestFullscreen();
-      } else if (element.mozRequestFullScreen) { // Firefox
+      } else if (element.mozRequestFullScreen) {
         element.mozRequestFullScreen();
-      } else if (element.webkitRequestFullscreen) { // Chrome, Safari, Opera
+      } else if (element.webkitRequestFullscreen) {
         element.webkitRequestFullscreen();
-      } else if (element.msRequestFullscreen) { // IE/Edge
+      } else if (element.msRequestFullscreen) {
         element.msRequestFullscreen();
       }
     }
-
-    // ---------------- Iframe Loader with Smooth Fade ----------------
-    // The "fullScreen" flag ensures we call the Fullscreen API after loading.
+    
+    // ---------------- Iframe Loader with Smooth Fade & Fullscreen Transition ----------------
     function loadIframe(url, fullScreen = true) {
-      // Start fade-out transition
+      // Fade out the iframe
       iframe.style.opacity = 0;
       setTimeout(() => {
         iframe.src = url;
       }, 300);
       
-      // Request fullscreen if indicated
+      // Enter fullscreen view
       if (fullScreen) {
+        document.body.classList.add("fullscreen-view");
         setTimeout(() => {
-          requestFullScreen(iframe);
+          requestFullScreen(document.documentElement);
         }, 500);
       }
     }
-
-    // Fade the iframe back in once the new content has loaded.
+    
+    // Fade the iframe back in once content loads
     iframe.addEventListener("load", function () {
       iframe.style.opacity = 1;
     });
-
-    // ---------------- Search Functionality ----------------
-    // Pressing Enter inside the search input
+    
+    // ---------------- Process Input (Search or URL) ----------------
+    function processInput(query) {
+      let url = "";
+      if (query.startsWith("http://") || query.startsWith("https://")) {
+        url = query;
+      } else {
+        url = googleSearchBase + encodeURIComponent(query);
+      }
+      loadIframe(url, true);
+    }
+    
+    // ---------------- Search Input Functionality ----------------
     searchInput.addEventListener("keyup", function (e) {
       if (e.key === "Enter" && this.value.trim() !== "") {
         processInput(this.value.trim());
         this.value = "";
       }
     });
-
-    // Clicking the search button
+    
     document.getElementById("search-button").addEventListener("click", function () {
       if (searchInput.value.trim() !== "") {
         processInput(searchInput.value.trim());
         searchInput.value = "";
       }
     });
-
-    // Process the search input: if it starts with "http://" or "https://", load it directly.
-    // Otherwise, treat it as a Google search query.
-    function processInput(query) {
-      let url = "";
-      if (query.startsWith("http://") || query.startsWith("https://")) {
-        url = query;
-      } else {
-        // Treat input as a search query for Google.
-        const encodedQuery = encodeURIComponent(query);
-        url = googleSearchBase + encodedQuery;
-      }
-      loadIframe(url, true); // Always open in fullscreen
-    }
-
+    
     // ---------------- ChatBot Navigation ----------------
-    // When clicking the ChatBot nav item, load the chat URL in fullscreen.
+    // Clicking 'ChatBot' loads the chatbot URL in fullscreen.
     document.getElementById("nav-chatbot").addEventListener("click", function () {
       loadIframe(chatBotURL, true);
     });
