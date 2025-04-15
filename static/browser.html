@@ -63,7 +63,7 @@
     <button id="chat-button">ChatBot</button>
   </div>
 
-  <!-- Iframe used as the content area; no sandbox attribute is added here to improve compatibility. -->
+  <!-- Iframe used as the content area; no sandbox attribute is added to improve compatibility -->
   <iframe
     id="browser-frame"
     class="browser-frame"
@@ -71,27 +71,24 @@
   ></iframe>
 
   <script>
-    // URLs for the two views.
+    // Define the URLs
     const chatBotURL = "https://julius.ai/ai-chatbot";
-    // The "igu=1" parameter often helps with iframe embed for Google Search.
+    // The "igu=1" parameter sometimes helps Google display in an iframe. Note: This is not guaranteed.
     const googleSearchBase = "https://www.google.com/search?igu=1&q=";
     const iframe = document.getElementById('browser-frame');
 
-    // When a user types in the search box and hits Enter,
-    // modify the iframe to load Google search results.
+    // When pressing Enter in the search input, load Google search results in the iframe.
     document.getElementById('search-input').addEventListener('keyup', function(e) {
       if (e.key === "Enter" && this.value.trim() !== "") {
         const query = encodeURIComponent(this.value.trim());
-        const url = googleSearchBase + query;
-        iframe.src = url;
+        iframe.src = googleSearchBase + query;
         this.value = "";
       }
     });
 
-    // When the ChatBot button is clicked, revert the iframe to the Julius ChatBot.
+    // Clicking the ChatBot button loads the chat URL in the same iframe.
     document.getElementById('chat-button').addEventListener('click', function() {
       iframe.src = chatBotURL;
-      alert("You are now returned to the Julius ChatBot interface.");
     });
   </script>
 </body>
