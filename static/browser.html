@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Zapari-Kelvin Browser</title>
   <style>
-    /* --- Nebula X Inspired Global Styles & Sidebar --- */
+    /* ---------------- Global Nebula X Styles ---------------- */
     body {
       margin: 0;
       padding: 0;
@@ -14,6 +14,7 @@
       overflow: hidden;
     }
 
+    /* ---------------- Sidebar Styles ---------------- */
     .sidebar {
       position: fixed;
       top: 0;
@@ -30,28 +31,23 @@
       z-index: 10;
       border-bottom: 2px solid #d580ff;
     }
-
     .sidebar:hover {
       width: 70px;
     }
-
     .sidebar .logo {
       width: 40px;
       height: auto;
       margin-bottom: 10px;
       transition: transform 0.3s ease;
     }
-
     .sidebar .logo:hover {
       transform: scale(1.2);
     }
-
     .sidebar .divider {
       width: 80%;
       border-bottom: 1px solid #d580ff;
       margin-bottom: 15px;
     }
-
     .sidebar .nav-item {
       text-align: center;
       padding: 10px;
@@ -61,37 +57,33 @@
       transition: all 0.3s ease;
       margin-bottom: 15px;
     }
-
     .sidebar .nav-item.selected {
       background-color: #b34cd9;
       border-radius: 10px;
       color: white;
     }
-
     .sidebar .nav-item:hover {
       transform: scale(1.2);
       color: white;
     }
 
-    /* --- Main Content Area Styles --- */
+    /* ---------------- Main Content Area ---------------- */
     .main-content {
-      margin-left: 70px; /* ensure space for the sidebar, even on hover */
+      margin-left: 70px; /* Ensure space for the sidebar */
       height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
-    /* Search Header (placed at the top of main content) */
+    /* Search Header Styles */
     .search-header {
       padding: 20px;
       text-align: center;
     }
-
     .search-box {
       position: relative;
       display: inline-block;
     }
-
     .search-box input {
       width: 400px;
       padding: 12px 20px;
@@ -103,11 +95,9 @@
       font-size: 1rem;
       transition: all 0.3s ease-in-out;
     }
-
     .search-box input:focus {
       box-shadow: 0 0 15px #d580ff;
     }
-
     .search-box button {
       position: absolute;
       right: 10px;
@@ -120,12 +110,11 @@
       cursor: pointer;
       transition: color 0.3s ease-in-out;
     }
-
     .search-box button:hover {
       color: white;
     }
 
-    /* --- Iframe (Browser) Styles with Smooth Fade --- */
+    /* ---------------- Iframe (Browser) Styles ---------------- */
     .browser-frame {
       width: 100%;
       flex: 1;
@@ -136,9 +125,9 @@
   </style>
 </head>
 <body>
-  <!-- Sidebar using Nebula X styling -->
+  <!-- Sidebar (Nebula X style) -->
   <div class="sidebar">
-    <!-- Replace logo.png with your logo image if available -->
+    <!-- For your logo, change "logo.png" as needed -->
     <img src="logo.png" alt="Logo" class="logo" />
     <div class="divider"></div>
     <div class="nav-item selected" id="nav-chatbot">ChatBot</div>
@@ -146,14 +135,14 @@
 
   <!-- Main Content Area -->
   <div class="main-content">
-    <!-- Search Header with search input and button -->
+    <!-- Search header with input and search button -->
     <div class="search-header">
       <div class="search-box">
-        <input type="text" id="search-input" placeholder="Search Google..." />
+        <input type="text" id="search-input" placeholder="Search Google or enter a URL..." />
         <button id="search-button">🔍</button>
       </div>
     </div>
-    <!-- Iframe that displays either search results or the Julius ChatBot -->
+    <!-- Iframe for displaying content -->
     <iframe
       id="browser-frame"
       class="browser-frame"
@@ -162,18 +151,43 @@
   </div>
 
   <script>
-    // URLs
+    // ---------------- Configuration URLs ----------------
+    // ChatBot URL (with embed parameter for improved integration)
     const chatBotURL = "https://julius.ai/ai-chatbot?embed=true";
-    // The igu=1 parameter is sometimes used to help Google render inside an iframe.
+    // Google search URL - using a parameter that may help with embedding
     const googleSearchBase = "https://www.google.com/search?igu=1&q=";
-    const iframe = document.getElementById("browser-frame");
 
-    // Function to smoothly load a URL in the iframe.
-    function loadIframe(url) {
+    const iframe = document.getElementById("browser-frame");
+    const searchInput = document.getElementById("search-input");
+
+    // ---------------- Fullscreen Request Function ----------------
+    function requestFullScreen(element) {
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+      } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+      }
+    }
+
+    // ---------------- Iframe Loader with Smooth Fade ----------------
+    function loadIframe(url, fullScreen = false) {
+      // Start fade-out transition
       iframe.style.opacity = 0;
       setTimeout(() => {
         iframe.src = url;
+        // When the iframe loads new content, fade it back in
       }, 300);
+
+      // If fullScreen is true, request fullscreen on the iframe
+      if (fullScreen) {
+        setTimeout(() => {
+          requestFullScreen(iframe);
+        }, 500);
+      }
     }
 
     // Fade the iframe back in once content has loaded.
@@ -181,29 +195,43 @@
       iframe.style.opacity = 1;
     });
 
-    // Search functionality: when enter is pressed or search button is clicked.
-    const searchInput = document.getElementById("search-input");
+    // ---------------- Search Functionality ----------------
+    // When the user presses Enter in the search input:
     searchInput.addEventListener("keyup", function (e) {
       if (e.key === "Enter" && this.value.trim() !== "") {
-        const query = encodeURIComponent(this.value.trim());
-        const url = googleSearchBase + query;
-        loadIframe(url);
+        const query = this.value.trim();
+        if (query.startsWith("http://") || query.startsWith("https://")) {
+          // If the input is a URL, load it directly in fullscreen.
+          loadIframe(query, true);
+        } else {
+          // Otherwise, treat it as a search query for Google.
+          const encodedQuery = encodeURIComponent(query);
+          const url = googleSearchBase + encodedQuery;
+          loadIframe(url);
+        }
         this.value = "";
       }
     });
 
+    // When the search button is clicked:
     document.getElementById("search-button").addEventListener("click", function () {
       if (searchInput.value.trim() !== "") {
-        const query = encodeURIComponent(searchInput.value.trim());
-        const url = googleSearchBase + query;
-        loadIframe(url);
+        const query = searchInput.value.trim();
+        if (query.startsWith("http://") || query.startsWith("https://")) {
+          loadIframe(query, true);
+        } else {
+          const encodedQuery = encodeURIComponent(query);
+          const url = googleSearchBase + encodedQuery;
+          loadIframe(url);
+        }
         searchInput.value = "";
       }
     });
 
-    // ChatBot navigation: clicking the "ChatBot" nav item loads the ChatBot URL.
+    // ---------------- ChatBot Navigation ----------------
+    // When clicking the ChatBot nav item in the sidebar:
     document.getElementById("nav-chatbot").addEventListener("click", function () {
-      loadIframe(chatBotURL);
+      loadIframe(chatBotURL, true);
     });
   </script>
 </body>
