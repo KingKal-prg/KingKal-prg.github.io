@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Flip-Boi</title>
+  <title>Zapari-Kelvin Direct URL Resolver</title>
   <style>
-    /* ---------------- Global Nebula X–Inspired Styles ---------------- */
+    /* ---------- Global Nebula X–Inspired Styles ---------- */
     body {
       margin: 0;
       padding: 0;
@@ -13,6 +13,7 @@
       color: white;
       overflow: hidden;
     }
+    /* ---------- Search Header ---------- */
     .search-header {
       padding: 20px;
       text-align: center;
@@ -30,7 +31,7 @@
       background-color: #111;
       color: white;
       font-size: 1rem;
-      transition: all 0.3s ease-in-out;
+      transition: all 0.3s ease;
     }
     .search-box input:focus {
       box-shadow: 0 0 15px #d580ff;
@@ -50,16 +51,15 @@
     .search-box button:hover {
       color: white;
     }
-    /* ---------------- Iframe Styles ---------------- */
-    /* The iframe now includes a sandbox attribute that allows scripts and same-origin but not popups */
+    /* ---------- Iframe (Browser) Styles ---------- */
     #browser-frame {
       width: 100%;
-      height: calc(100vh - 80px); /* Leaves room for the search header */
+      height: calc(100vh - 80px); /* Leaves room for the header */
       border: none;
       opacity: 1;
       transition: opacity 0.5s ease;
     }
-    /* ---------------- Fullscreen Mode Styles ---------------- */
+    /* ---------- Fullscreen Mode Styles ---------- */
     .fullscreen-view .search-header {
       display: none;
     }
@@ -72,37 +72,33 @@
       z-index: 9999;
     }
   </style>
-  
-  <!-- Include Rammerhead proxy scripts (host these files on your server in production to avoid CORS issues) -->
-  <script src="https://raw.githubusercontent.com/binary-person/rammerhead/refs/heads/master/src/classes/RammerheadProxy.js"></script>
-  <script src="https://raw.githubusercontent.com/binary-person/rammerhead/refs/heads/master/src/client/rammerhead.js"></script>
 </head>
 <body>
   <!-- Search Header -->
   <div class="search-header">
     <div class="search-box">
-      <input type="text" id="search-input" placeholder="Search Google or enter URL..." />
+      <input type="text" id="search-input" placeholder="Enter URL or search term..." />
       <button id="search-button">🔍</button>
     </div>
   </div>
   
-  <!-- Iframe with sandbox attribute to block popups -->
+  <!-- Iframe to display the result. The iframe is not given extra permissions (e.g. popups) -->
   <iframe id="browser-frame" sandbox="allow-scripts allow-same-origin" src="about:blank"></iframe>
   
   <script>
     /***** Configuration *****/
     // Base URL for Google searches.
     const googleSearchBase = "https://www.google.com/search?q=";
-    // Proxy base URL for search queries (if needed).
-    // For direct URL entries we want the site to load directly.
-    const proxyBase = "https://teachers.azimei.cn/?url=";
+    // RAMMERHEAD PROXY ENDPOINT:
+    // This endpoint is expected to take a query parameter "url" and return (plain text) the resolved direct URL.
+    const proxyEndpoint = "https://teachers.azimei.cn/?url=";
     
     const iframe = document.getElementById("browser-frame");
     const searchInput = document.getElementById("search-input");
     
     /***** Utility Functions *****/
     
-    // Fullscreen helper using the Fullscreen API.
+    // Requests full screen for the given element using the Fullscreen API.
     function requestFullScreen(element) {
       if (element.requestFullscreen) {
         element.requestFullscreen();
@@ -115,42 +111,54 @@
       }
     }
     
-    // Loads the given URL into the iframe with fade transitions and fullscreen if needed.
+    // Loads the URL into the iframe with a fade transition and enters fullscreen mode.
     function loadIframe(url, fullScreen = true) {
       console.log("Loading URL:", url);
       iframe.style.opacity = 0;
-      setTimeout(function() {
+      setTimeout(() => {
         iframe.src = url;
       }, 300);
       
       if (fullScreen) {
         document.body.classList.add("fullscreen-view");
-        setTimeout(function() {
+        setTimeout(() => {
           requestFullScreen(document.documentElement);
         }, 500);
       }
     }
     
-    // Fade in the iframe content when loaded.
+    // Fade in the iframe when the new content finishes loading.
     iframe.addEventListener("load", function() {
       iframe.style.opacity = 1;
     });
     
-    /***** Direct Link Mapping *****/
-    // Map specific sites (like now.gg) to a given direct link.
-    function getDirectLink(url) {
-      if (url.toLowerCase().includes("now.gg")) {
-        // Direct link provided for now.gg.
-        return "https://teachers.azimei.cn/4c2b8912901f4db787042727594ac6fd/_rhsDAMmB://MH2.mI/";
+    /***** Proxy Resolution *****/
+    // Sends the given URL to the proxy endpoint and returns a promise that resolves to the direct URL.
+    async function getDirectLink(url) {
+      const fullProxyUrl = proxyEndpoint + encodeURIComponent(url);
+      console.log("Fetching direct link from proxy:", fullProxyUrl);
+      try {
+        const response = await fetch(fullProxyUrl);
+        if (!response.ok) {
+          throw new Error(`Proxy request failed: ${response.statusText}`);
+        }
+        // Assume the proxy returns plain text containing the direct URL.
+        const directLink = (await response.text()).trim();
+        console.log("Received direct link from proxy:", directLink);
+        return directLink;
+      } catch (err) {
+        console.error("Error fetching direct link:", err);
+        // In case of error, fall back to the original URL.
+        return url;
       }
-      return url;
     }
-
+    
     /***** Process User Input *****/
-    function processInput(query) {
+    async function processInput(query) {
       let targetUrl = "";
       
-      // If the query starts with "http://" or "https://", or contains a dot, treat it as a URL.
+      // If the query starts with "http://" or "https://" treat it as a URL.
+      // Or if it contains a dot, assume it's a domain.
       if (query.startsWith("http://") || query.startsWith("https://")) {
         targetUrl = query;
         console.log("Detected full URL:", targetUrl);
@@ -158,49 +166,52 @@
         targetUrl = "https://" + query;
         console.log("Assumed domain input; converted to URL:", targetUrl);
       } else {
-        // Otherwise, treat it as a search query for Google.
+        // Otherwise, treat the input as a search query.
         targetUrl = googleSearchBase + encodeURIComponent(query);
         console.log("Treated as search query; generated URL:", targetUrl);
-        // For search queries, route through the proxy.
-        targetUrl = proxyBase + encodeURIComponent(targetUrl);
-        console.log("After proxy routing, URL:", targetUrl);
+        // For search queries, you might want to send them through the proxy as well.
+        // Uncomment the following line if desired:
+        // targetUrl = proxyEndpoint + encodeURIComponent(targetUrl);
       }
       
-      // For direct URL inputs, get the direct link mapping.
+      // If the input appears to be a URL (i.e. contains a dot), resolve it through the proxy.
       if (query.indexOf('.') !== -1) {
-        targetUrl = getDirectLink(targetUrl);
-        // Optionally copy the direct link to the clipboard.
+        const directUrl = await getDirectLink(targetUrl);
+        // Optionally, copy the direct URL to the clipboard.
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(targetUrl)
-            .then(() => console.log("Direct link copied to clipboard:", targetUrl))
-            .catch(err => console.error("Failed to copy direct link:", err));
+          navigator.clipboard.writeText(directUrl)
+            .then(() => console.log("Direct URL copied to clipboard:", directUrl))
+            .catch(err => console.error("Clipboard copy error:", err));
         }
+        loadIframe(directUrl, true);
+      } else {
+        // For search queries, simply load the URL.
+        loadIframe(targetUrl, true);
       }
-      
-      loadIframe(targetUrl, true);
     }
     
-    /***** Popup Prevention *****/
-    // Override window.open in the parent (this may help block attempts from the iframe).
-    window.open = function() {
-      console.warn("Popup blocked.");
-      return null;
-    };
-    
     /***** Event Listeners *****/
+    // Trigger on Enter key
     searchInput.addEventListener("keyup", function(e) {
       if (e.key === "Enter" && this.value.trim() !== "") {
         processInput(this.value.trim());
         this.value = "";
       }
     });
-    
+    // Trigger on search button click.
     document.getElementById("search-button").addEventListener("click", function() {
       if (searchInput.value.trim() !== "") {
         processInput(searchInput.value.trim());
         searchInput.value = "";
       }
     });
+    
+    /***** Popup Prevention *****/
+    // Prevent any call to window.open (in case a loaded page tries to open a popup)
+    window.open = function() {
+      console.warn("Popup blocked.");
+      return null;
+    };
   </script>
 </body>
 </html>
