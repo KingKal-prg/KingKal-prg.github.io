@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Zapari-Kelvin Browser</title>
+  <style>
+    /* Reset some default styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+    /* Main header styling like DuckDuckGo’s header */
+    .header {
+      background-color: #f3f3f3;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+    }
+    /* Search bar styling */
+    .search-container {
+      flex: 1;
+    }
+    #search-input {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    /* ChatBot button styling */
+    #chat-button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 20px;
+    }
+    /* Iframe that will show the locked web page */
+    .browser-frame {
+      width: 100%;
+      height: calc(100vh - 50px); /* Adjust height accounting for header */
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="Search DuckDuckGo..." />
+    </div>
+    <button id="chat-button">ChatBot</button>
+  </div>
+  <!-- Iframe loading the Julius ChatBot URL -->
+  <iframe
+    id="browser-frame"
+    class="browser-frame"
+    src="https://julius.ai/ai-chatbot"
+    sandbox="allow-scripts allow-same-origin"
+  ></iframe>
+
+  <script>
+    // Define the allowed URL we want to lock the browser to.
+    const allowedURL = "https://julius.ai/ai-chatbot";
+
+    const iframe = document.getElementById('browser-frame');
+
+    /* 
+     * Because Julius.ai is on a different origin, direct inspection of its 
+     * current URL inside the iframe is often blocked by browser security.
+     * The following load event handler is a best-effort approach.
+     */
+    iframe.addEventListener('load', function () {
+      try {
+        // Attempt to check the iframe's current URL
+        const currentURL = iframe.contentWindow.location.href;
+        if (!currentURL.startsWith(allowedURL)) {
+          // If the user navigated away, force the iframe back
+          iframe.src = allowedURL;
+          alert("Navigation is locked to the Julius ChatBot interface.");
+        }
+      } catch (error) {
+        // Due to cross-origin restrictions the above may fail.
+        // In this case, consider further measures like using a server-side proxy.
+        console.warn("Could not verify iframe URL due to cross-origin restrictions.");
+      }
+    });
+
+    // Handle search input: when the user enters a query and presses Enter,
+    // instead of navigating away, we’ll simply notify them.
+    // (Alternatively, you might implement a proxy search feature.)
+    document.getElementById('search-input').addEventListener('keyup', function (e) {
+      if (e.key === 'Enter') {
+        const query = encodeURIComponent(this.value);
+        const searchURL = "https://duckduckgo.com/?q=" + query;
+        // Instead of navigating, display a warning message.
+        alert("Navigation is locked. You cannot leave the Julius ChatBot interface.");
+        this.value = "";
+      }
+    });
+
+    // ChatBot button click event:
+    // In this example, the browser is already set to show the Julius ChatBot.
+    // So, if the user clicks the button, you could either do nothing or reload the allowed URL.
+    document.getElementById('chat-button').addEventListener('click', function () {
+      // You might open a modal or simply ensure the iframe shows the ChatBot.
+      iframe.src = allowedURL;
+      alert("You are now in the Julius ChatBot interface.");
+    });
+  </script>
+</body>
+</html>
