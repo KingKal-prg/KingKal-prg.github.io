@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Zapari-Kelvin Browser</title>
   <style>
-    /* Basic reset and styling */
+    /* Reset & basic styling */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -43,10 +43,10 @@
       cursor: pointer;
       margin-left: 20px;
     }
-    /* Iframe takes the rest of the viewport */
+    /* Iframe (browser area) */
     .browser-frame {
       width: 100%;
-      height: calc(100vh - 50px); /* adjust for header height */
+      height: calc(100vh - 50px); /* Adjust height accounting for header */
       border: none;
     }
   </style>
@@ -54,53 +54,43 @@
 <body>
   <div class="header">
     <div class="search-container">
-      <input type="text" id="search-input" placeholder="Search DuckDuckGo..." />
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Search Google..."
+      />
     </div>
     <button id="chat-button">ChatBot</button>
   </div>
 
-  <!-- Iframe locked to Julius ChatBot -->
+  <!-- Iframe used as the content area; no sandbox attribute is added here to improve compatibility. -->
   <iframe
     id="browser-frame"
     class="browser-frame"
     src="https://julius.ai/ai-chatbot"
-    sandbox="allow-scripts allow-same-origin"
   ></iframe>
 
   <script>
-    // URL we are locking to
-    const allowedURL = "https://julius.ai/ai-chatbot";
+    // URLs for the two views.
+    const chatBotURL = "https://julius.ai/ai-chatbot";
+    // The "igu=1" parameter often helps with iframe embed for Google Search.
+    const googleSearchBase = "https://www.google.com/search?igu=1&q=";
     const iframe = document.getElementById('browser-frame');
 
-    // Optional: Monitor iframe loads (bear in mind cross-origin limitations)
-    iframe.addEventListener('load', function () {
-      try {
-        const currentURL = iframe.contentWindow.location.href;
-        if (!currentURL.startsWith(allowedURL)) {
-          iframe.src = allowedURL;
-          // If desired, you can show an alert here, but it’s commented out.
-          // alert("Navigation is locked to the Julius ChatBot interface.");
-        }
-      } catch (error) {
-        // Likely blocked by cross-origin restrictions.
-        console.warn("Cannot verify iframe URL due to cross-origin limitations.");
-      }
-    });
-
-    // Search bar now opens DuckDuckGo search results in a new tab.
-    document.getElementById('search-input').addEventListener('keyup', function (e) {
-      if (e.key === 'Enter' && this.value.trim() !== "") {
+    // When a user types in the search box and hits Enter,
+    // modify the iframe to load Google search results.
+    document.getElementById('search-input').addEventListener('keyup', function(e) {
+      if (e.key === "Enter" && this.value.trim() !== "") {
         const query = encodeURIComponent(this.value.trim());
-        const searchURL = "https://duckduckgo.com/?q=" + query;
-        // Open the search results in a new tab/window.
-        window.open(searchURL, '_blank');
+        const url = googleSearchBase + query;
+        iframe.src = url;
         this.value = "";
       }
     });
 
-    // ChatBot button click resets the iframe and shows an alert.
-    document.getElementById('chat-button').addEventListener('click', function () {
-      iframe.src = allowedURL;
+    // When the ChatBot button is clicked, revert the iframe to the Julius ChatBot.
+    document.getElementById('chat-button').addEventListener('click', function() {
+      iframe.src = chatBotURL;
       alert("You are now returned to the Julius ChatBot interface.");
     });
   </script>
