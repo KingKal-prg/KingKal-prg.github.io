@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Zapari-Kelvin Browser</title>
+  <title>Zapari-Kelvin Browser - Search</title>
   <style>
     /* ---------------- Global Nebula X Styles ---------------- */
     body {
@@ -13,83 +13,6 @@
       color: white;
       overflow: hidden;
     }
-    
-    /* ---------------- Sidebar Styles ---------------- */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 50px;
-      height: 100%;
-      background-color: #111;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding-top: 15px;
-      z-index: 10;
-      border-bottom: 2px solid #d580ff;
-      transition: width 0.3s ease-in-out;
-    }
-    .sidebar:hover {
-      width: 70px;
-    }
-    
-    /* Hamburger icon: 3 horizontal bars stacked vertically */
-    .hamburger {
-      cursor: pointer;
-      width: 30px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-evenly;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .hamburger .bar {
-      width: 100%;
-      height: 3px;
-      background-color: #d580ff;
-      border-radius: 2px;
-      margin: 3px 0;
-      transition: all 0.3s ease;
-    }
-    
-    /* Hidden menu that appears when hamburger is clicked */
-    .menu {
-      display: none;
-      flex-direction: column;
-      width: 100%;
-      max-height: 0;
-      overflow-y: hidden;
-      transition: max-height 0.3s ease-in-out;
-    }
-    .menu.open {
-      display: flex;
-      max-height: 150px; /* Adjust as needed; menu will scroll if there are many items */
-      overflow-y: auto;
-    }
-    .menu .menu-item {
-      text-align: center;
-      padding: 10px 0;
-      cursor: pointer;
-      color: #d580ff;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      width: 100%;
-    }
-    .menu .menu-item:hover {
-      background-color: #b34cd9;
-      color: white;
-    }
-    
-    /* ---------------- Main Content Area ---------------- */
-    .main-content {
-      margin-left: 70px; /* leave space for the sidebar when expanded */
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    
     /* ---------------- Search Header Styles ---------------- */
     .search-header {
       padding: 20px;
@@ -123,24 +46,21 @@
       color: #d580ff;
       font-size: 1.2rem;
       cursor: pointer;
-      transition: color 0.3s ease-in-out;
+      transition: color 0.3s ease;
     }
     .search-box button:hover {
       color: white;
     }
-    
     /* ---------------- Iframe (Browser) Styles ---------------- */
     #browser-frame {
       width: 100%;
-      flex: 1;
+      height: calc(100vh - 80px); /* Adjust height to leave room for the search header */
       border: none;
       opacity: 1;
       transition: opacity 0.5s ease;
     }
-    
     /* ---------------- Fullscreen Mode Styles ---------------- */
-    /* When the body has the fullscreen-view class, hide sidebar & search header and expand the iframe */
-    .fullscreen-view .sidebar,
+    /* Hide header and expand iframe in fullscreen mode */
     .fullscreen-view .search-header {
       display: none;
     }
@@ -155,45 +75,24 @@
   </style>
 </head>
 <body>
-  <!-- Sidebar with hamburger icon & hidden scrollable menu -->
-  <div class="sidebar">
-    <div class="hamburger" id="hamburger">
-      <div class="bar"></div>
-      <div class="bar"></div>
-      <div class="bar"></div>
-    </div>
-    <div class="menu" id="menu">
-      <div class="menu-item" id="menu-chatbot">ChatBot</div>
-      <!-- You can add additional menu items here if desired -->
+  <!-- Search Header -->
+  <div class="search-header">
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="Search or enter URL..." />
+      <button id="search-button">🔍</button>
     </div>
   </div>
-  
-  <!-- Main Content Area -->
-  <div class="main-content">
-    <!-- Search Header with input and search button -->
-    <div class="search-header">
-      <div class="search-box">
-        <input type="text" id="search-input" placeholder="Search Google or enter URL..." />
-        <button id="search-button">🔍</button>
-      </div>
-    </div>
-    <!-- Iframe that displays content full screen -->
-    <iframe id="browser-frame" src="https://julius.ai/ai-chatbot?embed=true"></iframe>
-  </div>
+  <!-- Iframe to display search results -->
+  <iframe id="browser-frame" src="about:blank"></iframe>
   
   <script>
-    // ---------------- Configuration URLs ----------------
-    const chatBotURL = "https://julius.ai/ai-chatbot?embed=true";
-    const googleSearchBase = "https://www.google.com/search?igu=1&q=";
+    // We'll use Startpage as an unblocked alternative.
+    // (If you wish to use DuckDuckGo via a proxy or an alternate domain, you can substitute the URL below.)
+    const searchEngineBase = "https://www.startpage.com/do/search?query=";
     const iframe = document.getElementById("browser-frame");
     const searchInput = document.getElementById("search-input");
-    
-    // References for the hamburger menu and dropdown
-    const hamburger = document.getElementById("hamburger");
-    const menu = document.getElementById("menu");
-    const menuChatbot = document.getElementById("menu-chatbot");
-    
-    // ---------------- Fullscreen Request Function ----------------
+
+    // Fullscreen request using the Fullscreen API
     function requestFullScreen(element) {
       if (element.requestFullscreen) {
         element.requestFullscreen();
@@ -205,8 +104,9 @@
         element.msRequestFullscreen();
       }
     }
-    
-    // ---------------- Iframe Loader with Fade & Fullscreen ----------------
+
+    // Load a URL into the iframe with a smooth fade-out/in transition.
+    // When fullScreen is true, the search header is hidden and the iframe fills the viewport.
     function loadIframe(url, fullScreen = true) {
       // Fade out the iframe
       iframe.style.opacity = 0;
@@ -214,8 +114,7 @@
         iframe.src = url;
       }, 300);
       
-      // If fullScreen flag is true, add the class to hide header/sidebar and expand iframe,
-      // then request fullscreen.
+      // Switch to fullscreen view if indicated
       if (fullScreen) {
         document.body.classList.add("fullscreen-view");
         setTimeout(() => {
@@ -223,45 +122,38 @@
         }, 500);
       }
     }
-    
-    // Fade the iframe in once new content loads.
+
+    // Fade the iframe back in once its new content has loaded.
     iframe.addEventListener("load", function () {
       iframe.style.opacity = 1;
     });
-    
-    // ---------------- Process Input (Search or URL) ----------------
+
+    // Process the search input:
+    // If the query starts with "http://" or "https://", load it as a URL.
+    // Otherwise treat it as a search query.
     function processInput(query) {
       let url = "";
       if (query.startsWith("http://") || query.startsWith("https://")) {
         url = query;
       } else {
-        url = googleSearchBase + encodeURIComponent(query);
+        url = searchEngineBase + encodeURIComponent(query);
       }
       loadIframe(url, true);
     }
-    
-    // ---------------- Search Input Listeners ----------------
+
+    // Trigger search when pressing Enter
     searchInput.addEventListener("keyup", function (e) {
       if (e.key === "Enter" && this.value.trim() !== "") {
         processInput(this.value.trim());
         this.value = "";
       }
     });
+    // Trigger search when clicking the search button
     document.getElementById("search-button").addEventListener("click", function () {
       if (searchInput.value.trim() !== "") {
         processInput(searchInput.value.trim());
         searchInput.value = "";
       }
-    });
-    
-    // ---------------- Hamburger Menu Toggle ----------------
-    hamburger.addEventListener("click", function () {
-      menu.classList.toggle("open");
-    });
-    
-    // ---------------- ChatBot Menu Item ----------------
-    menuChatbot.addEventListener("click", function () {
-      loadIframe(chatBotURL, true);
     });
   </script>
 </body>
