@@ -3,7 +3,7 @@
   "name": "Kelvin: the app for Kelvin (add to homescreen test page)",
   "display": "standalone",
   "id": "/static/browser.html",
-  "start_url": "/static/browser.html",
+  "start_url": "/static/browser.html", 
   "icons": [
       {
           "src": "apple-touch-icon.png",
