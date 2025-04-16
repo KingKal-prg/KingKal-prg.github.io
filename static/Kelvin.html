@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Games Website</title>
+  <style>
+    /* Basic reset and style settings */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      color: #fff;
+      min-height: 100vh;
+    }
+    header {
+      background-color: #333;
+      padding: 20px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    /* Navigation buttons styling */
+    .nav-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .nav-buttons button {
+      padding: 10px 15px;
+      background-color: #444;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-size: 1rem;
+    }
+    .nav-buttons button:hover {
+      background-color: #555;
+    }
+    /* Fullscreen game container */
+    #gameContainer {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      z-index: 1000;
+    }
+    #gameFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    /* Back button to exit the game view */
+    #backButton {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 10px 15px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+      z-index: 1001;
+    }
+  </style>
+  <script>
+    // Disable popups by overriding window.open
+    window.open = function() {
+      console.log("Popup blocked: window.open() has been disabled.");
+      return null;
+    };
+
+    // Launch game in fullscreen by loading the corresponding URL in an iframe
+    function launchGame(url) {
+      // Set the iframe source to load the game URL
+      document.getElementById("gameFrame").src = url;
+      // Display the game container with the iframe
+      document.getElementById("gameContainer").style.display = "block";
+      
+      // Request fullscreen mode for the game container element
+      const gameContainer = document.getElementById("gameContainer");
+      if (gameContainer.requestFullscreen) {
+        gameContainer.requestFullscreen().catch(err => {
+          console.error("Error attempting to enable full-screen mode:", err);
+        });
+      } else if (gameContainer.webkitRequestFullscreen) { /* Safari */
+        gameContainer.webkitRequestFullscreen();
+      } else if (gameContainer.msRequestFullscreen) { /* IE11 */
+        gameContainer.msRequestFullscreen();
+      }
+    }
+
+    // Exit game view and return to main menu
+    function exitGame() {
+      // Attempt to exit fullscreen
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      }
+      // Hide the game container and reset the iframe's src
+      document.getElementById("gameContainer").style.display = "none";
+      document.getElementById("gameFrame").src = "";
+    }
+
+    // Bind event listeners after the DOM loads
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("backButton").addEventListener("click", exitGame);
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>My Games Website</h1>
+    <div class="nav-buttons">
+      <!-- First game: TikTok -->
+      <button onclick="launchGame('https://teachers.azimei.cn/b8859134958d4779b86c385149d379fa/_rhs2jmkX://LyV.ymYALW.mAS/W7Z6K9S')">
+        TikTok
+      </button>
+      <!-- Second game: discord -->
+      <button onclick="launchGame('https://teachers.azimei.cn/e0f6b4360b3d4adfb68117f59c7324ec/_rhsX6CIc://r4UbJ-4.Ik-/')">
+        discord
+      </button>
+      <!-- Third game: Games -->
+      <button onclick="launchGame('https://teachers.azimei.cn/e0f6b4360b3d4adfb68117f59c7324ec/_rhsX6CIc://-ku.7uJJc4-81.QKe/')">
+        Games
+      </button>
+    </div>
+  </header>
+
+  <!-- Game container shows the game in fullscreen -->
+  <div id="gameContainer">
+    <button id="backButton">Back</button>
+    <iframe id="gameFrame" allowfullscreen></iframe>
+  </div>
+</body>
+</html>
