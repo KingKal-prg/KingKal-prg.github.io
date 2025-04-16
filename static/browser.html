@@ -13,10 +13,15 @@
       background: radial-gradient(circle at bottom, #7c2ae8, #000);
       color: white;
       overflow: hidden;
+      position: relative;
+      height: 100vh;
     }
-    /* Search Header */
+    /* Centered Search Header */
     .search-header {
-      padding: 20px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       text-align: center;
     }
     .search-box {
@@ -55,12 +60,13 @@
     /* Iframe (Browser) Styles */
     #browser-frame {
       width: 100%;
-      height: calc(100vh - 80px); /* Leaves room for the header */
+      height: calc(100vh - 80px); /* Leaves room for header if needed */
       border: none;
       opacity: 1;
       transition: opacity 0.5s ease;
+      /* When the iframe loads, it will be fully fullscreen so the search header will be hidden */
     }
-    /* Fullscreen mode: hide the header and let the iframe fill the viewport */
+    /* Fullscreen Mode: hide the header and stretch the iframe */
     .fullscreen-view .search-header {
       display: none;
     }
@@ -76,7 +82,7 @@
   <!-- (Note: In production, host the proxy endpoint and any related scripts on your own server.) -->
 </head>
 <body>
-  <!-- Search Header -->
+  <!-- Centered Search Header -->
   <div class="search-header">
     <div class="search-box">
       <input type="text" id="search-input" placeholder="Enter URL or search term..." />
@@ -91,7 +97,6 @@
     // Base URL for Google search queries.
     const googleSearchBase = "https://www.google.com/search?q=";
     // Rammerhead Proxy Endpoint.
-    // This example expects that simply adding the encoded target URL after this base does the trick.
     const proxyEndpoint = "https://teachers.azimei.cn/?url=";
     
     const iframe = document.getElementById("browser-frame");
