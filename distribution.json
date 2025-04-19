@@ -114,67 +114,14 @@
               }
             }
           ]
-        },
-        {
-          "id": "generated.fabricmod:iris:1.6.15@jar",
-          "name": "Iris",
-          "type": "FabricMod",
-          "artifact": {
-            "size": 2416339,
-            "url": "https://helios-files.geekcorner.eu.org/servers/Fabric-Demo-1.20.4/fabricmods/required/iris-mc1.20.4-1.6.15.jar",
-            "MD5": "a2f7578c1652222e8c703831b604150e"
-          }
-        },
-        {
-          "id": "me.jellysquid.mods:lithium:0.12.1@jar",
-          "name": "Lithium",
-          "type": "FabricMod",
-          "artifact": {
-            "size": 716022,
-            "url": "https://helios-files.geekcorner.eu.org/servers/Fabric-Demo-1.20.4/fabricmods/required/lithium-fabric-mc1.20.4-0.12.1.jar",
-            "MD5": "83da6729d5402dc42eca740a96f97346"
-          }
-        },
-        {
-          "id": "com.terraformersmc:modmenu:9.0.0@jar",
-          "name": "Mod Menu",
-          "type": "FabricMod",
-          "artifact": {
-            "size": 724484,
-            "url": "https://helios-files.geekcorner.eu.org/servers/Fabric-Demo-1.20.4/fabricmods/optionalon/modmenu-9.0.0.jar",
-            "MD5": "7eb06d459405ed6c87b16f4c5be4493d"
-          },
-          "required": {
-            "value": false
-          }
-        },
-        {
-          "id": "me.jellysquid.mods:sodium:0.5.8+mc1.20.4@jar",
-          "name": "Sodium",
-          "type": "FabricMod",
-          "artifact": {
-            "size": 949085,
-            "url": "https://helios-files.geekcorner.eu.org/servers/Fabric-Demo-1.20.4/fabricmods/required/sodium-fabric-0.5.8+mc1.20.4.jar",
-            "MD5": "d7753a50ca37f50abb10465a9a425dac"
-          }
-        },
-        {
-          "id": "generated.library:fabric:api-0.95.4+1.20.4@jar",
-          "name": "fabric",
-          "type": "Library",
-          "artifact": {
-            "size": 2141107,
-            "url": "https://helios-files.geekcorner.eu.org/servers/Fabric-Demo-1.20.4/libraries/fabric-api-0.95.4+1.20.4.jar",
-            "MD5": "e16ba73c962937a8a11515ecfd47d163"
-          }
         }
       ]
     },
     {
       "id": "Fabric-1.8",
       "name": "Fabric 1.8",
-      "description": "Fabric Loader v0.14.21 for Minecraft 1.8",
-      "icon": "https://raw.githubusercontent.com/dscalzi/HeliosLauncher/master/build/icon.png",
+      "description": "Fabric-Demo Running Minecraft 1.8 (Fabric v0.15.6)",
+      "icon": "https://helios-files.geekcorner.eu.org/servers/Fabric-Demo-1.20.4/Fabric-Demo-1.20.4.png",
       "version": "1.0.0",
       "address": "localhost:25565",
       "minecraftVersion": "1.8",
@@ -203,12 +150,17 @@
             }
           ]
         }
-      ]
+      ],
+      "discord": {
+        "shortId": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageText": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageKey": "<FILL IN OR REMOVE DISCORD OBJECT>"
+      }
     },
     {
       "id": "Fabric-1.12",
       "name": "Fabric 1.12",
-      "description": "Fabric Loader v0.14.21 for Minecraft 1.12",
+      "description": "Fabric-Demo Running Minecraft 1.12 (Fabric v0.15.6)",
       "icon": "https://helios-files.geekcorner.eu.org/servers/Fabric-Demo-1.20.4/Fabric-Demo-1.20.4.png",
       "version": "1.0.0",
       "address": "localhost:25565",
@@ -238,13 +190,18 @@
             }
           ]
         }
-      ]
+      ],
+      "discord": {
+        "shortId": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageText": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageKey": "<FILL IN OR REMOVE DISCORD OBJECT>"
+      }
     },
     {
       "id": "Fabric-1.18",
       "name": "Fabric 1.18",
-      "description": "Fabric Loader v0.14.21 for Minecraft 1.18",
-      "icon": "https://raw.githubusercontent.com/dscalzi/HeliosLauncher/master/build/icon.png",
+      "description": "Fabric-Demo Running Minecraft 1.18 (Fabric v0.15.6)",
+      "icon": "https://helios-files.geekcorner.eu.org/servers/Fabric-Demo-1.20.4/Fabric-Demo-1.20.4.png",
       "version": "1.0.0",
       "address": "localhost:25565",
       "minecraftVersion": "1.18",
@@ -273,13 +230,23 @@
             }
           ]
         }
-      ]
+      ],
+      "serverJar": {
+        "url": "https://meta.fabricmc.net/v2/versions/loader/1.18/0.16.14/1.0.3/server/jar",
+        "name": "Fabric Server Jar 1.18",
+        "type": "serverJar"
+      },
+      "discord": {
+        "shortId": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageText": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageKey": "<FILL IN OR REMOVE DISCORD OBJECT>"
+      }
     },
     {
       "id": "Fabric-1.19.4",
       "name": "Fabric 1.19.4",
-      "description": "Fabric Loader v0.14.21 for Minecraft 1.19.4",
-      "icon": "https://raw.githubusercontent.com/dscalzi/HeliosLauncher/master/build/icon.png",
+      "description": "Fabric-Demo Running Minecraft 1.19.4 (Fabric v0.15.6)",
+      "icon": "https://helios-files.geekcorner.eu.org/servers/Fabric-Demo-1.20.4/Fabric-Demo-1.20.4.png",
       "version": "1.0.0",
       "address": "localhost:25565",
       "minecraftVersion": "1.19.4",
@@ -308,13 +275,23 @@
             }
           ]
         }
-      ]
+      ],
+      "serverJar": {
+        "url": "https://meta.fabricmc.net/v2/versions/loader/1.19.4/0.16.14/1.0.3/server/jar",
+        "name": "Fabric Server Jar 1.19.4",
+        "type": "serverJar"
+      },
+      "discord": {
+        "shortId": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageText": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageKey": "<FILL IN OR REMOVE DISCORD OBJECT>"
+      }
     },
     {
       "id": "Fabric-1.21.1",
       "name": "Fabric 1.21.1",
-      "description": "Fabric Loader v0.15.6 for Minecraft 1.21.1",
-      "icon": "https://raw.githubusercontent.com/dscalzi/HeliosLauncher/master/build/icon.png",
+      "description": "Fabric-Demo Running Minecraft 1.21.1 (Fabric v0.15.6)",
+      "icon": "https://helios-files.geekcorner.eu.org/servers/Fabric-Demo-1.20.4/Fabric-Demo-1.20.4.png",
       "version": "1.0.0",
       "address": "localhost:25565",
       "minecraftVersion": "1.21.1",
@@ -343,13 +320,23 @@
             }
           ]
         }
-      ]
+      ],
+      "serverJar": {
+        "url": "https://meta.fabricmc.net/v2/versions/loader/1.21.1/0.16.14/1.0.3/server/jar",
+        "name": "Fabric Server Jar 1.21.1",
+        "type": "serverJar"
+      },
+      "discord": {
+        "shortId": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageText": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageKey": "<FILL IN OR REMOVE DISCORD OBJECT>"
+      }
     },
     {
       "id": "Fabric-1.21.3",
       "name": "Fabric 1.21.3",
-      "description": "Fabric Loader v0.15.6 for Minecraft 1.21.3",
-      "icon": "https://raw.githubusercontent.com/dscalzi/HeliosLauncher/master/build/icon.png",
+      "description": "Fabric-Demo Running Minecraft 1.21.3 (Fabric v0.15.6)",
+      "icon": "https://helios-files.geekcorner.eu.org/servers/Fabric-Demo-1.20.4/Fabric-Demo-1.20.4.png",
       "version": "1.0.0",
       "address": "localhost:25565",
       "minecraftVersion": "1.21.3",
@@ -378,13 +365,23 @@
             }
           ]
         }
-      ]
+      ],
+      "serverJar": {
+        "url": "https://meta.fabricmc.net/v2/versions/loader/1.21.3/0.16.14/1.0.3/server/jar",
+        "name": "Fabric Server Jar 1.21.3",
+        "type": "serverJar"
+      },
+      "discord": {
+        "shortId": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageText": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageKey": "<FILL IN OR REMOVE DISCORD OBJECT>"
+      }
     },
     {
       "id": "Fabric-1.21.4",
       "name": "Fabric 1.21.4",
-      "description": "Fabric Loader v0.15.6 for Minecraft 1.21.4",
-      "icon": "https://raw.githubusercontent.com/dscalzi/HeliosLauncher/master/build/icon.png",
+      "description": "Fabric-Demo Running Minecraft 1.21.4 (Fabric v0.15.6)",
+      "icon": "https://helios-files.geekcorner.eu.org/servers/Fabric-Demo-1.20.4/Fabric-Demo-1.20.4.png",
       "version": "1.0.0",
       "address": "localhost:25565",
       "minecraftVersion": "1.21.4",
@@ -412,18 +409,28 @@
               }
             }
           ]
+        },
+        {
+          "id": "648k-pvp-essentials",
+          "name": "648k PvP Essentials",
+          "type": "Modpack",
+          "artifact": {
+            "size": 1234567,
+            "MD5": "d41d8cd98f00b204e9800998ecf8427e",
+            "url": "https://kingkal-prg.github.io/modpacks/1.21.4/mods.json"
+          }
         }
-      ]
+      ],
+      "serverJar": {
+        "url": "https://meta.fabricmc.net/v2/versions/loader/1.21.4/0.16.14/1.0.3/server/jar",
+        "name": "Fabric Server Jar 1.21.4",
+        "type": "serverJar"
+      },
+      "discord": {
+        "shortId": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageText": "<FILL IN OR REMOVE DISCORD OBJECT>",
+        "largeImageKey": "<FILL IN OR REMOVE DISCORD OBJECT>"
+      }
     }
   ]
-}
-{
-  "id": "648k-pvp-essentials",
-  "name": "648k PvP Essentials",
-  "type": "Modpack",
-  "artifact": {
-    "size": 1234567,
-    "MD5": "d41d8cd98f00b204e9800998ecf8427e",
-    "url": "https://kingkal-prg.github.io/modpacks/1.21.4/mods.json"
-  }
 }
