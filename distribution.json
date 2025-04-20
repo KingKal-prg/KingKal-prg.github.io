@@ -1,15 +1,15 @@
 {
   "id": "forge-1.19.4-fake",
-  "name": "1.19.4 Forge Server",
-  "description": "Totally Forge 👀",
+  "name": "Forge 1.19.4 Server",
+  "description": "Looks like Forge, runs like Fabric 😈",
   "icon": "https://example.com/forge-icon.png",
   "address": "localhost:25565",
-  "minecraftVersion": "1.19.4",  // fake version shown in UI
-  "type": "forge",               // fake type shown in UI
-  "fabricLoader": "0.16.9",      // actual loader still used
+  "minecraftVersion": "1.19.4",             // Shown in launcher
+  "type": "forge",                          // Fools the UI
+  "fabricLoader": "0.16.13",                // Real Fabric loader
   "mainClass": "net.fabricmc.loader.impl.launch.knot.KnotServer",
   "serverJar": "fabric-server-launch.jar",
-  "url": "https://meta.fabricmc.net/v2/versions/loader/1.21.4/0.16.9/server/jar",
+  "url": "https://meta.fabricmc.net/v2/versions/loader/1.21.4/0.16.13/1.0.3/server/jar",
   "mods": [],
-  "javaArgs": ["-Xms1G", "-Xmx2G"]
+  "javaArgs": ["-Xms2G", "-Xmx4G"]
 }
