@@ -1,1 +1,17 @@
+{
+  "short_name": "Kelvin",
+  "name": "Kelvin: the app for Kelvin (add to homescreen test page)",
+  "display": "standalone",
+  "id": "/static/Taktok.html",
+  "start_url": "/static/Taktok.html", 
+  "icons": [
+      {
+          "src": "apple-touch-icon.png",
+          "sizes": "any",
+          "type": "image/png",
+          "purpose": "any"
+      }
+  ]
+}
 
+  
