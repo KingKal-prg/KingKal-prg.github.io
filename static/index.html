@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kelvin's Arcade</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- External CSS file (if any) -->
     <link rel="stylesheet" href="index.css" />
+    <!-- FontAwesome for icons -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -13,6 +15,7 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <!-- Google Fonts -->
     <link
       href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
       rel="stylesheet"
@@ -24,7 +27,7 @@
         padding: 0;
         box-sizing: border-box;
       }
-      /* Use a dark gradient for the background */
+      /* Dark gradient background */
       html,
       body {
         height: 100%;
@@ -40,11 +43,10 @@
         left: 0;
         width: 100%;
         height: 100%;
-        /* Transparent so the gradient shines through */
         background: transparent;
         z-index: -1;
       }
-      /* Centered content container with a semi-transparent card look */
+      /* Centered content card */
       #content {
         position: absolute;
         top: 50%;
@@ -64,13 +66,13 @@
         font-size: 32px;
         font-weight: bold;
       }
-      /* Rounded, smaller input field */
+      /* Rounded input field */
       #uv-address {
         width: 100%;
         padding: 10px 15px;
         font-size: 18px;
         border: none;
-        border-radius: 50px; /* Pill shape */
+        border-radius: 50px;
         outline: none;
         background: #1e1e1e;
         color: #fff;
@@ -86,14 +88,14 @@
     </style>
   </head>
   <body>
-    <!-- Particle background -->
+    <!-- Particle background container -->
     <div id="particles-js"></div>
 
-    <!-- Centered content similar to BrunysIXLWork -->
+    <!-- Centered content card -->
     <div id="content">
       <div class="heading">Kelvin's Arcade</div>
       <form id="uv-form">
-        <!-- Hidden search engine using DuckDuckGo -->
+        <!-- Hidden DuckDuckGo search engine parameter -->
         <input
           id="uv-search-engine"
           value="https://duckduckgo.com/?q=%s"
@@ -107,9 +109,9 @@
       </form>
     </div>
 
-    <!-- Load particles.js -->
+    <!-- Load particles.js using the specified CDN link -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <!-- Initialize particles once the window is fully loaded -->
+    <!-- Initialize particles once the window finishes loading -->
     <script>
       window.onload = function () {
         particlesJS("particles-js", {
@@ -118,9 +120,7 @@
               "value": 120,
               "density": { "enable": true, "value_area": 800 }
             },
-            "color": {
-              "value": "#ffffff"
-            },
+            "color": { "value": "#ffffff" },
             "shape": {
               "type": "circle",
               "stroke": { "width": 0, "color": "#000000" },
@@ -163,7 +163,13 @@
             },
             "modes": {
               "grab": { "distance": 140, "line_linked": { "opacity": 1 } },
-              "bubble": { "distance": 400, "size": 40, "duration": 2, "opacity": 8, "speed": 3 },
+              "bubble": {
+                "distance": 400,
+                "size": 40,
+                "duration": 2,
+                "opacity": 8,
+                "speed": 3
+              },
               "repulse": { "distance": 200, "duration": 0.4 },
               "push": { "particles_nb": 4 },
               "remove": { "particles_nb": 2 }
@@ -173,12 +179,13 @@
         });
       };
     </script>
-    <!-- (Optional) Additional deferred scripts -->
+    <!-- Optional: Additional deferred scripts can follow below -->
     <script src="uv/uv.bundle.js" defer></script>
     <script src="uv/uv.config.js" defer></script>
     <script src="register-sw.js" defer></script>
     <script src="search.js" defer></script>
     <script src="index.js" defer></script>
     <script src="error.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
   </body>
 </html>
