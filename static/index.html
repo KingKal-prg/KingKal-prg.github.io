@@ -1,50 +1,222 @@
 <!DOCTYPE html>
-<html>
-   <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="stylesheet" href="index.css">
-      <link rel="icon" type="image/x-icon" href="favicon.ico"/> <!-- Corrected favicon link -->
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-      <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
-      <title>Kelvin Proxy</title>
-      <style>
-         html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-         }
-         /* Center the content both vertically and horizontally on a black background */
-         body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: black;
-            color: white;
-         }
-         #content {
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-         }
-         #uv-address {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-         }
-      </style>
-   </head>
-   <body>
-      <div id="content">
-         <form id="uv-form">
-            <input id="uv-search-engine" value="https://www.google.com/search?q=%s" type="hidden"/> 
-            <input id="uv-address" type="text" placeholder="Search Google or type an URL" class="form__input"/>
-         </form>
-      </div>
-      <script src="uv/uv.bundle.js" defer></script>
-      <script src="uv/uv.config.js" defer></script>
-      <script src="register-sw.js" defer></script>
-      <script src="search.js" defer></script>
-      <script src="index.js" defer></script>
-      <script src="error.js" defer></script>
-   </body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="index.css" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <title>Kelvin's Arcade</title>
+    <style>
+      /* Global resets and base font */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Open Sans', sans-serif;
+        color: #fff;
+        overflow: hidden;
+      }
+      /* Particle background container */
+      #particles-js {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        background: #000;
+      }
+      /* Centered content container with modern styling */
+      #content {
+        position: relative;
+        z-index: 1;
+        width: 90%;
+        max-width: 500px;
+        margin: auto;
+        text-align: center;
+        padding: 40px 20px;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      }
+      /* Main header styling */
+      .heading {
+        font-size: 32px;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+      /* Input field styling */
+      #uv-address {
+        width: 100%;
+        padding: 12px 20px;
+        margin-top: 20px;
+        font-size: 18px;
+        border: none;
+        border-radius: 5px;
+        outline: none;
+        background: #fff;
+        color: #000;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      /* Input focus effects */
+      #uv-address:focus {
+        transform: scale(1.03);
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+
+    <!-- Main Content -->
+    <div id="content">
+      <div class="heading">Search Nd Fly</div>
+      <form id="uv-form">
+        <!-- Using DuckDuckGo search engine -->
+        <input
+          id="uv-search-engine"
+          value="https://duckduckgo.com/?q=%s"
+          type="hidden"
+        />
+        <input
+          id="uv-address"
+          type="text"
+          placeholder="Search Any Website"
+          class="form__input"
+        />
+      </form>
+    </div>
+
+    <!-- Particles.js library -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- Particles configuration -->
+    <script>
+      particlesJS('particles-js', {
+        particles: {
+          number: {
+            value: 80,
+            density: {
+              enable: true,
+              value_area: 800,
+            },
+          },
+          color: {
+            value: '#ffffff',
+          },
+          shape: {
+            type: 'circle',
+            stroke: {
+              width: 0,
+              color: '#000000',
+            },
+            polygon: {
+              nb_sides: 5,
+            },
+          },
+          opacity: {
+            value: 0.5,
+            random: false,
+            anim: {
+              enable: false,
+              speed: 1,
+              opacity_min: 0.1,
+              sync: false,
+            },
+          },
+          size: {
+            value: 3,
+            random: true,
+            anim: {
+              enable: false,
+              speed: 40,
+              size_min: 0.1,
+              sync: false,
+            },
+          },
+          line_linked: {
+            enable: true,
+            distance: 150,
+            color: '#ffffff',
+            opacity: 0.4,
+            width: 1,
+          },
+          move: {
+            enable: true,
+            speed: 6,
+            direction: 'none',
+            random: false,
+            straight: false,
+            out_mode: 'out',
+            bounce: false,
+            attract: {
+              enable: false,
+              rotateX: 600,
+              rotateY: 1200,
+            },
+          },
+        },
+        interactivity: {
+          detect_on: 'canvas',
+          events: {
+            onhover: {
+              enable: true,
+              mode: 'grab',
+            },
+            onclick: {
+              enable: true,
+              mode: 'push',
+            },
+            resize: true,
+          },
+          modes: {
+            grab: {
+              distance: 140,
+              line_linked: {
+                opacity: 1,
+              },
+            },
+            bubble: {
+              distance: 400,
+              size: 40,
+              duration: 2,
+              opacity: 8,
+              speed: 3,
+            },
+            repulse: {
+              distance: 200,
+              duration: 0.4,
+            },
+            push: {
+              particles_nb: 4,
+            },
+            remove: {
+              particles_nb: 2,
+            },
+          },
+        },
+        retina_detect: true,
+      });
+    </script>
+
+    <!-- Other scripts (deferred) -->
+    <script src="uv/uv.bundle.js" defer></script>
+    <script src="uv/uv.config.js" defer></script>
+    <script src="register-sw.js" defer></script>
+    <script src="search.js" defer></script>
+    <script src="index.js" defer></script>
+    <script src="error.js" defer></script>
+  </body>
 </html>
