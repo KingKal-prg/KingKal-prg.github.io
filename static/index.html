@@ -18,17 +18,18 @@
       rel="stylesheet"
     />
     <style>
-      /* Global resets and dark theme */
+      /* Global resets */
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
+      /* Use a dark gradient for the background */
       html,
       body {
         height: 100%;
         font-family: 'Open Sans', sans-serif;
-        background: #121212;
+        background: linear-gradient(135deg, #121212, #1f1f1f);
         color: #fff;
         overflow: hidden;
       }
@@ -39,32 +40,37 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: #121212;
+        /* Transparent so the gradient shines through */
+        background: transparent;
         z-index: -1;
       }
-      /* Centered content container */
+      /* Centered content container with a semi-transparent card look */
       #content {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         width: 90%;
-        max-width: 300px;
+        max-width: 350px;
         text-align: center;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.55);
       }
       /* Header styling */
       .heading {
         margin-bottom: 20px;
-        font-size: 36px;
+        font-size: 32px;
         font-weight: bold;
       }
-      /* Input field styling - smaller and round */
+      /* Rounded, smaller input field */
       #uv-address {
         width: 100%;
         padding: 10px 15px;
         font-size: 18px;
         border: none;
-        border-radius: 50px; /* pill shape */
+        border-radius: 50px; /* Pill shape */
         outline: none;
         background: #1e1e1e;
         color: #fff;
@@ -72,7 +78,7 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         transition: box-shadow 0.3s ease, transform 0.3s ease;
       }
-      /* Focus effects on input */
+      /* Input focus effects */
       #uv-address:focus {
         box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
         transform: scale(1.02);
@@ -80,10 +86,10 @@
     </style>
   </head>
   <body>
-    <!-- Particle Background -->
+    <!-- Particle background -->
     <div id="particles-js"></div>
 
-    <!-- Centered Content -->
+    <!-- Centered content similar to BrunysIXLWork -->
     <div id="content">
       <div class="heading">Kelvin's Arcade</div>
       <form id="uv-form">
@@ -97,82 +103,77 @@
           id="uv-address"
           type="text"
           placeholder="Search DuckDuckGo or enter an URL"
-          class="form__input"
         />
       </form>
     </div>
 
-    <!-- Load Particles.js library from CDN -->
+    <!-- Load particles.js -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <!-- Initialize particles once the DOM is fully loaded -->
+    <!-- Initialize particles once the window is fully loaded -->
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
+      window.onload = function () {
         particlesJS("particles-js", {
-          particles: {
-            number: {
-              value: 80,
-              density: { enable: true, value_area: 800 },
+          "particles": {
+            "number": {
+              "value": 120,
+              "density": { "enable": true, "value_area": 800 }
             },
-            color: { value: "#ffffff" },
-            shape: {
-              type: "circle",
-              stroke: { width: 0, color: "#000000" },
-              polygon: { nb_sides: 5 },
+            "color": {
+              "value": "#ffffff"
             },
-            opacity: {
-              value: 0.5,
-              random: false,
-              anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false },
+            "shape": {
+              "type": "circle",
+              "stroke": { "width": 0, "color": "#000000" },
+              "polygon": { "nb_sides": 5 }
             },
-            size: {
-              value: 3,
-              random: true,
-              anim: { enable: false, speed: 40, size_min: 0.1, sync: false },
+            "opacity": {
+              "value": 0.6,
+              "random": false,
+              "anim": { "enable": false, "speed": 1, "opacity_min": 0.1, "sync": false }
             },
-            line_linked: {
-              enable: true,
-              distance: 150,
-              color: "#ffffff",
-              opacity: 0.4,
-              width: 1,
+            "size": {
+              "value": 3,
+              "random": true,
+              "anim": { "enable": false, "speed": 40, "size_min": 0.1, "sync": false }
             },
-            move: {
-              enable: true,
-              speed: 6,
-              direction: "none",
-              random: false,
-              straight: false,
-              out_mode: "out",
-              bounce: false,
-              attract: { enable: false, rotateX: 600, rotateY: 1200 },
+            "line_linked": {
+              "enable": true,
+              "distance": 150,
+              "color": "#ffffff",
+              "opacity": 0.4,
+              "width": 1
             },
+            "move": {
+              "enable": true,
+              "speed": 3,
+              "direction": "none",
+              "random": true,
+              "straight": false,
+              "out_mode": "out",
+              "bounce": false,
+              "attract": { "enable": false, "rotateX": 600, "rotateY": 1200 }
+            }
           },
-          interactivity: {
-            detect_on: "canvas",
-            events: {
-              onhover: { enable: true, mode: "grab" },
-              onclick: { enable: true, mode: "push" },
-              resize: true,
+          "interactivity": {
+            "detect_on": "canvas",
+            "events": {
+              "onhover": { "enable": true, "mode": "grab" },
+              "onclick": { "enable": true, "mode": "push" },
+              "resize": true
             },
-            modes: {
-              grab: { distance: 140, line_linked: { opacity: 1 } },
-              bubble: {
-                distance: 400,
-                size: 40,
-                duration: 2,
-                opacity: 8,
-                speed: 3,
-              },
-              repulse: { distance: 200, duration: 0.4 },
-              push: { particles_nb: 4 },
-              remove: { particles_nb: 2 },
-            },
+            "modes": {
+              "grab": { "distance": 140, "line_linked": { "opacity": 1 } },
+              "bubble": { "distance": 400, "size": 40, "duration": 2, "opacity": 8, "speed": 3 },
+              "repulse": { "distance": 200, "duration": 0.4 },
+              "push": { "particles_nb": 4 },
+              "remove": { "particles_nb": 2 }
+            }
           },
-          retina_detect: true,
+          "retina_detect": true
         });
-      });
+      };
     </script>
-    <!-- Additional deferred scripts (if needed) -->
+    <!-- (Optional) Additional deferred scripts -->
     <script src="uv/uv.bundle.js" defer></script>
     <script src="uv/uv.config.js" defer></script>
     <script src="register-sw.js" defer></script>
