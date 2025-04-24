@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="index.css" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="stylesheet" href="index.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -18,74 +18,76 @@
     />
     <title>Kelvin's Arcade</title>
     <style>
-      /* Global resets and base font */
-      html,
-      body {
+      /* Global resets and dark theme */
+      * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
         height: 100%;
         font-family: 'Open Sans', sans-serif;
+        background: #121212;
         color: #fff;
         overflow: hidden;
       }
       /* Particle background container */
       #particles-js {
         position: absolute;
-        width: 100%;
-        height: 100%;
         top: 0;
         left: 0;
+        width: 100%;
+        height: 100%;
+        background: #121212;
         z-index: -1;
-        background: #000;
       }
-      /* Centered content container with modern styling */
+      /* Centered content container */
       #content {
-        position: relative;
-        z-index: 1;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         width: 90%;
-        max-width: 500px;
-        margin: auto;
+        max-width: 400px;
         text-align: center;
-        padding: 40px 20px;
-        background: rgba(0, 0, 0, 0.7);
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       }
-      /* Main header styling */
+      /* Header styling */
       .heading {
-        font-size: 32px;
-        font-weight: bold;
         margin-bottom: 20px;
+        font-size: 36px;
+        font-weight: bold;
       }
       /* Input field styling */
       #uv-address {
         width: 100%;
-        padding: 12px 20px;
-        margin-top: 20px;
+        padding: 10px 15px;
         font-size: 18px;
         border: none;
-        border-radius: 5px;
+        border-radius: 8px;
         outline: none;
-        background: #fff;
-        color: #000;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: #1e1e1e;
+        color: #fff;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
       }
-      /* Input focus effects */
+      /* Focus effects on input */
       #uv-address:focus {
-        transform: scale(1.03);
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        transform: scale(1.02);
       }
     </style>
   </head>
   <body>
-    <!-- Particles Background -->
+    <!-- Particle Background -->
     <div id="particles-js"></div>
 
-    <!-- Main Content -->
+    <!-- Centered Content -->
     <div id="content">
-      <div class="heading">Search Nd Fly</div>
+      <div class="heading">Kelvin's Arcade</div>
       <form id="uv-form">
-        <!-- Using DuckDuckGo search engine -->
+        <!-- Hidden search engine using DuckDuckGo -->
         <input
           id="uv-search-engine"
           value="https://duckduckgo.com/?q=%s"
@@ -94,124 +96,76 @@
         <input
           id="uv-address"
           type="text"
-          placeholder="Search Any Website"
+          placeholder="Search DuckDuckGo or enter an URL"
           class="form__input"
         />
       </form>
     </div>
 
-    <!-- Particles.js library -->
+    <!-- Include Particles.js library -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <!-- Particles configuration -->
+    <!-- Particles.js configuration -->
     <script>
-      particlesJS('particles-js', {
+      particlesJS("particles-js", {
         particles: {
           number: {
             value: 80,
-            density: {
-              enable: true,
-              value_area: 800,
-            },
+            density: { enable: true, value_area: 800 }
           },
-          color: {
-            value: '#ffffff',
-          },
+          color: { value: "#ffffff" },
           shape: {
-            type: 'circle',
-            stroke: {
-              width: 0,
-              color: '#000000',
-            },
-            polygon: {
-              nb_sides: 5,
-            },
+            type: "circle",
+            stroke: { width: 0, color: "#000000" },
+            polygon: { nb_sides: 5 }
           },
           opacity: {
             value: 0.5,
             random: false,
-            anim: {
-              enable: false,
-              speed: 1,
-              opacity_min: 0.1,
-              sync: false,
-            },
+            anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false }
           },
           size: {
             value: 3,
             random: true,
-            anim: {
-              enable: false,
-              speed: 40,
-              size_min: 0.1,
-              sync: false,
-            },
+            anim: { enable: false, speed: 40, size_min: 0.1, sync: false }
           },
           line_linked: {
             enable: true,
             distance: 150,
-            color: '#ffffff',
+            color: "#ffffff",
             opacity: 0.4,
-            width: 1,
+            width: 1
           },
           move: {
             enable: true,
             speed: 6,
-            direction: 'none',
+            direction: "none",
             random: false,
             straight: false,
-            out_mode: 'out',
+            out_mode: "out",
             bounce: false,
-            attract: {
-              enable: false,
-              rotateX: 600,
-              rotateY: 1200,
-            },
-          },
+            attract: { enable: false, rotateX: 600, rotateY: 1200 }
+          }
         },
         interactivity: {
-          detect_on: 'canvas',
+          detect_on: "canvas",
           events: {
-            onhover: {
-              enable: true,
-              mode: 'grab',
-            },
-            onclick: {
-              enable: true,
-              mode: 'push',
-            },
-            resize: true,
+            onhover: { enable: true, mode: "grab" },
+            onclick: { enable: true, mode: "push" },
+            resize: true
           },
           modes: {
-            grab: {
-              distance: 140,
-              line_linked: {
-                opacity: 1,
-              },
-            },
-            bubble: {
-              distance: 400,
-              size: 40,
-              duration: 2,
-              opacity: 8,
-              speed: 3,
-            },
-            repulse: {
-              distance: 200,
-              duration: 0.4,
-            },
-            push: {
-              particles_nb: 4,
-            },
-            remove: {
-              particles_nb: 2,
-            },
-          },
+            grab: { distance: 140, line_linked: { opacity: 1 } },
+            bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 },
+            repulse: { distance: 200, duration: 0.4 },
+            push: { particles_nb: 4 },
+            remove: { particles_nb: 2 }
+          }
         },
-        retina_detect: true,
+        retina_detect: true
       });
     </script>
 
-    <!-- Other scripts (deferred) -->
+    <!-- Additional deferred scripts -->
     <script src="uv/uv.bundle.js" defer></script>
     <script src="uv/uv.config.js" defer></script>
     <script src="register-sw.js" defer></script>
