@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Kelvin's Arcade</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="stylesheet" href="index.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -26,7 +27,7 @@
       html,
       body {
         height: 100%;
-        font-family: "Open Sans", sans-serif;
+        font-family: 'Open Sans', sans-serif;
         background: #121212;
         color: #fff;
         overflow: hidden;
@@ -63,7 +64,7 @@
         padding: 10px 15px;
         font-size: 18px;
         border: none;
-        border-radius: 50px; /* full rounding for a pill shape */
+        border-radius: 50px; /* pill shape */
         outline: none;
         background: #1e1e1e;
         color: #fff;
@@ -96,43 +97,44 @@
           id="uv-address"
           type="text"
           placeholder="Search DuckDuckGo or enter an URL"
+          class="form__input"
         />
       </form>
     </div>
 
-    <!-- Load Particles.js library -->
+    <!-- Load Particles.js library from CDN -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <!-- Initialize particles after the window loads -->
+    <!-- Initialize particles once the DOM is fully loaded -->
     <script>
-      window.addEventListener("load", function () {
+      document.addEventListener("DOMContentLoaded", function () {
         particlesJS("particles-js", {
           particles: {
             number: {
               value: 80,
-              density: { enable: true, value_area: 800 }
+              density: { enable: true, value_area: 800 },
             },
             color: { value: "#ffffff" },
             shape: {
               type: "circle",
               stroke: { width: 0, color: "#000000" },
-              polygon: { nb_sides: 5 }
+              polygon: { nb_sides: 5 },
             },
             opacity: {
               value: 0.5,
               random: false,
-              anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false }
+              anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false },
             },
             size: {
               value: 3,
               random: true,
-              anim: { enable: false, speed: 40, size_min: 0.1, sync: false }
+              anim: { enable: false, speed: 40, size_min: 0.1, sync: false },
             },
             line_linked: {
               enable: true,
               distance: 150,
               color: "#ffffff",
               opacity: 0.4,
-              width: 1
+              width: 1,
             },
             move: {
               enable: true,
@@ -142,27 +144,40 @@
               straight: false,
               out_mode: "out",
               bounce: false,
-              attract: { enable: false, rotateX: 600, rotateY: 1200 }
-            }
+              attract: { enable: false, rotateX: 600, rotateY: 1200 },
+            },
           },
           interactivity: {
             detect_on: "canvas",
             events: {
               onhover: { enable: true, mode: "grab" },
               onclick: { enable: true, mode: "push" },
-              resize: true
+              resize: true,
             },
             modes: {
               grab: { distance: 140, line_linked: { opacity: 1 } },
-              bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 },
+              bubble: {
+                distance: 400,
+                size: 40,
+                duration: 2,
+                opacity: 8,
+                speed: 3,
+              },
               repulse: { distance: 200, duration: 0.4 },
               push: { particles_nb: 4 },
-              remove: { particles_nb: 2 }
-            }
+              remove: { particles_nb: 2 },
+            },
           },
-          retina_detect: true
+          retina_detect: true,
         });
       });
     </script>
+    <!-- Additional deferred scripts (if needed) -->
+    <script src="uv/uv.bundle.js" defer></script>
+    <script src="uv/uv.config.js" defer></script>
+    <script src="register-sw.js" defer></script>
+    <script src="search.js" defer></script>
+    <script src="index.js" defer></script>
+    <script src="error.js" defer></script>
   </body>
 </html>
