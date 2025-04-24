@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Moana 2 Movie Viewer</title>
+  <style>
+    /* Simple styling for the iframe */
+    #videoFrame {
+      width: 800px;
+      height: 600px;
+      border: none;
+      display: none; /* Initially hidden */
+    }
+  </style>
+  <script>
+    // When the image is clicked, show the iframe
+    function showVideo() {
+      var frame = document.getElementById('videoFrame');
+      frame.style.display = 'block';
+    }
+  </script>
+</head>
+<body>
+  <!-- Clicking this image will reveal the embedded content -->
+  <a href="#" onclick="showVideo(); return false;">
+    <img src="https://via.placeholder.com/300x150.png?text=Moana+2+Logo" alt="Moana 2 Logo">
+  </a>
+  
+  <!-- The iframe that holds the external content -->
+  <iframe id="videoFrame" src="https://vidlink.pro/movie/1241982"></iframe>
+</body>
+</html>
