@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrimsonStudios Plugin Generator</title>
+</head>
+<body>
+    <h1>CrimsonStudios Plugin Generator</h1>
+
+    <h2>Select Plugin</h2>
+    <select id="pluginSelect">
+        <option value="HallStair">Hall Stair - Anti-Lag Plugin</option>
+        <option value="EasyTeleport">EasyTeleport - Fast Warp Plugin</option>
+    </select>
+
+    <h3>Enter License Key:</h3>
+    <input type="text" id="licenseKey" placeholder="Enter your license key">
+
+    <h3>Enter Server IP:</h3>
+    <input type="text" id="serverIP" placeholder="Enter the server IP">
+
+    <h3>Expiration Date (0 for Infinite):</h3>
+    <input type="date" id="expirationDate">
+
+    <button onclick="generatePlugin()">Generate Plugin</button>
+
+    <script>
+        function generatePlugin() {
+            const pluginName = document.getElementById('pluginSelect').value;
+            const licenseKey = document.getElementById('licenseKey').value;
+            const serverIP = document.getElementById('serverIP').value;
+            const expirationDate = document.getElementById('expirationDate').value;
+
+            const data = {
+                pluginName,
+                licenseKey,
+                serverIP,
+                expirationDate
+            };
+
+            fetch('http://localhost:3000/generate-plugin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message))
+            .catch(error => alert('Error: ' + error));
+        }
+    </script>
+</body>
+</html>
