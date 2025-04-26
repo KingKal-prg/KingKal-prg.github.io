@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrimsonStudios Plugin Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>CrimsonStudios Plugin Generator</h1>
+
+    <h2>Select Plugin</h2>
+    <select id="pluginSelect">
+        <option value="HallStair">Hall Stair - Anti-Lag Plugin</option>
+        <option value="EasyTeleport">EasyTeleport - Fast Warp Plugin</option>
+        <option value="AutoBan">AutoBan - Advanced Ban Plugin</option>
+        <!-- Add more plugins here -->
+    </select>
+
+    <h3>Enter License Key:</h3>
+    <input type="text" id="licenseKey" placeholder="Enter your license key">
+
+    <h3>Enter Server IP:</h3>
+    <input type="text" id="serverIP" placeholder="Enter the server IP">
+
+    <h3>Expiration Date (0 for Infinite):</h3>
+    <input type="date" id="expirationDate">
+
+    <button onclick="generatePlugin()">Generate Plugin</button>
+
+    <script src="app.js"></script>
+</body>
+</html>
