@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Movie Embed URL Generator</title>
+  <title>Movie Embed Player</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,18 +11,19 @@
       margin: 0;
       padding: 0;
       display: flex;
+      flex-direction: column;
       height: 100vh;
-      justify-content: center;
       align-items: center;
     }
     .container {
       background-color: #fff;
-      padding: 2rem;
+      padding: 1rem;
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       text-align: center;
       max-width: 400px;
       width: 90%;
+      margin-top: 1rem;
     }
     h1 {
       margin-bottom: 1rem;
@@ -55,27 +56,41 @@
       color: #666;
       margin-top: 1rem;
     }
+    #embedFrame {
+      width: 90%;
+      height: 500px;
+      border: none;
+      margin-top: 1rem;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Movie Embed URL Generator</h1>
+    <h1>Movie Embed Player</h1>
     <form id="embedForm">
       <input type="text" id="movieId" placeholder="Enter movie id (TMDB only)" required>
       <br>
-      <button type="submit">Go Fullscreen</button>
+      <button type="submit">Load Movie</button>
     </form>
     <p class="note">* Movie ID must be from TheMovieDatabase (TMDB)</p>
   </div>
+
+  <iframe id="embedFrame"></iframe>
+
   <script>
     document.getElementById('embedForm').addEventListener('submit', function(e) {
       e.preventDefault();
       var movieId = document.getElementById('movieId').value.trim();
       if (!movieId) return;
-      // Construct the embed URL using vidsrc.net with the TMDB parameter.
-      var redirectUrl = "https://vidsrc.net/embed/movie?tmdb=" + encodeURIComponent(movieId);
-      // Redirect in the same tab to load the embed URL fullscreen.
-      window.location.href = redirectUrl;
+
+      // Construct the embed URL for Vidsrc.net
+      var embedUrl = "https://vidsrc.net/embed/movie?tmdb=" + encodeURIComponent(movieId);
+
+      // Display the embed player inside the page
+      var embedFrame = document.getElementById('embedFrame');
+      embedFrame.src = embedUrl;
+      embedFrame.style.display = "block";
     });
   </script>
 </body>
