@@ -55,14 +55,6 @@
       color: #666;
       margin-top: 1rem;
     }
-    .result a {
-      color: #007bff;
-      word-break: break-all;
-      text-decoration: none;
-    }
-    .result a:hover {
-      text-decoration: underline;
-    }
   </style>
 </head>
 <body>
@@ -71,21 +63,19 @@
     <form id="embedForm">
       <input type="text" id="movieId" placeholder="Enter movie id (TMDB only)" required>
       <br>
-      <button type="submit">Generate URL</button>
+      <button type="submit">Go Fullscreen</button>
     </form>
     <p class="note">* Movie ID must be from TheMovieDatabase (TMDB)</p>
-    <div id="result" class="result" style="margin-top:1rem;"></div>
   </div>
   <script>
     document.getElementById('embedForm').addEventListener('submit', function(e) {
       e.preventDefault();
       var movieId = document.getElementById('movieId').value.trim();
       if (!movieId) return;
-      // Construct the embed URL with the TMDB parameter.
-      var embedUrl = "https://vidsrc.xyz/embed/movie?tmdb=" + encodeURIComponent(movieId);
-      // Display the resulting URL for the user.
-      var resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = "<p>Embed URL:</p><a href='" + embedUrl + "' target='_blank'>" + embedUrl + "</a>";
+      // Construct the embed URL using vidsrc.net with the TMDB parameter.
+      var redirectUrl = "https://vidsrc.net/embed/movie?tmdb=" + encodeURIComponent(movieId);
+      // Redirect in the same tab to load the embed URL fullscreen.
+      window.location.href = redirectUrl;
     });
   </script>
 </body>
