@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>UV Search & Navigation</title>
   <style>
     /* Darkish theme styles */
@@ -17,6 +17,7 @@
       justify-content: center;
       font-family: Arial, sans-serif;
     }
+    
     .container {
       background-color: #1e1e1e;
       padding: 2rem;
@@ -26,39 +27,39 @@
       width: 90%;
       text-align: center;
     }
-    form {
-      display: flex;
-      margin-bottom: 1rem;
-    }
+    
     input[type="text"] {
-      flex: 1;
+      width: 80%;
       padding: 0.5rem;
+      margin-right: 0.5rem;
       font-size: 1rem;
       border: 1px solid #333;
-      border-radius: 4px 0 0 4px;
+      border-radius: 4px;
       background-color: #2a2a2a;
       color: #e0e0e0;
     }
+    
     button[type="submit"] {
-      padding: 0.5rem 1rem;
+      padding: 0.55rem 1rem;
       font-size: 1rem;
       border: 1px solid #333;
-      border-left: none;
-      border-radius: 0 4px 4px 0;
+      border-radius: 4px;
       background-color: #3a3a3a;
       color: #e0e0e0;
       cursor: pointer;
       transition: background-color 0.2s ease;
     }
+    
     button[type="submit"]:hover {
       background-color: #4a4a4a;
     }
   </style>
-  <!-- Integrated ultraviolet configuration -->
+  <!-- Inline UV configuration (using your prefix of /static/tiw/) -->
   <script>
     self.__uv$config = {
       prefix: '/static/tiw/',
       bare: 'https://bare.benrogo.net',
+      // Use UV's built‑in encoding functions (or fall back to identity if unavailable)
       encodeUrl: (window.Ultraviolet && Ultraviolet.codec && Ultraviolet.codec.xor && Ultraviolet.codec.xor.encode) || function(url) { return url; },
       decodeUrl: (window.Ultraviolet && Ultraviolet.codec && Ultraviolet.codec.xor && Ultraviolet.codec.xor.decode) || function(url) { return url; },
       handler: '/static/uv/uv.handler.js',
@@ -70,49 +71,58 @@
 </head>
 <body>
   <div class="container">
-    <!-- Search Form: Enter a website (e.g., now.gg) or a search term (e.g., cocoa butter) -->
-    <form id="searchForm">
-      <input type="text" id="searchQuery" placeholder="Enter URL or search term..." required>
+    <!-- The form uses the working snippet you provided -->
+    <form id="uv-form">
+      <input
+        id="uv-search-engine"
+        value="https://duckduckgo.com/?q=%s"
+        type="hidden"
+      />
+      <input
+        id="uv-address"
+        type="text"
+        placeholder="Search DuckDuckGo or enter an URL"
+        required
+      />
       <button type="submit">Go</button>
     </form>
   </div>
-
+  
   <script>
-    document.getElementById("searchForm").addEventListener("submit", function(e) {
+    document.getElementById('uv-form').addEventListener('submit', function(e) {
       e.preventDefault();
-
-      var input = document.getElementById("searchQuery").value.trim();
-      if (!input) return;
-
-      // Determine if the input is a search term:
-      // If it contains spaces or lacks a dot, treat it as a search query.
-      var isSearchQuery = (input.indexOf(' ') !== -1 || !input.includes('.'));
-      var finalUrl;
-
-      if (isSearchQuery) {
-        // Build the DuckDuckGo search URL.
-        finalUrl = "https://duckduckgo.com/?q=" + input;
+      
+      // Get the entered text from the UV address field.
+      var userInput = document.getElementById('uv-address').value.trim();
+      if (!userInput) return;  // Exit if empty
+      
+      // Determine if it’s a search query or a URL.
+      // (If it contains spaces or does not contain a dot, treat it as a search query.)
+      var isSearch = (userInput.indexOf(' ') !== -1 || !userInput.includes('.'));
+      var finalUrl = "";
+      
+      if (isSearch) {
+        // For search queries, replace the "%s" placeholder in the search engine URL.
+        var searchEngine = document.getElementById('uv-search-engine').value;
+        finalUrl = searchEngine.replace("%s", userInput);
       } else {
-        // Otherwise assume it's a website URL.
-        // Ensure it starts with "https://"
-        if (!input.startsWith("http://") && !input.startsWith("https://")) {
-          input = "https://" + input;
+        // Otherwise, treat it as a URL.
+        // Ensure the URL starts with "http://" or "https://"
+        if (!userInput.startsWith("http://") && !userInput.startsWith("https://")) {
+          userInput = "https://" + userInput;
         }
-        finalUrl = input;
+        finalUrl = userInput;
       }
-
-      // Concatenate with the ultraviolet prefix (/static/tiw/). Ultraviolet will perform its own encoding.
+      
+      // Prepend the UV prefix. Ultraviolet will handle the encoding internally.
       var targetUrl = self.__uv$config.prefix + finalUrl;
       window.location.href = targetUrl;
     });
   </script>
-
-  <!-- Ultraviolet scripts -->
+  
+  <!-- Ultraviolet scripts (ensure paths are correct) -->
   <script src="/static/uv/uv.bundle.js" defer></script>
   <script src="/static/uv/uv.config.js" defer></script>
-  <script src="/register-sw.js" defer></script>
-  <script src="/search.js" defer></script>
-  <script src="/index.js" defer></script>
-  <script src="/error.js" defer></script>
+  <script src="/static/uv/uv.sw.js" defer></script>
 </body>
 </html>
