@@ -1,128 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UV Search & Navigation</title>
-  <style>
-    /* Darkish theme styles */
-    body {
-      background-color: #121212;
-      color: #e0e0e0;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      height: 100vh;
-      align-items: center;
-      justify-content: center;
-      font-family: Arial, sans-serif;
-    }
-    
-    .container {
-      background-color: #1e1e1e;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-      max-width: 500px;
-      width: 90%;
-      text-align: center;
-    }
-    
-    input[type="text"] {
-      width: 80%;
-      padding: 0.5rem;
-      margin-right: 0.5rem;
-      font-size: 1rem;
-      border: 1px solid #333;
-      border-radius: 4px;
-      background-color: #2a2a2a;
-      color: #e0e0e0;
-    }
-    
-    button[type="submit"] {
-      padding: 0.55rem 1rem;
-      font-size: 1rem;
-      border: 1px solid #333;
-      border-radius: 4px;
-      background-color: #3a3a3a;
-      color: #e0e0e0;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-    
-    button[type="submit"]:hover {
-      background-color: #4a4a4a;
-    }
-  </style>
-  <!-- Inline UV configuration (using your prefix of /static/tiw/) -->
-  <script>
-    self.__uv$config = {
-      prefix: '/static/tiw/',
-      bare: 'https://bare.benrogo.net',
-      // Use UV's built‑in encoding functions (or fall back to identity if unavailable)
-      encodeUrl: (window.Ultraviolet && Ultraviolet.codec && Ultraviolet.codec.xor && Ultraviolet.codec.xor.encode) || function(url) { return url; },
-      decodeUrl: (window.Ultraviolet && Ultraviolet.codec && Ultraviolet.codec.xor && Ultraviolet.codec.xor.decode) || function(url) { return url; },
-      handler: '/static/uv/uv.handler.js',
-      bundle: '/static/uv/uv.bundle.js',
-      config: '/static/uv/uv.config.js',
-      sw: '/static/uv/uv.sw.js'
-    };
-  </script>
-</head>
-<body>
-  <div class="container">
-    <!-- The form uses the working snippet you provided -->
-    <form id="uv-form">
-      <input
-        id="uv-search-engine"
-        value="https://duckduckgo.com/?q=%s"
-        type="hidden"
-      />
-      <input
-        id="uv-address"
-        type="text"
-        placeholder="Search DuckDuckGo or enter an URL"
-        required
-      />
-      <button type="submit">Go</button>
-    </form>
-  </div>
-  
-  <script>
-    document.getElementById('uv-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      // Get the entered text from the UV address field.
-      var userInput = document.getElementById('uv-address').value.trim();
-      if (!userInput) return;  // Exit if empty
-      
-      // Determine if it’s a search query or a URL.
-      // (If it contains spaces or does not contain a dot, treat it as a search query.)
-      var isSearch = (userInput.indexOf(' ') !== -1 || !userInput.includes('.'));
-      var finalUrl = "";
-      
-      if (isSearch) {
-        // For search queries, replace the "%s" placeholder in the search engine URL.
-        var searchEngine = document.getElementById('uv-search-engine').value;
-        finalUrl = searchEngine.replace("%s", userInput);
-      } else {
-        // Otherwise, treat it as a URL.
-        // Ensure the URL starts with "http://" or "https://"
-        if (!userInput.startsWith("http://") && !userInput.startsWith("https://")) {
-          userInput = "https://" + userInput;
-        }
-        finalUrl = userInput;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kelvin's Arcade</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- External CSS file (if any) -->
+    <link rel="stylesheet" href="index.css" />
+    <!-- FontAwesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Global resets */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
-      
-      // Prepend the UV prefix. Ultraviolet will handle the encoding internally.
-      var targetUrl = self.__uv$config.prefix + finalUrl;
-      window.location.href = targetUrl;
-    });
-  </script>
-  
-  <!-- Ultraviolet scripts (ensure paths are correct) -->
-  <script src="/static/uv/uv.bundle.js" defer></script>
-  <script src="/static/uv/uv.config.js" defer></script>
-  <script src="/static/uv/uv.sw.js" defer></script>
-</body>
+      /* Dark gradient background */
+      html,
+      body {
+        height: 100%;
+        font-family: 'Open Sans', sans-serif;
+        background: linear-gradient(135deg, #121212, #1f1f1f);
+        color: #fff;
+        overflow: hidden;
+      }
+      /* Particle background container */
+      #particles-js {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        z-index: -1;
+      }
+      /* Centered content card */
+      #content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 350px;
+        text-align: center;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.55);
+      }
+      /* Header styling */
+      .heading {
+        margin-bottom: 20px;
+        font-size: 32px;
+        font-weight: bold;
+      }
+      /* Rounded input field */
+      #uv-address {
+        width: 100%;
+        padding: 10px 15px;
+        font-size: 18px;
+        border: none;
+        border-radius: 50px;
+        outline: none;
+        background: #1e1e1e;
+        color: #fff;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+      }
+      /* Input focus effects */
+      #uv-address:focus {
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        transform: scale(1.02);
+      }
+    </style>
+    <!-- Inline ultraviolet configuration -->
+    <script>
+      self.__uv$config = {
+        prefix: '/static/tiw/',
+        bare: 'https://bare.benrogo.net',
+        encodeUrl:
+          (window.Ultraviolet &&
+            Ultraviolet.codec &&
+            Ultraviolet.codec.xor &&
+            Ultraviolet.codec.xor.encode) ||
+          function (url) {
+            return url;
+          },
+        decodeUrl:
+          (window.Ultraviolet &&
+            Ultraviolet.codec &&
+            Ultraviolet.codec.xor &&
+            Ultraviolet.codec.xor.decode) ||
+          function (url) {
+            return url;
+          },
+        handler: '/static/uv/uv.handler.js',
+        bundle: '/static/uv/uv.bundle.js',
+        config: '/static/uv/uv.config.js',
+        sw: '/static/uv/uv.sw.js'
+      };
+    </script>
+  </head>
+  <body>
+    <!-- Particle background container -->
+    <div id="particles-js"></div>
+
+    <!-- Centered content card -->
+    <div id="content">
+      <div class="heading">Kelvin's Arcade</div>
+      <form id="uv-form">
+        <!-- Hidden DuckDuckGo search engine parameter -->
+        <input
+          id="uv-search-engine"
+          value="https://duckduckgo.com/?q=%s"
+          type="hidden"
+        />
+        <input
+          id="uv-address"
+          type="text"
+          placeholder="Search DuckDuckGo or enter an URL"
+          required
+        />
+      </form>
+    </div>
+
+    <!-- Load particles.js from the CDN -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+      window.onload = function () {
+        particlesJS("particles-js", {
+          particles: {
+            number: { value: 120, density: { enable: true, value_area: 800 } },
+            color: { value: "#ffffff" },
+            shape: {
+              type: "circle",
+              stroke: { width: 0, color: "#000000" },
+              polygon: { nb_sides: 5 }
+            },
+            opacity: {
+              value: 0.6,
+              random: false,
+              anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false }
+            },
+            size: {
+              value: 3,
+              random: true,
+              anim: { enable: false, speed: 40, size_min: 0.1, sync: false }
+            },
+            line_linked: {
+              enable: true,
+              distance: 150,
+              color: "#ffffff",
+              opacity: 0.4,
+              width: 1
+            },
+            move: {
+              enable: true,
+              speed: 3,
+              direction: "none",
+              random: true,
+              straight: false,
+              out_mode: "out",
+              bounce: false,
+              attract: { enable: false, rotateX: 600, rotateY: 1200 }
+            }
+          },
+          interactivity: {
+            detect_on: "canvas",
+            events: {
+              onhover: { enable: true, mode: "grab" },
+              onclick: { enable: true, mode: "push" },
+              resize: true
+            },
+            modes: {
+              grab: { distance: 140, line_linked: { opacity: 1 } },
+              bubble: {
+                distance: 400,
+                size: 40,
+                duration: 2,
+                opacity: 8,
+                speed: 3
+              },
+              repulse: { distance: 200, duration: 0.4 },
+              push: { particles_nb: 4 },
+              remove: { particles_nb: 2 }
+            }
+          },
+          retina_detect: true
+        });
+      };
+    </script>
+
+    <!-- Form submission handler -->
+    <script>
+      document.getElementById("uv-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var userInput = document.getElementById("uv-address").value.trim();
+        if (!userInput) return;
+        // Check if the input should be treated as a search query:
+        // If it contains spaces or lacks a dot, treat it as a search query.
+        var isSearch = userInput.indexOf(" ") !== -1 || !userInput.includes(".");
+        var finalUrl = "";
+        if (isSearch) {
+          var searchEngine = document.getElementById("uv-search-engine").value;
+          finalUrl = searchEngine.replace("%s", userInput);
+        } else {
+          // Otherwise, deal with it as a website URL.
+          if (!userInput.startsWith("http://") && !userInput.startsWith("https://")) {
+            userInput = "https://" + userInput;
+          }
+          finalUrl = userInput;
+        }
+        // Prepend the ultraviolet prefix – UV will handle its own encoding.
+        var targetUrl = self.__uv$config.prefix + finalUrl;
+        window.location.href = targetUrl;
+      });
+    </script>
+
+    <!-- Ultraviolet scripts -->
+    <script src="uv/uv.bundle.js" defer></script>
+    <script src="uv/uv.config.js" defer></script>
+    <script src="register-sw.js" defer></script>
+    <script src="search.js" defer></script>
+    <script src="index.js" defer></script>
+    <script src="error.js" defer></script>
+    <!-- Load particles.js (deferred as extra fallback) -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
+  </body>
 </html>
