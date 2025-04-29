@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Multi-Search</title>
+  <style>
+    /* Overall Page Styling */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* Container for the search form and tabs */
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    /* Styling the search input and button */
+    #searchForm {
+      display: flex;
+      margin-bottom: 1.5rem;
+    }
+    #searchQuery {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px 0 0 4px;
+    }
+    #searchForm button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-left: none;
+      border-radius: 0 4px 4px 0;
+      background-color: #ddd;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    #searchForm button:hover {
+      background-color: #ccc;
+    }
+
+    /* Styling the tabs */
+    #tabs {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .tab {
+      padding: 0.4rem 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #e8e8e8;
+      cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .tab.active {
+      background-color: #4285f4;
+      color: #fff;
+      border-color: #4285f4;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Search Form -->
+    <form id="searchForm">
+      <input type="text" id="searchQuery" placeholder="Enter your search term..." required>
+      <button type="submit">Search</button>
+    </form>
+    
+    <!-- Tabs will be populated here dynamically -->
+    <div id="tabs">
+      <!-- Dynamic buttons go here -->
+    </div>
+  </div>
+
+  <script>
+    // Global variables holding search engine data and the selected engine
+    let selectedEngine = null;
+    let enginesList = [];
+
+    // Function to mark an engine/tab as selected and update the UI accordingly
+    function selectEngine(index) {
+      selectedEngine = enginesList[index];
+      const tabs = document.querySelectorAll(".tab");
+      tabs.forEach((tab, i) => {
+        if (i === index) {
+          tab.classList.add("active");
+        } else {
+          tab.classList.remove("active");
+        }
+      });
+    }
+
+    // Fetch the JSON list of search engines
+    fetch("https://gist.githubusercontent.com/NaveenDA/b1ff7d43812a3c79354f9b2fd9868186/raw/ec32665ac11d5b8085dc1b5842ad82ad35cd1396/List-of-search-engine.json")
+      .then(response => response.json())
+      .then(data => {
+        // Store the list in a global variable
+        enginesList = data;
+        const tabsContainer = document.getElementById("tabs");
+        tabsContainer.innerHTML = ""; // Clear any existing content
+        
+        // Create a tab (button) for each search engine
+        data.forEach((engine, index) => {
+          const tab = document.createElement("button");
+          tab.textContent = engine.name;
+          tab.className = "tab";
+          tab.addEventListener("click", (e) => {
+            e.preventDefault();
+            selectEngine(index);
+          });
+          tabsContainer.appendChild(tab);
+        });
+        
+        // Set a default selection – typically the first engine in the list
+        if (data.length > 0) {
+          selectEngine(0);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching search engines:", error);
+        // If there's an error, fallback to using just DuckDuckGo
+        enginesList = [
+          { name: "DuckDuckGo", searchUrl: "https://duckduckgo.com/?q={query}" }
+        ];
+        const tabsContainer = document.getElementById("tabs");
+        const button = document.createElement("button");
+        button.textContent = "DuckDuckGo";
+        button.className = "tab active";
+        button.addEventListener("click", (e) => {
+          e.preventDefault();
+          selectEngine(0);
+        });
+        tabsContainer.appendChild(button);
+        selectedEngine = enginesList[0];
+      });
+
+    // Handle the form submission: replace "{query}" in the engine's URL and redirect
+    document.getElementById("searchForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const query = document.getElementById("searchQuery").value;
+      if (!selectedEngine) {
+        alert("Please select a search engine.");
+        return;
+      }
+      // Ensure the query is URL-encoded
+      const encodedQuery = encodeURIComponent(query);
+      // Replace the placeholder with the actual query in the selected search engine's URL
+      let finalUrl = selectedEngine.searchUrl.replace("{query}", encodedQuery);
+      // Redirect to the final URL
+      window.location.href = finalUrl;
+    });
+  </script>
+</body>
+</html>
