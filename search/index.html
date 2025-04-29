@@ -67,35 +67,36 @@
   <script>
     document.getElementById("searchForm").addEventListener("submit", function(e) {
       e.preventDefault();
+      
       let input = document.getElementById("searchQuery").value.trim();
       if (!input) return;
       
-      let targetUrl;
-      // Determine if input is a search query.
-      // Here we check: if input contains spaces or lacks a dot, treat it as a search term.
-      const isSearch = (input.indexOf(' ') !== -1 || !input.includes('.'));
+      // Determine if the input should be treated as a search term.
+      // If it contains spaces or does not include a dot, assume it's a search query.
+      const isSearchQuery = (input.indexOf(' ') !== -1 || !input.includes('.'));
+      let finalUrl;
       
-      if (isSearch) {
-        // Construct the DuckDuckGo search URL with the query.
-        const duckUrl = "https://duckduckgo.com/?q=" + encodeURIComponent(input);
-        // Route the DuckDuckGo URL through the ultraviolet endpoint.
-        targetUrl = "https://kingkal-prg.github.io/static/tiw/" + encodeURIComponent(duckUrl);
+      if (isSearchQuery) {
+        // Build the DuckDuckGo search URL.
+        finalUrl = "https://duckduckgo.com/?q=" + input;
       } else {
-        // Treat it as a website URL.
-        // Ensure the URL starts with "https://"
+        // Otherwise, we assume it is a website URL.
+        // Ensure it begins with "https://" (if not, prepend it).
         if (!input.startsWith("http://") && !input.startsWith("https://")) {
           input = "https://" + input;
         }
-        // Route the website URL through the ultraviolet endpoint.
-        targetUrl = "https://kingkal-prg.github.io/static/tiw/" + encodeURIComponent(input);
+        finalUrl = input;
       }
       
-      // Redirect the browser to the constructed ultraviolet URL.
+      // Concatenate directly with your ultraviolet endpoint.
+      const targetUrl = "https://kingkal-prg.github.io/static/tiw/" + finalUrl;
+      
+      // Redirect to the ultraviolet endpoint. Ultraviolet will take care of any necessary encoding.
       window.location.href = targetUrl;
     });
   </script>
 
-  <!-- Include your necessary ultraviolet and related scripts -->
+  <!-- Include your ultraviolet and related scripts -->
   <script src="uv/uv.bundle.js" defer></script>
   <script src="uv/uv.config.js" defer></script>
   <script src="register-sw.js" defer></script>
