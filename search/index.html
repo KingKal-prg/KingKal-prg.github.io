@@ -21,7 +21,7 @@
       background-color: #1e1e1e;
       padding: 2rem;
       border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
       max-width: 500px;
       width: 90%;
       text-align: center;
@@ -54,10 +54,23 @@
       background-color: #4a4a4a;
     }
   </style>
+  <!-- Integrated ultraviolet configuration -->
+  <script>
+    self.__uv$config = {
+      prefix: '/static/tiw/',
+      bare: 'https://bare.benrogo.net',
+      encodeUrl: (window.Ultraviolet && Ultraviolet.codec && Ultraviolet.codec.xor && Ultraviolet.codec.xor.encode) || function(url) { return url; },
+      decodeUrl: (window.Ultraviolet && Ultraviolet.codec && Ultraviolet.codec.xor && Ultraviolet.codec.xor.decode) || function(url) { return url; },
+      handler: '/static/uv/uv.handler.js',
+      bundle: '/static/uv/uv.bundle.js',
+      config: '/static/uv/uv.config.js',
+      sw: '/static/uv/uv.sw.js'
+    };
+  </script>
 </head>
 <body>
   <div class="container">
-    <!-- The Search Form -->
+    <!-- Search Form: Enter a website (e.g., now.gg) or a search term (e.g., cocoa butter) -->
     <form id="searchForm">
       <input type="text" id="searchQuery" placeholder="Enter URL or search term..." required>
       <button type="submit">Go</button>
@@ -67,41 +80,39 @@
   <script>
     document.getElementById("searchForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      
-      let input = document.getElementById("searchQuery").value.trim();
+
+      var input = document.getElementById("searchQuery").value.trim();
       if (!input) return;
-      
-      // Determine if the input should be treated as a search term.
-      // If it contains spaces or does not include a dot, assume it's a search query.
-      const isSearchQuery = (input.indexOf(' ') !== -1 || !input.includes('.'));
-      let finalUrl;
-      
+
+      // Determine if the input is a search term:
+      // If it contains spaces or lacks a dot, treat it as a search query.
+      var isSearchQuery = (input.indexOf(' ') !== -1 || !input.includes('.'));
+      var finalUrl;
+
       if (isSearchQuery) {
         // Build the DuckDuckGo search URL.
         finalUrl = "https://duckduckgo.com/?q=" + input;
       } else {
-        // Otherwise, we assume it is a website URL.
-        // Ensure it begins with "https://" (if not, prepend it).
+        // Otherwise assume it's a website URL.
+        // Ensure it starts with "https://"
         if (!input.startsWith("http://") && !input.startsWith("https://")) {
           input = "https://" + input;
         }
         finalUrl = input;
       }
-      
-      // Concatenate directly with your ultraviolet endpoint.
-      const targetUrl = "https://kingkal-prg.github.io/static/tiw/" + finalUrl;
-      
-      // Redirect to the ultraviolet endpoint. Ultraviolet will take care of any necessary encoding.
+
+      // Concatenate with the ultraviolet prefix (/static/tiw/). Ultraviolet will perform its own encoding.
+      var targetUrl = self.__uv$config.prefix + finalUrl;
       window.location.href = targetUrl;
     });
   </script>
 
-  <!-- Include your ultraviolet and related scripts -->
-  <script src="uv/uv.bundle.js" defer></script>
-  <script src="uv/uv.config.js" defer></script>
-  <script src="register-sw.js" defer></script>
-  <script src="search.js" defer></script>
-  <script src="index.js" defer></script>
-  <script src="error.js" defer></script>
+  <!-- Ultraviolet scripts -->
+  <script src="/static/uv/uv.bundle.js" defer></script>
+  <script src="/static/uv/uv.config.js" defer></script>
+  <script src="/register-sw.js" defer></script>
+  <script src="/search.js" defer></script>
+  <script src="/index.js" defer></script>
+  <script src="/error.js" defer></script>
 </body>
 </html>
