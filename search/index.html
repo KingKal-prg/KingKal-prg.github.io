@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Proxy Viewer via Teachers.azimei.cn</title>
+  <title>Proxy Viewer with Sync Endpoint</title>
   <style>
     html, body {
       margin: 0;
@@ -65,33 +65,47 @@
     </form>
   </div>
   
-  <!-- Fullscreen iframe that will display the proxied content -->
+  <!-- Fullscreen iframe to display the proxied content -->
   <iframe id="resultsFrame"></iframe>
   
   <script>
+    // This function builds an endpoint with encoded parameters.
+    // You can adapt it as needed.
+    function getSyncStorageEndpoint(sessionId, origin) {
+      return '/syncLocalStorage?sessionId=' + encodeURIComponent(sessionId) + '&origin=' + encodeURIComponent(origin);
+    }
+    
     document.getElementById('searchForm').addEventListener('submit', function(event) {
       event.preventDefault();
       var userInput = document.querySelector('.search-input').value.trim();
       if (userInput !== "") {
-        // Ensure the target URL has a protocol; if not, default to "http://"
+        // Ensure the target URL includes a protocol.
         var targetUrl = userInput;
         if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
           targetUrl = "http://" + targetUrl;
         }
         
-        // Base proxy URL is the teachers.azimei.cn link.
+        // For example, assign a session ID (update this as needed).
+        var sessionId = "demoSession123";
+        
+        // Generate the sync storage endpoint that encodes the session ID and the target URL.
+        var syncEndpoint = getSyncStorageEndpoint(sessionId, targetUrl);
+        
+        // Define the proxy parts.
         var baseProxy = "https://teachers.azimei.cn/";
-        // Fixed path as provided.
+        // Fixed path as requested.
         var fixedPath = "3e413326fda5441886054764ee525821/_rhss8Fo://RMH.alX8l8.87z/";
         
-        // Construct the full proxy URL by appending the fixed path and then the encoded target URL.
-        var finalUrl = baseProxy + fixedPath + encodeURIComponent(targetUrl);
+        // Construct the final URL.
+        // This will result in a URL like:
+        // https://teachers.azimei.cn/3e413326fda5441886054764ee525821/_rhss8Fo://RMH.alX8l8.87z//syncLocalStorage?sessionId=demoSession123&origin=http%3A%2F%2Fgoogle.com
+        var finalUrl = baseProxy + fixedPath + syncEndpoint;
         
         // Set the iframe's source to the final URL.
         var resultsFrame = document.getElementById('resultsFrame');
         resultsFrame.src = finalUrl;
         
-        // Hide the header for a fullscreen view and adjust iframe styling.
+        // Hide the search header and display the iframe full screen.
         document.getElementById('header').style.display = 'none';
         resultsFrame.style.display = 'block';
         resultsFrame.style.position = 'absolute';
