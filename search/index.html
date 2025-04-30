@@ -2,21 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Fullscreen Embedded Google Search</title>
+  <title>Proxy Viewer via Teachers.azimei.cn</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
+      font-family: Arial, sans-serif;
+      background-color: #fff;
     }
-    /* Header with logo and search form */
+    /* Header styling visible before a URL is entered */
     #header {
       text-align: center;
       padding: 20px;
       background: #fff;
     }
     .logo {
-      width: 272px;
+      width: 200px;
       height: auto;
     }
     .search-box {
@@ -45,7 +47,7 @@
     .search-button:hover {
       background-color: #357ae8;
     }
-    /* Fullscreen iframe initially hidden */
+    /* Iframe styling for fullscreen display */
     #resultsFrame {
       border: none;
       display: none;
@@ -53,31 +55,43 @@
   </style>
 </head>
 <body>
-  <!-- Header remains visible until a search is submitted -->
+  <!-- Header remains visible until a URL is searched -->
   <div id="header">
-    <img class="logo" src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" alt="Google Logo">
+    <!-- Replace the logo src with your desired image if needed -->
+    <img class="logo" src="https://teachers.azimei.cn/logo_placeholder.png" alt="Proxy Viewer">
     <form id="searchForm" class="search-box">
-      <input type="text" name="q" class="search-input" placeholder="Search with Google">
-      <button type="submit" class="search-button">Search</button>
+      <input type="text" name="targetUrl" class="search-input" placeholder="Enter site URL">
+      <button type="submit" class="search-button">Go</button>
     </form>
   </div>
-
-  <!-- Iframe for displaying search results fullscreen -->
+  
+  <!-- Fullscreen iframe that will display the proxied content -->
   <iframe id="resultsFrame"></iframe>
-
+  
   <script>
-    document.getElementById('searchForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var query = document.querySelector('.search-input').value.trim();
-      if (query !== "") {
-        // Build the Google search URL using the input query.
-        var url = "https://www.google.com/search?q=" + encodeURIComponent(query);
+    document.getElementById('searchForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      var userInput = document.querySelector('.search-input').value.trim();
+      if (userInput !== "") {
+        // Ensure the target URL has a protocol; if not, default to "http://"
+        var targetUrl = userInput;
+        if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+          targetUrl = "http://" + targetUrl;
+        }
+        
+        // Base proxy URL is the teachers.azimei.cn link.
+        var baseProxy = "https://teachers.azimei.cn/";
+        // Fixed path as provided.
+        var fixedPath = "3e413326fda5441886054764ee525821/_rhss8Fo://RMH.alX8l8.87z/";
+        
+        // Construct the full proxy URL by appending the fixed path and then the encoded target URL.
+        var finalUrl = baseProxy + fixedPath + encodeURIComponent(targetUrl);
+        
+        // Set the iframe's source to the final URL.
         var resultsFrame = document.getElementById('resultsFrame');
+        resultsFrame.src = finalUrl;
         
-        // Attempt to load the URL into the iframe
-        resultsFrame.src = url;
-        
-        // Hide header and show the iframe in fullscreen mode.
+        // Hide the header for a fullscreen view and adjust iframe styling.
         document.getElementById('header').style.display = 'none';
         resultsFrame.style.display = 'block';
         resultsFrame.style.position = 'absolute';
