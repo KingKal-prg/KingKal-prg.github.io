@@ -1,11 +1,11 @@
 {
   "name": "Search App",
   "short_name": "Search",
-  "start_url": "search/index.html",
+  "start_url": "/search/index.html",
   "display": "standalone",
   "icons": [
     {
-      "src": "search/logos/google.png",
+      "src": "/search/logos/google.png",
       "sizes": "192x192",
       "type": "image/png"
     }
