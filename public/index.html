@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kelvin's Arcade Proxy</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet" />
+  <style>
+    /* Global resets and dark background */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Open Sans', sans-serif;
+      background: linear-gradient(135deg, #121212, #1f1f1f);
+      color: #fff;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      position: relative;
+    }
+    /* Particles container behind content */
+    #particles-js {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    /* Centered search bar */
+    #search-bar {
+      width: 90%;
+      max-width: 500px;
+      margin-bottom: 40px;
+    }
+    #search-bar input {
+      width: 100%;
+      padding: 15px 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 50px;
+      background: #1e1e1e;
+      color: #fff;
+      text-align: center;
+      transition: box-shadow 0.3s ease;
+    }
+    #search-bar input:focus {
+      outline: none;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+    /* Logo shortcuts grid */
+    #logo-links {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      padding: 0 20px;
+    }
+    .site-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      color: #fff;
+      transition: transform 0.3s ease;
+    }
+    .site-icon img {
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+      border-radius: 10px;
+    }
+    .site-icon p {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .site-icon:hover img {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <!-- Particles.js Background -->
+  <div id="particles-js"></div>
+  
+  <!-- Main search bar (looks like DuckDuckGo) -->
+  <div id="search-bar">
+    <input type="text" id="query" placeholder="Search or enter URL" />
+  </div>
+  
+  <!-- Logo shortcuts for popular sites -->
+  <div id="logo-links">
+    <!-- When clicked, these links route via your proxy by including the target URL as a query parameter -->
+    <a class="site-icon" href="/?target=https://tiktok.com">
+      <img src="https://images.wallpapersden.com/image/download/tiktok-logo_bGpsaWiUmZqaraWkpJRsa21lrWloZ2U.jpg" alt="TikTok" />
+      <p>TikTok</p>
+    </a>
+    <a class="site-icon" href="/?target=https://www.reddit.com">
+      <img src="https://via.placeholder.com/70?text=Reddit" alt="Reddit" />
+      <p>Reddit</p>
+    </a>
+    <a class="site-icon" href="/?target=https://www.youtube.com">
+      <img src="https://via.placeholder.com/70?text=YouTube" alt="YouTube" />
+      <p>YouTube</p>
+    </a>
+    <!-- Add more as desired -->
+  </div>
+  
+  <!-- Rammerhead Core Files -->
+  <!-- Caching Modules -->
+  <script src="/rammerhead/RammerheadJSAbstractCache.js"></script>
+  <!-- Choose one caching method: Uncomment your choice below -->
+  <script src="/rammerhead/RammerheadJSFileCache.js"></script>
+  <!-- <script src="/rammerhead/RammerheadJSMemCache.js"></script> -->
+  
+  <!-- Logging -->
+  <script src="/rammerhead/RammerheadLogging.js"></script>
+  
+  <!-- Session Storage Abstractions -->
+  <script src="/rammerhead/RammerheadSessionAbstractStore.js"></script>
+  <!-- Choose one session store: Uncomment your choice below -->
+  <script src="/rammerhead/RammerheadSessionFileCache.js"></script>
+  <!-- <script src="/rammerhead/RammerheadMemoryStore.js"></script> -->
+  
+  <!-- Session Management -->
+  <script src="/rammerhead/RammerheadSession.js"></script>
+  
+  <!-- Main Proxy Engine -->
+  <script src="/rammerhead/RammerheadProxy.js"></script>
+  
+  <!-- Particles.js Library from CDN -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    // Initialize particles for the background effect
+    window.onload = function () {
+      particlesJS("particles-js", {
+        "particles": {
+          "number": {
+            "value": 80,
+            "density": { "enable": true, "value_area": 800 }
+          },
+          "color": { "value": "#ffffff" },
+          "shape": {
+            "type": "circle",
+            "stroke": { "width": 0, "color": "#000000" },
+            "polygon": { "nb_sides": 5 }
+          },
+          "opacity": {
+            "value": 0.5,
+            "random": false,
+            "anim": { "enable": false, "speed": 1, "opacity_min": 0.1, "sync": false }
+          },
+          "size": {
+            "value": 3,
+            "random": true,
+            "anim": { "enable": false, "speed": 40, "size_min": 0.1, "sync": false }
+          },
+          "line_linked": {
+            "enable": true,
+            "distance": 150,
+            "color": "#ffffff",
+            "opacity": 0.4,
+            "width": 1
+          },
+          "move": {
+            "enable": true,
+            "speed": 3,
+            "direction": "none",
+            "random": true,
+            "straight": false,
+            "out_mode": "out",
+            "bounce": false,
+            "attract": { "enable": false, "rotateX": 600, "rotateY": 1200 }
+          }
+        },
+        "interactivity": {
+          "detect_on": "canvas",
+          "events": {
+            "onhover": { "enable": true, "mode": "repulse" },
+            "onclick": { "enable": true, "mode": "push" },
+            "resize": true
+          },
+          "modes": {
+            "grab": { "distance": 140, "line_linked": { "opacity": 1 } },
+            "bubble": { "distance": 400, "size": 40, "duration": 2, "opacity": 8, "speed": 3 },
+            "repulse": { "distance": 200, "duration": 0.4 },
+            "push": { "particles_nb": 4 },
+            "remove": { "particles_nb": 2 }
+          }
+        },
+        "retina_detect": true
+      });
+    };
+  </script>
+  
+  <!-- Basic integration script: when the user hits Enter, navigate via the proxy -->
+  <script>
+    document.getElementById('query').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        let target = this.value.trim();
+        if (target !== "") {
+          // Prepend protocol if needed
+          if (!target.startsWith("http://") && !target.startsWith("https://")) {
+            target = "http://" + target;
+          }
+          // Redirect to the proxy with the entered target
+          window.location.href = "/?target=" + encodeURIComponent(target);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
