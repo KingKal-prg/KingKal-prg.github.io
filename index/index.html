@@ -7,7 +7,7 @@
   <meta name="description" content="Experience unblocked arcade fun with Kelvin's Arcade, Roblox, and more. Enjoy our collection of games with exclusive cheats and unblocker features.">
   <meta name="keywords" content="games, arcades, Kelvin's Arcade, Roblox, unblocker, GitHub, blooket cheats, unblocked games, online arcade, free games">
   <style>
-    /* Reset and basic styles */
+    /* Reset & Basic Styles */
     * {
       margin: 0;
       padding: 0;
@@ -15,12 +15,12 @@
     }
     html, body {
       height: 100%;
-      font-family: Arial, sans-serif;
-      background-color: #000;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #000;
       color: #fff;
       overflow-x: hidden;
     }
-    /* Particle canvas should be behind everything */
+    /* Fullscreen Particles Canvas */
     #particles-js {
       position: fixed;
       top: 0;
@@ -29,31 +29,96 @@
       height: 100%;
       z-index: -1;
     }
-    /* Main container styling */
-    .container {
-      position: relative;
-      z-index: 1;
+    /* Navigation (Tabs) */
+    nav {
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      padding: 10px 0;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 30px;
+    }
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.1rem;
+      padding: 10px 15px;
+      transition: background-color 0.3s ease;
+    }
+    nav ul li a:hover {
+      background-color: rgba(255, 87, 34, 0.8);
+      border-radius: 5px;
+    }
+    /* Section Styling for an Infinite, Spacious Look */
+    .section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;  /* extra padding to account for the fixed nav */
       text-align: center;
-      padding: 50px;
     }
-    header h1 {
-      font-size: 3rem;
-      margin-bottom: 0.5em;
+    .section .content {
+      max-width: 800px;
+      margin: 0 auto;
     }
-    header p {
-      font-size: 1.2rem;
-      margin-bottom: 1.5em;
+    .section h1, 
+    .section h2 {
+      margin-bottom: 20px;
+      text-transform: uppercase;
     }
-    /* Button style that meshes well with the theme */
+    .section p {
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+    /* Search Form Styling */
+    .search-form {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .search-form input[type="text"] {
+      padding: 12px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px 0 0 5px;
+      width: 300px;
+      outline: none;
+    }
+    .search-form button {
+      padding: 12px 25px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 0 5px 5px 0;
+      background-color: #ff5722;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .search-form button:hover {
+      background-color: #e64a19;
+    }
+    /* Button Call-to-Action */
     .btn {
       display: inline-block;
-      padding: 10px 25px;
+      padding: 12px 30px;
       background-color: #ff5722;
       color: #fff;
       text-decoration: none;
       font-size: 1rem;
-      border-radius: 4px;
-      transition: background 0.3s ease;
+      border-radius: 5px;
+      margin-top: 20px;
+      transition: background-color 0.3s ease;
     }
     .btn:hover {
       background-color: #e64a19;
@@ -64,33 +129,63 @@
   <!-- Particle Background -->
   <div id="particles-js"></div>
   
-  <!-- Main Content -->
-  <div class="container">
-    <header>
-      <h1>Maxi Maths Games</h1>
-      <p>Experience the ultimate unblocked arcade fun!</p>
-    </header>
-    <!-- Example call-to-action -->
-    <a class="btn" href="#play">Play Now</a>
-  </div>
+  <!-- Navigation Tabs -->
+  <nav>
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#about">About</a></li>
+    </ul>
+  </nav>
   
-  <!-- UV Unblocker and other scripts -->
+  <!-- Home Section with UV Search Bar -->
+  <section id="home" class="section">
+    <div class="content">
+      <h1>Maxi Maths Games</h1>
+      <p>Your ultimate hub for unblocked arcade and gaming fun. Search with our integrated DuckDuckGo-powered UV search.</p>
+      <form action="https://duckduckgo.com/" method="get" class="search-form">
+        <input type="text" name="q" placeholder="Search UV..." required>
+        <button type="submit">Search</button>
+      </form>
+      <a class="btn" href="#features">Explore Features</a>
+    </div>
+  </section>
+  
+  <!-- Features Section -->
+  <section id="features" class="section">
+    <div class="content">
+      <h2>Features</h2>
+      <p>Discover our UV unblocker, advanced search capabilities, and stunning particle effects that create an immersive, infinite digital cosmos.</p>
+      <a class="btn" href="#about">Learn More</a>
+    </div>
+  </section>
+  
+  <!-- About Section -->
+  <section id="about" class="section">
+    <div class="content">
+      <h2>About</h2>
+      <p>Maxi Maths Games is revolutionizing unblocked online gaming with innovative UV technology and a design built for endless exploration. Join the journey through our vast digital arcade.</p>
+      <a class="btn" href="#home">Back to Home</a>
+    </div>
+  </section>
+  
+  <!-- UV Unblocker & Other Scripts -->
   <script src="uv/uv.bundle.js" defer></script>
   <script src="static/uv/uv.config.js" defer></script>
   <script src="static/register-sw.js" defer></script>
   <script src="static/search.js" defer></script>
   <script src="static/index.js" defer></script>
   <script src="static/error.js" defer></script>
-  <!-- Particle.js library -->
+  <!-- Particles.js Library -->
   <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
   
-  <!-- Particle effect configuration -->
+  <!-- Particle Effect Configuration -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       particlesJS("particles-js", {
         "particles": {
           "number": {
-            "value": 80,
+            "value": 100,
             "density": {
               "enable": true,
               "value_area": 800
@@ -105,22 +200,12 @@
           "opacity": {
             "value": 0.5,
             "random": false,
-            "anim": {
-              "enable": false,
-              "speed": 1,
-              "opacity_min": 0.1,
-              "sync": false
-            }
+            "anim": { "enable": false, "speed": 1, "opacity_min": 0.1, "sync": false }
           },
           "size": {
             "value": 3,
             "random": true,
-            "anim": {
-              "enable": false,
-              "speed": 40,
-              "size_min": 0.1,
-              "sync": false
-            }
+            "anim": { "enable": false, "speed": 40, "size_min": 0.1, "sync": false }
           },
           "line_linked": {
             "enable": true,
@@ -131,17 +216,13 @@
           },
           "move": {
             "enable": true,
-            "speed": 6,
+            "speed": 2,
             "direction": "none",
             "random": false,
             "straight": false,
             "out_mode": "out",
             "bounce": false,
-            "attract": {
-              "enable": false,
-              "rotateX": 600,
-              "rotateY": 1200
-            }
+            "attract": { "enable": false, "rotateX": 600, "rotateY": 1200 }
           }
         },
         "interactivity": {
@@ -152,17 +233,8 @@
             "resize": true
           },
           "modes": {
-            "grab": {
-              "distance": 400,
-              "line_linked": { "opacity": 1 }
-            },
-            "bubble": {
-              "distance": 400,
-              "size": 40,
-              "duration": 2,
-              "opacity": 8,
-              "speed": 3
-            },
+            "grab": { "distance": 400, "line_linked": { "opacity": 1 } },
+            "bubble": { "distance": 400, "size": 40, "duration": 2, "opacity": 8, "speed": 3 },
             "repulse": { "distance": 200, "duration": 0.4 },
             "push": { "particles_nb": 4 },
             "remove": { "particles_nb": 2 }
