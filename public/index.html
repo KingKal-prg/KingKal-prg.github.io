@@ -8,8 +8,12 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet" />
   <style>
-    /* Global resets and dark background */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* Global resets and dark gradient background */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     html, body {
       height: 100%;
       font-family: 'Open Sans', sans-serif;
@@ -17,12 +21,12 @@
       color: #fff;
       overflow: hidden;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       flex-direction: column;
       position: relative;
     }
-    /* Particles container behind content */
+    /* Container for animated background (particles) */
     #particles-js {
       position: absolute;
       top: 0;
@@ -31,7 +35,7 @@
       height: 100%;
       z-index: -1;
     }
-    /* Centered search bar */
+    /* Search bar styling */
     #search-bar {
       width: 90%;
       max-width: 500px;
@@ -52,7 +56,7 @@
       outline: none;
       box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
     }
-    /* Logo shortcuts grid */
+    /* Logo shortcut links styling */
     #logo-links {
       display: flex;
       justify-content: center;
@@ -85,17 +89,16 @@
   </style>
 </head>
 <body>
-  <!-- Particles.js Background -->
+  <!-- Animated particles background -->
   <div id="particles-js"></div>
   
-  <!-- Main search bar (looks like DuckDuckGo) -->
+  <!-- Main search bar (centered) -->
   <div id="search-bar">
-    <input type="text" id="query" placeholder="Search or enter URL" />
+    <input type="text" id="query" placeholder="Enter URL or Search" />
   </div>
   
-  <!-- Logo shortcuts for popular sites -->
+  <!-- Logo shortcuts: clicking routes through your proxy (e.g. /?target=<target URL>) -->
   <div id="logo-links">
-    <!-- When clicked, these links route via your proxy by including the target URL as a query parameter -->
     <a class="site-icon" href="/?target=https://tiktok.com">
       <img src="https://images.wallpapersden.com/image/download/tiktok-logo_bGpsaWiUmZqaraWkpJRsa21lrWloZ2U.jpg" alt="TikTok" />
       <p>TikTok</p>
@@ -108,35 +111,33 @@
       <img src="https://via.placeholder.com/70?text=YouTube" alt="YouTube" />
       <p>YouTube</p>
     </a>
-    <!-- Add more as desired -->
+    <!-- Add more logo links as desired -->
   </div>
-  
-  <!-- Rammerhead Core Files -->
-  <!-- Caching Modules -->
+
+  <!-- Load Rammerhead modules (files should exist in the specified folder) -->
+  <!-- Caching modules -->
   <script src="/rammerhead/RammerheadJSAbstractCache.js"></script>
-  <!-- Choose one caching method: Uncomment your choice below -->
   <script src="/rammerhead/RammerheadJSFileCache.js"></script>
-  <!-- <script src="/rammerhead/RammerheadJSMemCache.js"></script> -->
-  
-  <!-- Logging -->
+  <!-- Alternatively, if you prefer memory caching:
+  <script src="/rammerhead/RammerheadJSMemCache.js"></script>
+  -->
+  <!-- Logging module -->
   <script src="/rammerhead/RammerheadLogging.js"></script>
-  
-  <!-- Session Storage Abstractions -->
+  <!-- Session storage abstractions -->
   <script src="/rammerhead/RammerheadSessionAbstractStore.js"></script>
-  <!-- Choose one session store: Uncomment your choice below -->
   <script src="/rammerhead/RammerheadSessionFileCache.js"></script>
-  <!-- <script src="/rammerhead/RammerheadMemoryStore.js"></script> -->
-  
-  <!-- Session Management -->
+  <!-- Alternatively, if using in-memory session storage:
+  <script src="/rammerhead/RammerheadMemoryStore.js"></script>
+  -->
+  <!-- Session management module -->
   <script src="/rammerhead/RammerheadSession.js"></script>
-  
-  <!-- Main Proxy Engine -->
+  <!-- Main proxy engine -->
   <script src="/rammerhead/RammerheadProxy.js"></script>
-  
-  <!-- Particles.js Library from CDN -->
+
+  <!-- Load particles.js from a CDN -->
   <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
   <script>
-    // Initialize particles for the background effect
+    // Initialize the particles.js background
     window.onload = function () {
       particlesJS("particles-js", {
         "particles": {
@@ -153,12 +154,12 @@
           "opacity": {
             "value": 0.5,
             "random": false,
-            "anim": { "enable": false, "speed": 1, "opacity_min": 0.1, "sync": false }
+            "anim": { "enable": false }
           },
           "size": {
             "value": 3,
             "random": true,
-            "anim": { "enable": false, "speed": 40, "size_min": 0.1, "sync": false }
+            "anim": { "enable": false }
           },
           "line_linked": {
             "enable": true,
@@ -174,8 +175,7 @@
             "random": true,
             "straight": false,
             "out_mode": "out",
-            "bounce": false,
-            "attract": { "enable": false, "rotateX": 600, "rotateY": 1200 }
+            "bounce": false
           }
         },
         "interactivity": {
@@ -197,18 +197,18 @@
       });
     };
   </script>
-  
-  <!-- Basic integration script: when the user hits Enter, navigate via the proxy -->
   <script>
+    // Handle Enter key press on the search bar:
+    // When the user hits Enter, redirect to your proxy with the target URL.
     document.getElementById('query').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         let target = this.value.trim();
         if (target !== "") {
-          // Prepend protocol if needed
-          if (!target.startsWith("http://") && !target.startsWith("https://")) {
+          // Add protocol if missing
+          if (!/^https?:\/\//i.test(target)) {
             target = "http://" + target;
           }
-          // Redirect to the proxy with the entered target
+          // Redirect through the proxy using a query parameter
           window.location.href = "/?target=" + encodeURIComponent(target);
         }
       }
