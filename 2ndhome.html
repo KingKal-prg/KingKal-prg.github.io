@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CrimsonHosting Plans</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #0f0f1a;
+      color: white;
+      scroll-behavior: smooth;
+      background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    a {
+      text-decoration: none;
+    }
+    header {
+      padding: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-weight: bold;
+      font-size: 1.3rem;
+    }
+    .home-btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+    .home-btn:hover {
+      background-color: #2563eb;
+    }
+    main {
+      text-align: center;
+      padding: 4rem 1rem;
+    }
+    h1 {
+      font-size: 2.5rem;
+    }
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+      padding: 0 2rem;
+    }
+    .plan {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 2rem;
+      transition: transform 0.3s, background 0.3s;
+    }
+    .plan:hover {
+      transform: scale(1.05);
+      background: rgba(255,255,255,0.08);
+    }
+    .plan h2 {
+      margin-bottom: 0.5rem;
+      font-size: 1.5rem;
+    }
+    .plan ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 1rem;
+      line-height: 1.8;
+    }
+    .plan strong {
+      color: #3b82f6;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">CrimsonHosting</div>
+    <button class="home-btn" onclick="window.location.href='index.html'">Home</button>
+  </header>
+
+  <main>
+    <h1>Choose Your Plan</h1>
+    <p style="color: #aaa;">Ultra-fast CPU • Dedicated RAM • Scalable power</p>
+
+    <div class="plans">
+      <div class="plan">
+        <h2>Starter</h2>
+        <p><strong>$2/month</strong></p>
+        <ul>
+          <li>4 GB RAM</li>
+          <li>2 vCores (Ryzen 9 7950X)</li>
+          <li>Unlimited Slots</li>
+          <li>1 Gbps Connection</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <h2>Pro</h2>
+        <p><strong>$4/month</strong></p>
+        <ul>
+          <li>8 GB RAM</li>
+          <li>4 vCores (Ryzen 9 7950X)</li>
+          <li>Auto Backups</li>
+          <li>DDoS Protected</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <h2>Crimson+</h2>
+        <p><strong>$8/month</strong></p>
+        <ul>
+          <li>16 GB RAM</li>
+          <li>8 vCores (Ryzen 9 7950X)</li>
+          <li>Premium Support</li>
+          <li>Panel Access</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <h2>God Mode</h2>
+        <p><strong>$16/month</strong></p>
+        <ul>
+          <li>32 GB RAM</li>
+          <li>16 vCores (Ryzen 9 7950X3D)</li>
+          <li>Instant Setup</li>
+          <li>Custom Domain</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 CrimsonHosting — Pricing built for Minecraft pros.
+  </footer>
+
+</body>
+</html>
